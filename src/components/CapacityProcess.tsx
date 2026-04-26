@@ -57,7 +57,7 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
   const expectedWidth = Math.max(800, chartData.length * 80);
 
   return (
-    <div className="bg-white p-6 rounded-lg border border-gray-200">
+    <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col h-full">
       <div className="mb-6 flex justify-between items-end">
         <div>
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">

@@ -72,9 +72,13 @@ export async function fetchDashboardData(): Promise<DashboardData> {
               operatorName: getVal('Operator Name'),
               machine: getVal('M/C'),
               obSmv: parseFloat(getVal('OB SMV')) || 0,
+              avgMin: parseFloat(getVal('Avg Min')) || parseFloat(getVal('OB SMV')) || 0,
+              tt100: parseFloat(getVal('100% T&T')) || parseFloat(getVal('Tack Time (Sec)')) || 0,
               target100: parseFloat(getVal('100% TGT')) || 0,
               capacity: parseFloat(getVal('CAPACITY')) || 0,
               diffr: parseFloat(getVal('Diffr (A-B)')) || 0,
+              minVari: parseFloat(getVal('Min Vari')) || 0,
+              minUti: parseFloat(getVal('Min Uti.')) || 0,
               actualOutput: parseFloat(getVal('Actual Output')) || 0,
               raw: row
             });

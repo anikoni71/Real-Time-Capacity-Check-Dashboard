@@ -9,7 +9,9 @@ import ProcessAnalysis from './ProcessAnalysis';
 import Analytics from './Analytics';
 import Performers from './Performers';
 import Database from './Database';
-import { RefreshCcw, Loader2, Factory, LineChart, BarChart2, Trophy, Database as DbIcon, Activity } from 'lucide-react';
+import OperatorUtilization from './OperatorUtilization';
+import MachineDistribution from './MachineDistribution';
+import { RefreshCcw, Loader2, Factory, LineChart, BarChart2, Trophy, Database as DbIcon, Activity, Layers } from 'lucide-react';
 
 export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -118,6 +120,7 @@ export default function Dashboard() {
 
   const tabs = [
     { id: 'Capacity by Process', icon: Factory },
+    { id: 'Utilization & Machines', icon: Layers },
     { id: 'Process Analysis', icon: LineChart },
     { id: 'Analytics', icon: BarChart2 },
     { id: 'Performers', icon: Trophy },
@@ -194,6 +197,12 @@ export default function Dashboard() {
           
           <div className="p-4 bg-gray-50">
             {activeTab === 'Capacity by Process' && <CapacityProcess processes={filteredProcesses} />}
+            {activeTab === 'Utilization & Machines' && (
+              <div className="space-y-6">
+                <OperatorUtilization processes={filteredProcesses} />
+                <MachineDistribution processes={filteredProcesses} />
+              </div>
+            )}
             {activeTab === 'Process Analysis' && <ProcessAnalysis processes={filteredProcesses} />}
             {activeTab === 'Analytics' && <Analytics processes={filteredProcesses} />}
             {activeTab === 'Performers' && <Performers processes={filteredProcesses} />}

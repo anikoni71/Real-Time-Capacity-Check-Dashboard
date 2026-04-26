@@ -70,7 +70,7 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
 
   return (
     <div className="space-y-6">
-      <div className="bg-white p-6 rounded-lg border border-gray-200">
+      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col h-full">
         <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
           <Cpu className="h-5 w-5 text-blue-600" />
           Capacity per Operator per Process
@@ -95,7 +95,7 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-lg border border-gray-200">
+      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col h-full">
         <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
           <Activity className="h-5 w-5 text-indigo-600" />
           Capacity vs Actual Output (Process x Operator)
@@ -121,7 +121,7 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-lg border border-gray-200">
+      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col h-full">
         <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-amber-500" />
           100% Target vs Capacity (Line Chart)

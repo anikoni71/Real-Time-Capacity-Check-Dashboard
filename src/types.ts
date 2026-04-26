@@ -11,9 +11,13 @@ export interface ProcessRow {
   operatorName: string;
   machine: string;
   obSmv: number;
+  avgMin: number;
+  tt100: number;
   target100: number;
   capacity: number;
   diffr: number;
+  minVari: number;
+  minUti: number;
   actualOutput: number;
   raw: any;
 }
