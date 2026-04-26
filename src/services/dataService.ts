@@ -80,6 +80,8 @@ export async function fetchDashboardData(): Promise<DashboardData> {
               minVari: parseFloat(getVal('Min Vari')) || 0,
               minUti: parseFloat(getVal('Min Uti.')) || 0,
               actualOutput: parseFloat(getVal('Actual Output')) || 0,
+              todayPlanLcTarget: parseFloat(getVal('Today Plan LC Target')) || 0,
+              lineTarget100: parseFloat(getVal('LinE Target 100%')) || 0,
               raw: row
             });
           }

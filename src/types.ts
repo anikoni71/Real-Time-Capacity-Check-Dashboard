@@ -19,6 +19,8 @@ export interface ProcessRow {
   minVari: number;
   minUti: number;
   actualOutput: number;
+  todayPlanLcTarget: number;
+  lineTarget100: number;
   raw: any;
 }
 

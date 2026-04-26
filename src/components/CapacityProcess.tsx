@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ProcessRow } from '../types';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList, Cell, ReferenceLine } from 'recharts';
 import { BarChart2 } from 'lucide-react';
 
 // Define fixed colors for operators to keep them consistent
@@ -9,7 +9,7 @@ const OPERATOR_COLORS = [
 ];
 
 export default function CapacityProcess({ processes }: { processes: ProcessRow[] }) {
-  const { chartData, ops, totalCapacity } = useMemo(() => {
+  const { chartData, ops, totalCapacity, target1, target2, calculatedMax } = useMemo(() => {
     // Process chart needs original sequence exactly. 
     // We can group by Process Name but maintain order of appearance.
     
@@ -48,7 +48,18 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
       });
     });
 
-    return { chartData, ops, totalCapacity };
+    const target1 = processes.length > 0 ? processes[0].todayPlanLcTarget : 0;
+    const target2 = processes.length > 0 ? processes[0].lineTarget100 : 0;
+    
+    // We compute max dynamically, ignoring NaNs from functions.
+    let currentDataMax = 0;
+    chartData.forEach(d => {
+      if (d.Capacity > currentDataMax) currentDataMax = d.Capacity;
+    });
+
+    const calculatedMax = Math.round(Math.max(currentDataMax, target1, target2) * 1.2);
+
+    return { chartData, ops, totalCapacity, target1, target2, calculatedMax };
   }, [processes]);
 
   if (processes.length === 0) return <div className="p-8 text-center text-gray-500">No data found matching current filters.</div>;
@@ -83,6 +94,7 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
                 height={80}
               />
               <YAxis 
+                domain={[0, calculatedMax === 0 ? 'auto' : calculatedMax]}
                 tick={{ fontSize: 12, fill: '#4B5563' }} 
                 label={{ value: 'Capacity', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#6B7280' } }}
               />
@@ -103,6 +115,27 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
                   color: OPERATOR_COLORS[i % OPERATOR_COLORS.length]
                 }))}
               />
+              
+              {target1 > 0 && (
+                <ReferenceLine 
+                  y={target1} 
+                  stroke="#ef4444" 
+                  strokeDasharray="3 3" 
+                  strokeWidth={2}
+                  ifOverflow="extendDomain"
+                  label={{ position: 'top', value: `LC Target: ${target1}`, fill: '#ef4444', fontSize: 11, fontWeight: 'bold' }} 
+                />
+              )}
+              {target2 > 0 && (
+                <ReferenceLine 
+                  y={target2} 
+                  stroke="#047857" 
+                  strokeWidth={2}
+                  ifOverflow="extendDomain"
+                  label={{ position: 'top', value: `100% Target: ${target2}`, fill: '#047857', fontSize: 11, fontWeight: 'bold' }} 
+                />
+              )}
+
               <Bar dataKey="Capacity" maxBarSize={60}>
                 {chartData.map((entry, index) => {
                   const opIndex = ops.indexOf(entry.operatorName);

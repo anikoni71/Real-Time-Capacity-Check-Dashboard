@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import { ProcessRow } from '../types';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList, ReferenceLine } from 'recharts';
 import { Sparkles, AlertCircle, ArrowUp, ArrowDown } from 'lucide-react';
 
 export default function Performers({ processes }: { processes: ProcessRow[] }) {
-  const { topProc, lowProc, topOp, lowOp } = useMemo(() => {
+  const { topProc, lowProc, topOp, lowOp, target1, target2 } = useMemo(() => {
     // Aggregate by process
     const procMap = new Map<string, number>();
     const opMap = new Map<string, number>();
@@ -30,8 +30,11 @@ export default function Performers({ processes }: { processes: ProcessRow[] }) {
     
     const topOp = sortedOp.slice(0, 5);
     const lowOp = sortedOp.slice().reverse().slice(0, 5);
+    
+    const target1 = processes.length > 0 ? processes[0].todayPlanLcTarget : 0;
+    const target2 = processes.length > 0 ? processes[0].lineTarget100 : 0;
 
-    return { topProc, lowProc, topOp, lowOp };
+    return { topProc, lowProc, topOp, lowOp, target1, target2 };
   }, [processes]);
 
   if (processes.length === 0) return <div className="p-8 text-center text-gray-500">No data found matching current filters.</div>;
@@ -44,11 +47,33 @@ export default function Performers({ processes }: { processes: ProcessRow[] }) {
       </h3>
       <div className="flex-1 w-full" style={{ minHeight: '300px' }}>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} layout="vertical" margin={{ top: 5, right: 30, left: 100, bottom: 5 }}>
+          <BarChart data={data} layout="vertical" margin={{ top: 20, right: 30, left: 100, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
-            <XAxis type="number" tick={{ fontSize: 11 }} />
+            <XAxis type="number" tick={{ fontSize: 11 }} domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} />
             <YAxis dataKey="name" type="category" tick={{ fontSize: 11, fill: '#4B5563' }} width={90} />
             <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+            
+            {target1 > 0 && (
+              <ReferenceLine 
+                x={target1} 
+                stroke="#ef4444" 
+                strokeDasharray="3 3" 
+                strokeWidth={2}
+                ifOverflow="extendDomain"
+                label={{ position: 'insideTopLeft', value: `LC Target: ${target1}`, fill: '#ef4444', fontSize: 11, fontWeight: 'bold' }} 
+              />
+            )}
+            
+            {target2 > 0 && (
+              <ReferenceLine 
+                x={target2} 
+                stroke="#047857" 
+                strokeWidth={2}
+                ifOverflow="extendDomain"
+                label={{ position: 'insideTopRight', value: `100% Target: ${target2}`, fill: '#047857', fontSize: 11, fontWeight: 'bold' }} 
+              />
+            )}
+
             <Bar dataKey="Capacity" fill={color} radius={[0, 4, 4, 0]} maxBarSize={30}>
               <LabelList dataKey="Capacity" position="right" fill="#374151" fontSize={11} fontWeight={600} />
             </Bar>

@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import { ProcessRow } from '../types';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList, Cell } from 'recharts';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList, Cell, ReferenceLine } from 'recharts';
 import { Activity, Cpu, TrendingUp } from 'lucide-react';
 
 export default function ProcessAnalysis({ processes }: { processes: ProcessRow[] }) {
-  const { capacityData, compareData, targetData } = useMemo(() => {
+  const { capacityData, compareData, targetData, target1, target2 } = useMemo(() => {
     const processOps: string[] = [];
     processes.forEach(p => {
       const g = p.operatorName ? `${p.processName} (${p.operatorName})` : p.processName;
@@ -50,8 +50,11 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
         Capacity: Math.round(pRows.reduce((s, x) => s + x.capacity, 0)),
       };
     });
+    
+    const target1 = processes.length > 0 ? processes[0].todayPlanLcTarget : 0;
+    const target2 = processes.length > 0 ? processes[0].lineTarget100 : 0;
 
-    return { capacityData, compareData, targetData };
+    return { capacityData, compareData, targetData, target1, target2 };
   }, [processes]);
 
   if (processes.length === 0) return <div className="p-8 text-center text-gray-500">No data found matching current filters.</div>;
@@ -81,9 +84,17 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
                <BarChart data={capacityData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-45} textAnchor="end" height={80}/>
-                 <YAxis tick={{ fontSize: 11 }} />
+                 <YAxis domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} tick={{ fontSize: 11 }} />
                  <Tooltip />
                  <Legend verticalAlign="top" height={36} />
+                 
+                 {target1 > 0 && (
+                   <ReferenceLine y={target1} stroke="#ef4444" strokeDasharray="3 3" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'top', value: `LC Target: ${target1}`, fill: '#ef4444', fontSize: 11, fontWeight: 'bold' }} />
+                 )}
+                 {target2 > 0 && (
+                   <ReferenceLine y={target2} stroke="#047857" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'top', value: `100% Target: ${target2}`, fill: '#047857', fontSize: 11, fontWeight: 'bold' }} />
+                 )}
+
                  {capKeys.map((k, i) => (
                    <Bar key={k} dataKey={k} fill={['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][i % 5]} maxBarSize={50}>
                      <LabelList dataKey={k} position="top" fill="#374151" fontSize={11} fontWeight={600} formatter={(val: number) => val > 0 ? Math.round(val) : ''} />
@@ -106,9 +117,17 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
                <BarChart data={compareData} margin={{ top: 20, right: 30, left: 20, bottom: 90 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-45} textAnchor="end" height={90}/>
-                 <YAxis tick={{ fontSize: 11 }} />
+                 <YAxis domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} tick={{ fontSize: 11 }} />
                  <Tooltip />
                  <Legend verticalAlign="top" height={36} />
+                 
+                 {target1 > 0 && (
+                   <ReferenceLine y={target1} stroke="#ef4444" strokeDasharray="3 3" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'top', value: `LC Target: ${target1}`, fill: '#ef4444', fontSize: 11, fontWeight: 'bold' }} />
+                 )}
+                 {target2 > 0 && (
+                   <ReferenceLine y={target2} stroke="#047857" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'top', value: `100% Target: ${target2}`, fill: '#047857', fontSize: 11, fontWeight: 'bold' }} />
+                 )}
+
                  <Bar dataKey="Capacity" fill="#8b5cf6" maxBarSize={40}>
                    <LabelList dataKey="Capacity" position="top" fill="#374151" fontSize={11} fontWeight={600} formatter={(v: number) => v > 0 ? v : ''} />
                  </Bar>
@@ -132,7 +151,7 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
                <LineChart data={targetData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-45} textAnchor="end" height={80}/>
-                 <YAxis tick={{ fontSize: 11 }} />
+                 <YAxis domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} tick={{ fontSize: 11 }} />
                  <Tooltip />
                  <Legend verticalAlign="top" height={36} />
                  <Line type="monotone" dataKey="Target" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }}>
