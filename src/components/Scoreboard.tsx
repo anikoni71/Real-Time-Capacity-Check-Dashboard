@@ -3,8 +3,9 @@ import { ScoreboardRow } from '../types';
 import { ClipboardList } from 'lucide-react';
 
 export default function Scoreboard({ scoreboards, activeCount }: { scoreboards: ScoreboardRow[], activeCount: number }) {
-  
-  if (scoreboards.length === 0) {
+  const validScoreboards = scoreboards.filter(sb => sb.obMp?.trim() || sb.lineTotalSmv?.trim() || sb.lineTarget100?.trim() || sb.todayPlanLcTarget?.trim());
+
+  if (validScoreboards.length === 0) {
     return (
       <div className="bg-white rounded-lg p-12 text-center border">
         <h3 className="text-lg font-medium text-gray-900 mb-2">No Matching Data Found</h3>
@@ -49,7 +50,7 @@ export default function Scoreboard({ scoreboards, activeCount }: { scoreboards: 
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 text-gray-800">
-            {scoreboards.map((sb, i) => (
+            {validScoreboards.map((sb, i) => (
               <tr key={i} className="hover:bg-gray-50 transition-colors">
                 <td className="px-4 py-2 font-medium">{sb.unit}</td>
                 <td className="px-4 py-2 font-medium">{sb.line}</td>

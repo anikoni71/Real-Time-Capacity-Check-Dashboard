@@ -6,6 +6,7 @@ import FilterBar from './FilterBar';
 import Scoreboard from './Scoreboard';
 import CapacityProcess from './CapacityProcess';
 import ProcessAnalysis from './ProcessAnalysis';
+import LineTargets from './LineTargets';
 import Analytics from './Analytics';
 import Performers from './Performers';
 import Database from './Database';
@@ -122,6 +123,7 @@ export default function Dashboard() {
     { id: 'Capacity by Process', icon: Factory },
     { id: 'Utilization & Machines', icon: Layers },
     { id: 'Process Analysis', icon: LineChart },
+    { id: 'Line Targets', icon: Activity },
     { id: 'Analytics', icon: BarChart2 },
     { id: 'Performers', icon: Trophy },
     { id: 'Database', icon: DbIcon }
@@ -204,6 +206,7 @@ export default function Dashboard() {
               </div>
             )}
             {activeTab === 'Process Analysis' && <ProcessAnalysis processes={filteredProcesses} />}
+            {activeTab === 'Line Targets' && <LineTargets processes={filteredProcesses} />}
             {activeTab === 'Analytics' && <Analytics processes={filteredProcesses} />}
             {activeTab === 'Performers' && <Performers processes={filteredProcesses} />}
             {activeTab === 'Database' && <Database processes={filteredProcesses} />}

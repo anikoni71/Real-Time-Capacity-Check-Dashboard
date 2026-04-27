@@ -46,7 +46,7 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
       });
       return {
         name: g,
-        Target: Math.round(pRows.reduce((s, x) => s + x.target100, 0)),
+        Target: Math.round(pRows[0]?.target100 || 0),
         Capacity: Math.round(pRows.reduce((s, x) => s + x.capacity, 0)),
       };
     });
@@ -143,7 +143,7 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
       <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col h-full">
         <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-amber-500" />
-          100% Target vs Capacity (Line Chart)
+          100% Process Target vs Capacity (Line Chart)
         </h2>
         <div className="overflow-x-auto w-full pb-4" style={{ WebkitOverflowScrolling: 'touch' }}>
            <div style={{ width: `${Math.max(800, targetData.length * 100)}px`, height: '400px' }}>
