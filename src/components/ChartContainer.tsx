@@ -11,12 +11,13 @@ interface ChartContainerProps {
 
 export default function ChartContainer({ title, icon, children }: ChartContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const isPrintingRef = useRef(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isFullscreen) {
+      if (e.key === 'Escape' && isFullscreen && !isPrintingRef.current) {
         setIsFullscreen(false);
       }
     };
@@ -46,10 +47,8 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
         if (headerPlaceholder) {
             const clone = scoreboardEl.cloneNode(true) as HTMLElement;
             clone.id = 'print-scoreboard-clone';
-            clone.style.transform = 'scale(0.8)';
-            clone.style.transformOrigin = 'top center';
-            clone.style.width = '125%';
-            clone.style.marginBottom = '-20px';
+            // Use zoom instead of scale so it actually reduces the layout height and prevents spilling onto page 2
+            (clone.style as any).zoom = '0.65';
             
             // Allow wrapping if necessary or let it be responsive
             const tableContainer = clone.querySelector('.overflow-x-auto') as HTMLElement;
@@ -68,6 +67,7 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
     }
     
     // We delay slightly to allow CSS to adjust layout and ResponsiveContainer to rerender before calling window.print()
+    isPrintingRef.current = true;
     setTimeout(() => {
       window.print();
       document.body.classList.remove('print-single-chart');
@@ -75,6 +75,11 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
         containerRef.current.classList.remove('printable-area');
         window.dispatchEvent(new Event('resize'));
       }
+      
+      // Delay resetting the printing ref to avoid race conditions with keyup/keydown
+      setTimeout(() => {
+        isPrintingRef.current = false;
+      }, 100);
     }, 800);
   };
 
@@ -113,8 +118,7 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
               const headerPlaceholder = clonedElement.querySelector('#print-scoreboard-placeholder');
               if (headerPlaceholder) {
                   const clone = scoreboardEl.cloneNode(true) as HTMLElement;
-                  clone.style.transformOrigin = 'top center';
-                  clone.style.marginBottom = '20px';
+                  (clone.style as any).zoom = '0.65';
                   headerPlaceholder.appendChild(clone);
               }
           }
