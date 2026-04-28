@@ -54,49 +54,64 @@
 
   /* Hide UI elements that shouldn't be printed */
   .header-controls, 
-  .print\\:hidden,
+  .print\:hidden,
   .text-xs.bg-gray-50, /* "Scroll horizontally" messages */
   ::-webkit-scrollbar {
     display: none !important;
   }
   
+  /* Container Shrinking for the generic dashboard print */
+  #root {
+    /* Scale down the entire dashboard so multi-column layouts fit on one wide page */
+    transform: scale(0.65);
+    transform-origin: top left;
+    width: 153.8% !important; /* Forces layout to be wide enough to fill 100% after scaling down by 0.65 */
+    height: auto !important;
+  }
+  
+  /* Universal Recharts Print Scaling */
+  /* This prevents the SVG from clipping on the right and forces full 100% rendering */
+  .recharts-responsive-container,
+  .recharts-responsive-container > svg,
+  .recharts-wrapper,
+  .recharts-surface {
+    overflow: visible !important;
+    width: 100% !important;
+  }
+
   /* Shrink chart containers to fit page */
+  body.print-single-chart .printable-area {
+    width: 100% !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
   body.print-single-chart .printable-area .scrollable-chart-area {
-    overflow: hidden !important;
+    overflow: visible !important;
     height: auto !important;
   }
 
   body.print-single-chart .printable-area .scrollable-chart-inner {
-    width: 100% !important; /* Force to fit exactly page width */
+    width: 100% !important; 
     max-width: 100% !important;
     height: auto !important;
-    /* Optional scale if it's still large, but 100% width normally fits Recharts */
-    transform: none !important; 
-  }
-
-  .recharts-responsive-container,
-  .recharts-responsive-container svg {
-    width: 100% !important;
-    height: auto !important;
+    transform: none !important; /* Managed by the parent now */
   }
 
   /* Universal X-Axis label override */
   .recharts-cartesian-axis-tick-value {
     font-size: 7px !important;
   }
-
-  body.print-single-chart .printable-area {
-    width: 100% !important;
-    position: static !important;
-    padding: 0 !important;
-    display: block !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
 }
 
-
 body.print-single-chart {
+  /* Print-preview setup, normally handled by print media, but we add some visibility guards here */
   height: 100vh !important;
   width: 100vw !important;
   overflow: hidden !important;
@@ -123,22 +138,16 @@ body.print-single-chart .printable-area {
   width: 100vw !important;
   height: 100vh !important;
   max-height: 100vh !important;
-  overflow: hidden !important;
+  overflow: hidden !important; /* Only hidden on screen, printed handled inside @media print */
   box-sizing: border-box !important;
   margin: 0 !important;
   padding: 5mm !important;
-  border: none;
-  box-shadow: none;
-  page-break-inside: avoid;
-  break-inside: avoid;
   background: white !important;
-  -webkit-print-color-adjust: exact !important;
-  print-color-adjust: exact !important;
   z-index: 9999;
 }
 
 body.print-single-chart .printable-area .scrollable-chart-area {
-  overflow: visible !important;
+  overflow: hidden !important; /* hidden for screen */
   width: 100% !important;
   height: 100% !important;
   flex: 1 1 auto !important;
@@ -148,23 +157,16 @@ body.print-single-chart .printable-area .scrollable-chart-area {
 }
 
 body.print-single-chart .printable-area .scrollable-chart-inner {
-  width: 100vw !important; /* Force to page width */
+  width: 100vw !important; /* Force screen to page width */
   max-width: 100% !important;
   height: 100% !important;   
   min-height: 0 !important;
   flex: 1 1 auto;
-  transform: scale(0.95);
-  transform-origin: top left;
 }
 
 body.print-single-chart .printable-area .recharts-responsive-container {
   width: 100% !important;
   height: 100% !important;
-}
-
-/* Improve X-axis label legibility when squeezed */
-body.print-single-chart .printable-area .recharts-cartesian-axis-tick-value {
-  font-size: 7px !important;
 }
 
 /* Ensure our header displays on print */
