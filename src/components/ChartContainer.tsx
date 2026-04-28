@@ -35,6 +35,31 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
   const handlePrint = (e: React.MouseEvent) => {
     e.stopPropagation();
     
+    const existingClone = document.getElementById('print-scoreboard-clone');
+    if (existingClone) {
+        existingClone.remove();
+    }
+    
+    const scoreboardEl = document.querySelector('.scoreboard-container');
+    if (scoreboardEl && containerRef.current) {
+        const headerPlaceholder = containerRef.current.querySelector('#print-scoreboard-placeholder');
+        if (headerPlaceholder) {
+            const clone = scoreboardEl.cloneNode(true) as HTMLElement;
+            clone.id = 'print-scoreboard-clone';
+            clone.style.transform = 'scale(0.85)';
+            clone.style.transformOrigin = 'top center';
+            clone.style.width = '117%'; // Compensate for the 0.85 scale
+            clone.style.marginBottom = '-20px'; // Reduce whitespace
+            
+            // Allow wrapping if necessary or let it be responsive
+            const tableContainer = clone.querySelector('.overflow-x-auto') as HTMLElement;
+            if (tableContainer) {
+              tableContainer.style.overflow = 'visible';
+            }
+            headerPlaceholder.appendChild(clone);
+        }
+    }
+    
     document.body.classList.add('print-single-chart');
     if (containerRef.current) {
       containerRef.current.classList.add('printable-area');
@@ -77,6 +102,20 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
           const header = clonedElement.querySelector('.print-header') as HTMLElement;
           if (header) {
             header.style.display = 'block';
+            header.classList.remove('hidden');
+          }
+          
+          const scoreboardEl = doc.querySelector('.scoreboard-container');
+          if (scoreboardEl) {
+              const headerPlaceholder = clonedElement.querySelector('#print-scoreboard-placeholder');
+              if (headerPlaceholder) {
+                  const clone = scoreboardEl.cloneNode(true) as HTMLElement;
+                  clone.style.transform = 'scale(0.85)';
+                  clone.style.transformOrigin = 'top center';
+                  clone.style.width = '117%';
+                  clone.style.marginBottom = '-20px';
+                  headerPlaceholder.appendChild(clone);
+              }
           }
           
           const scrollableArea = clonedElement.querySelector('.scrollable-chart-area') as HTMLElement;
@@ -144,9 +183,13 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
       ref={containerRef} 
       className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col h-full chart-wrapper relative transition-all"
     >
-      <div className="print-header hidden mb-6 text-center border-b pb-4">
-        <h1 className="text-2xl font-bold text-gray-900">Factory Production Report</h1>
-        <p className="text-gray-500">Generated on {new Date().toLocaleDateString()}</p>
+      <div className="print-header hidden mb-6 text-center border-b pb-4 relative">
+        <h1 className="text-2xl font-bold text-gray-900">Capacity Check Report</h1>
+        <p className="text-gray-500 mb-4">Generated on {new Date().toLocaleDateString()}</p>
+        <div id="print-scoreboard-placeholder" className="text-left flex justify-center w-full"></div>
+        <div className="absolute top-0 right-0 text-xs text-gray-400 italic font-medium">
+          App Developed by Anik_Oni
+        </div>
       </div>
 
       <div className="flex items-center justify-between mb-4 header-controls print:hidden">

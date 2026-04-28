@@ -7,7 +7,7 @@ export default function Scoreboard({ scoreboards, activeCount }: { scoreboards: 
 
   if (validScoreboards.length === 0) {
     return (
-      <div className="bg-white rounded-lg p-12 text-center border">
+      <div className="scoreboard-container bg-white rounded-lg p-12 text-center border">
         <h3 className="text-lg font-medium text-gray-900 mb-2">No Matching Data Found</h3>
         <p className="text-gray-500 text-sm">We couldn't find any scoreboard records matching your {activeCount} active filters. Please adjust them above.</p>
       </div>
@@ -21,7 +21,7 @@ export default function Scoreboard({ scoreboards, activeCount }: { scoreboards: 
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+    <div className="scoreboard-container bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col">
       <div className="px-4 py-3 border-b border-gray-200 bg-gray-50/50 flex justify-between items-center">
         <h2 className="text-base font-semibold text-gray-800 flex items-center gap-2">
           <ClipboardList className="h-5 w-5 text-blue-600" />
