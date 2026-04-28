@@ -49,7 +49,35 @@
     size: A4 landscape;
     margin: 0 !important;
   }
+
+  /* Focus on Graph Only: Hide Scoreboard & Total Capacity Text */
+  #print-scoreboard-placeholder,
+  #print-scoreboard-clone,
+  .scoreboard-container,
+  .print-hide-total,
+  body.print-single-chart .printable-area > div > .mb-2 {
+    display: none !important;
+  }
+
+  /* Scale to Fit & X-Axis Optimization */
+  body.print-single-chart .printable-area .scrollable-chart-area {
+    overflow: visible !important;
+  }
+
+  body.print-single-chart .printable-area .scrollable-chart-inner {
+    width: 100vw !important; /* Force to page width */
+    max-width: 100% !important;
+    height: 100% !important;
+    /* Shrink the entire chart container so it fits 100% of the paper width */
+    transform: scale(0.95);
+    transform-origin: top left;
+  }
+
+  body.print-single-chart .printable-area .recharts-cartesian-axis-tick-value {
+    font-size: 7px !important;
+  }
 }
+
 
 body.print-single-chart {
   height: 100vh !important;
@@ -93,21 +121,23 @@ body.print-single-chart .printable-area {
 }
 
 body.print-single-chart .printable-area .scrollable-chart-area {
-  overflow: hidden !important;
+  overflow: visible !important;
   width: 100% !important;
   height: 100% !important;
   flex: 1 1 auto !important;
   padding-bottom: 0 !important; 
-  display: flex !important;
-  flex-direction: column !important;
+  display: block !important;
   box-sizing: border-box !important;
 }
 
 body.print-single-chart .printable-area .scrollable-chart-inner {
-  width: 100% !important;
+  width: 100vw !important; /* Force to page width */
+  max-width: 100% !important;
   height: 100% !important;   
   min-height: 0 !important;
   flex: 1 1 auto;
+  transform: scale(0.95);
+  transform-origin: top left;
 }
 
 body.print-single-chart .printable-area .recharts-responsive-container {
@@ -117,7 +147,7 @@ body.print-single-chart .printable-area .recharts-responsive-container {
 
 /* Improve X-axis label legibility when squeezed */
 body.print-single-chart .printable-area .recharts-cartesian-axis-tick-value {
-  font-size: 9px !important;
+  font-size: 7px !important;
 }
 
 /* Ensure our header displays on print */
