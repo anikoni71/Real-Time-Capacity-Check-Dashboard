@@ -78,10 +78,10 @@ export default function OperatorUtilization({ processes }: { processes: ProcessR
               <ReferenceLine y={60} stroke="#EF4444" strokeDasharray="3 3" label={{ position: 'top', value: '60 Min Capacity', fill: '#EF4444', fontSize: 12, fontWeight: 'bold' }} />
 
               <Bar dataKey="Utilized" stackId="a" fill="#10B981" name="Utilized Minute" maxBarSize={50}>
-                <LabelList dataKey="Utilized" position="insideTop" fill="#ffffff" fontSize={11} fontWeight={600} />
+                <LabelList dataKey="Utilized" position="insideTop" fill="#ffffff" fontSize={11} fontWeight="bold" angle={-90} offset={10} />
               </Bar>
               <Bar dataKey="Unutilized" stackId="a" fill="#FBBF24" name="Unutilized Minute" maxBarSize={50}>
-                <LabelList dataKey="Percentage" position="top" fill="#374151" fontSize={11} fontWeight={600} />
+                <LabelList dataKey="Percentage" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-90} offset={10} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>

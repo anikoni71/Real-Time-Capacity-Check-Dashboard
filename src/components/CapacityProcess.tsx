@@ -143,9 +143,11 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
                 <LabelList 
                   dataKey="Capacity" 
                   position="top" 
-                  fill="#374151" 
+                  fill="#111827" 
                   fontSize={11} 
-                  fontWeight={600}
+                  fontWeight="bold"
+                  angle={-90}
+                  offset={15}
                 />
               </Bar>
             </BarChart>

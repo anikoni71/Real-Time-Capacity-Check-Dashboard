@@ -41,10 +41,10 @@ export default function LineTargets({ processes }: { processes: ProcessRow[] }) 
                  <Tooltip />
                  <Legend verticalAlign="top" height={36} />
                  <Line type="monotone" dataKey="Capacity" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }}>
-                   <LabelList dataKey="Capacity" position="bottom" fill="#3b82f6" fontSize={11} fontWeight={600} />
+                   <LabelList dataKey="Capacity" position="bottom" fill="#3b82f6" fontSize={11} fontWeight="bold" angle={-90} offset={15} />
                  </Line>
                  <Line type="monotone" dataKey="Line 100% Target" stroke="#ef4444" strokeWidth={3} dot={false} activeDot={false}>
-                   <LabelList dataKey="Line 100% Target" position="top" fill="#ef4444" fontSize={11} fontWeight={600} />
+                   <LabelList dataKey="Line 100% Target" position="top" fill="#ef4444" fontSize={11} fontWeight="bold" angle={-90} offset={15} />
                  </Line>
                </LineChart>
              </ResponsiveContainer>
@@ -63,10 +63,10 @@ export default function LineTargets({ processes }: { processes: ProcessRow[] }) 
                  <Tooltip />
                  <Legend verticalAlign="top" height={36} />
                  <Line type="monotone" dataKey="Capacity" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }}>
-                   <LabelList dataKey="Capacity" position="bottom" fill="#3b82f6" fontSize={11} fontWeight={600} />
+                   <LabelList dataKey="Capacity" position="bottom" fill="#3b82f6" fontSize={11} fontWeight="bold" angle={-90} offset={15} />
                  </Line>
                  <Line type="monotone" dataKey="Today Plan LC Target" stroke="#ef4444" strokeWidth={3} dot={false} activeDot={false}>
-                   <LabelList dataKey="Today Plan LC Target" position="top" fill="#ef4444" fontSize={11} fontWeight={600} />
+                   <LabelList dataKey="Today Plan LC Target" position="top" fill="#ef4444" fontSize={11} fontWeight="bold" angle={-90} offset={15} />
                  </Line>
                </LineChart>
              </ResponsiveContainer>

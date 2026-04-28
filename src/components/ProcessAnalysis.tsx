@@ -94,7 +94,7 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
 
                  {capKeys.map((k, i) => (
                    <Bar key={k} dataKey={k} fill={['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][i % 5]} maxBarSize={50}>
-                     <LabelList dataKey={k} position="top" fill="#374151" fontSize={11} fontWeight={600} formatter={(val: number) => val > 0 ? Math.round(val) : ''} />
+                     <LabelList dataKey={k} position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-90} offset={15} formatter={(val: number) => val > 0 ? Math.round(val) : ''} />
                    </Bar>
                  ))}
                </BarChart>
@@ -122,10 +122,10 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
                  )}
 
                  <Bar dataKey="Capacity" fill="#8b5cf6" maxBarSize={40}>
-                   <LabelList dataKey="Capacity" position="top" fill="#374151" fontSize={11} fontWeight={600} formatter={(v: number) => v > 0 ? v : ''} />
+                   <LabelList dataKey="Capacity" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-90} offset={15} formatter={(v: number) => v > 0 ? v : ''} />
                  </Bar>
                  <Bar dataKey="Output" fill="#ec4899" maxBarSize={40}>
-                   <LabelList dataKey="Output" position="top" fill="#374151" fontSize={11} fontWeight={600} formatter={(v: number) => v > 0 ? v : ''} />
+                   <LabelList dataKey="Output" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-90} offset={15} formatter={(v: number) => v > 0 ? v : ''} />
                  </Bar>
                </BarChart>
              </ResponsiveContainer>
@@ -144,10 +144,10 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
                  <Tooltip />
                  <Legend verticalAlign="top" height={36} />
                  <Line type="monotone" dataKey="Target" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }}>
-                   <LabelList dataKey="Target" position="top" fill="#f59e0b" fontSize={11} fontWeight={600} />
+                   <LabelList dataKey="Target" position="top" fill="#f59e0b" fontSize={11} fontWeight="bold" angle={-90} offset={15} />
                  </Line>
                  <Line type="monotone" dataKey="Capacity" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }}>
-                   <LabelList dataKey="Capacity" position="bottom" fill="#3b82f6" fontSize={11} fontWeight={600} />
+                   <LabelList dataKey="Capacity" position="bottom" fill="#3b82f6" fontSize={11} fontWeight="bold" angle={-90} offset={15} />
                  </Line>
                </LineChart>
              </ResponsiveContainer>

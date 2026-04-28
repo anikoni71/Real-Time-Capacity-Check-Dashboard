@@ -57,10 +57,10 @@ export default function Analytics({ processes }: { processes: ProcessRow[] }) {
                  )}
 
                  <Bar dataKey="Capacity" fill="#10b981" name="Capacity" maxBarSize={40}>
-                   <LabelList dataKey="Capacity" position="top" fill="#374151" fontSize={11} fontWeight={600} formatter={(v: number) => v > 0 ? v : ''} />
+                   <LabelList dataKey="Capacity" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-90} offset={15} formatter={(v: number) => v > 0 ? v : ''} />
                  </Bar>
                  <Bar dataKey="ActualOutput" fill="#ef4444" name="Output" maxBarSize={40}>
-                   <LabelList dataKey="ActualOutput" position="top" fill="#374151" fontSize={11} fontWeight={600} formatter={(v: number) => v > 0 ? v : ''} />
+                   <LabelList dataKey="ActualOutput" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-90} offset={15} formatter={(v: number) => v > 0 ? v : ''} />
                  </Bar>
                </BarChart>
              </ResponsiveContainer>
@@ -79,10 +79,10 @@ export default function Analytics({ processes }: { processes: ProcessRow[] }) {
                  <Tooltip />
                  <Legend verticalAlign="top" height={36} />
                  <Line type="monotone" dataKey="Target100" name="100% Target" stroke="#6366f1" strokeWidth={3} dot={{ r: 4 }}>
-                   <LabelList dataKey="Target100" position="top" fill="#6366f1" fontSize={11} fontWeight={600} />
+                   <LabelList dataKey="Target100" position="top" fill="#6366f1" fontSize={11} fontWeight="bold" angle={-90} offset={15} />
                  </Line>
                  <Line type="monotone" dataKey="Capacity" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }}>
-                   <LabelList dataKey="Capacity" position="bottom" fill="#10b981" fontSize={11} fontWeight={600} />
+                   <LabelList dataKey="Capacity" position="bottom" fill="#10b981" fontSize={11} fontWeight="bold" angle={-90} offset={15} />
                  </Line>
                </LineChart>
              </ResponsiveContainer>
