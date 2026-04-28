@@ -54,7 +54,7 @@ export default function OperatorUtilization({ processes }: { processes: ProcessR
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                 <XAxis 
                   dataKey="name" 
-                  angle={-45} 
+                  angle={-90} 
                   textAnchor="end" 
                   tick={{ fontSize: 11, fill: '#4B5563' }} 
                   interval={0}

@@ -88,7 +88,7 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
                 dataKey="name" 
                 tick={{ fontSize: 12, fill: '#4B5563' }} 
                 interval={0} 
-                angle={-45} 
+                angle={-90} 
                 textAnchor="end"
                 height={160}
               />

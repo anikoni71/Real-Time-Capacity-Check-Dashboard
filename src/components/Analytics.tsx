@@ -44,7 +44,7 @@ export default function Analytics({ processes }: { processes: ProcessRow[] }) {
              <ResponsiveContainer width="100%" height="100%">
                <BarChart data={processStats} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-45} textAnchor="end" height={160}/>
+                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-90} textAnchor="end" height={160}/>
                  <YAxis domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} tick={{ fontSize: 11 }} />
                  <Tooltip />
                  <Legend verticalAlign="top" height={36} />
@@ -74,7 +74,7 @@ export default function Analytics({ processes }: { processes: ProcessRow[] }) {
              <ResponsiveContainer width="100%" height="100%">
                <LineChart data={topProcesses} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-45} textAnchor="end" height={160}/>
+                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-90} textAnchor="end" height={160}/>
                  <YAxis tick={{ fontSize: 11 }} />
                  <Tooltip />
                  <Legend verticalAlign="top" height={36} />
