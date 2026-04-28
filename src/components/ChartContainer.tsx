@@ -56,9 +56,18 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
     
     setIsDownloading(true);
     try {
+      const scrollInner = containerRef.current.querySelector('.scrollable-chart-inner') as HTMLElement;
+      let targetWidth = containerRef.current.offsetWidth;
+      if (scrollInner) {
+         const innerW = parseInt(scrollInner.style.width || '0', 10) || scrollInner.scrollWidth;
+         targetWidth = Math.max(targetWidth, innerW + 48); // 48px to account for padding
+      }
+      
       const canvas = await html2canvas(containerRef.current, {
         scale: 2,
         backgroundColor: '#ffffff',
+        width: targetWidth,
+        windowWidth: targetWidth,
         onclone: (doc, clonedElement) => {
           // Remove the utility buttons from the cloned canvas
           const buttons = clonedElement.querySelectorAll('button');
@@ -68,15 +77,9 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
           const innerChart = clonedElement.querySelector('.scrollable-chart-inner') as HTMLElement;
           
           if (scrollableArea && innerChart) {
-             scrollableArea.style.overflow = 'hidden';
-             
-             // Expand the cloned element to show the entire chart
-             // Use the inner width if it's wider than the container
-             const innerWidth = parseInt(innerChart.style.width || '0', 10) || innerChart.scrollWidth;
-             if (innerWidth > scrollableArea.clientWidth) {
-               clonedElement.style.width = `${innerWidth + 48}px`; // 48px to account for container padding
-               scrollableArea.style.width = '100%';
-             }
+             scrollableArea.style.overflow = 'visible';
+             clonedElement.style.width = `${targetWidth}px`;
+             scrollableArea.style.width = `${targetWidth}px`;
           }
         }
       });
@@ -107,8 +110,7 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
       const y = margin + (availableHeight - finalHeight) / 2;
       
       pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight);
-      const safeTitle = title.replace(/[^a-zA-Z0-9]/g, '_');
-      pdf.save(`${safeTitle}.pdf`);
+      pdf.save(`Production_Capacity_Report.pdf`);
     } catch (err) {
       console.error('Error generating PDF:', err);
     } finally {
