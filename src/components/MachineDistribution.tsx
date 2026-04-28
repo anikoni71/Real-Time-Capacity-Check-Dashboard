@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { ProcessRow } from '../types';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Settings } from 'lucide-react';
+import ChartContainer from './ChartContainer';
 
 export default function MachineDistribution({ processes }: { processes: ProcessRow[] }) {
   const { data, COLORS } = useMemo(() => {
@@ -44,15 +45,13 @@ export default function MachineDistribution({ processes }: { processes: ProcessR
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col h-full">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-          <Settings className="h-5 w-5 text-blue-600" />
-          Machine Type Distribution
-        </h3>
-      </div>
-      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8 pb-4">
-        <div className="w-full lg:w-1/2" style={{ height: '350px' }}>
+    <div className="h-full">
+      <ChartContainer 
+        title="Machine Type Distribution" 
+        icon={<Settings className="h-5 w-5 text-blue-600" />}
+      >
+        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8 pb-4 scrollable-chart-area flex-1">
+          <div className="w-full lg:w-1/2 scrollable-chart-inner" style={{ height: '350px' }}>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -84,7 +83,7 @@ export default function MachineDistribution({ processes }: { processes: ProcessR
         
         <div className="w-full lg:w-1/2">
           <h4 className="text-sm font-semibold text-gray-700 mb-3">Machine Details</h4>
-          <div className="border rounded-md overflow-hidden max-h-[350px] overflow-y-auto">
+          <div className="border rounded-md overflow-hidden max-h-[350px] overflow-y-auto print:max-h-full print:overflow-visible">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr>
@@ -113,7 +112,8 @@ export default function MachineDistribution({ processes }: { processes: ProcessR
             </table>
           </div>
         </div>
-      </div>
+        </div>
+      </ChartContainer>
     </div>
   );
 }

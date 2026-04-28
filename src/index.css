@@ -37,8 +37,9 @@
   }
   
   /* Show only the chart wrapper being printed */
-  body.print-single-chart .this-is-printing {
-    display: flex !important;
+  body.print-single-chart .printable-area {
+    display: block !important;
+    visibility: visible !important;
     position: fixed;
     left: 0;
     top: 0;
@@ -50,36 +51,32 @@
     box-shadow: none;
     box-sizing: border-box;
     page-break-inside: avoid;
-    flex-direction: column;
     background: white;
     z-index: 9999;
   }
 
   /* Force responsive container to squeeze onto the page instead of scrolling horizontally */
-  body.print-single-chart .this-is-printing .scrollable-chart-area {
+  body.print-single-chart .printable-area .scrollable-chart-area {
     overflow: hidden !important;
     width: 100% !important;
-    height: 100% !important;
-    flex-grow: 1 !important;
+    height: 500px !important;
     padding-bottom: 0 !important; 
-    display: flex;
-    flex-direction: column;
+    display: block !important;
   }
 
-  body.print-single-chart .this-is-printing .scrollable-chart-inner {
+  body.print-single-chart .printable-area .scrollable-chart-inner {
     width: 100% !important;    
-    height: 100% !important;   
-    min-height: unset !important;
-    flex-grow: 1 !important;
+    height: 500px !important;   
+    min-height: 500px !important;
   }
 
-  body.print-single-chart .this-is-printing .recharts-responsive-container {
+  body.print-single-chart .printable-area .recharts-responsive-container {
     width: 100% !important;
-    height: 100% !important;
+    height: 500px !important;
   }
 
   /* Improve X-axis label legibility when squeezed */
-  body.print-single-chart .this-is-printing .recharts-cartesian-axis-tick-value {
+  body.print-single-chart .printable-area .recharts-cartesian-axis-tick-value {
     font-size: 9px !important;
   }
 

@@ -37,7 +37,7 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
     
     document.body.classList.add('print-single-chart');
     if (containerRef.current) {
-      containerRef.current.classList.add('this-is-printing');
+      containerRef.current.classList.add('printable-area');
     }
     
     // We delay slightly to allow CSS to adjust layout before calling window.print()
@@ -45,7 +45,7 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
       window.print();
       document.body.classList.remove('print-single-chart');
       if (containerRef.current) {
-        containerRef.current.classList.remove('this-is-printing');
+        containerRef.current.classList.remove('printable-area');
       }
     }, 100);
   };
@@ -110,7 +110,7 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
       const y = margin + (availableHeight - finalHeight) / 2;
       
       pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight);
-      pdf.save(`Production_Capacity_Report.pdf`);
+      pdf.save(`CapacityCheck_Report.pdf`);
     } catch (err) {
       console.error('Error generating PDF:', err);
     } finally {

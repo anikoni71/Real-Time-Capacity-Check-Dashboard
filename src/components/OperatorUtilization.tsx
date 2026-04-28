@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { ProcessRow } from '../types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList, ReferenceLine } from 'recharts';
 import { Clock } from 'lucide-react';
+import ChartContainer from './ChartContainer';
 
 export default function OperatorUtilization({ processes }: { processes: ProcessRow[] }) {
   const chartData = useMemo(() => {
@@ -38,29 +39,27 @@ export default function OperatorUtilization({ processes }: { processes: ProcessR
   if (processes.length === 0) return <div className="p-8 text-center text-gray-500">No data found matching current filters.</div>;
 
   return (
-    <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col h-full">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            <Clock className="h-5 w-5 text-emerald-600" />
-            Operator Utilization Minute
-          </h3>
+    <div className="h-full">
+      <ChartContainer 
+        title="Operator Utilization Minute" 
+        icon={<Clock className="h-5 w-5 text-emerald-600" />}
+      >
+        <div className="mb-2">
           <p className="text-sm text-gray-500 mt-1">Yellow bar represents 60 minutes total time. Green represents utilized minutes.</p>
         </div>
-      </div>
-      <div className="overflow-x-auto w-full pb-4" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <div style={{ width: `${Math.max(800, stackedData.length * 80)}px`, height: '450px' }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={stackedData} margin={{ top: 20, right: 30, left: 10, bottom: 80 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-              <XAxis 
-                dataKey="name" 
-                angle={-45} 
-                textAnchor="end" 
-                tick={{ fontSize: 11, fill: '#4B5563' }} 
-                interval={0}
-                height={80}
-              />
+        <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="scrollable-chart-inner" style={{ width: `${Math.max(800, stackedData.length * 80)}px`, height: '450px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={stackedData} margin={{ top: 20, right: 30, left: 10, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis 
+                  dataKey="name" 
+                  angle={-45} 
+                  textAnchor="end" 
+                  tick={{ fontSize: 11, fill: '#4B5563' }} 
+                  interval={0}
+                  height={160}
+                />
               <YAxis 
                 tick={{ fontSize: 11 }}
                 label={{ value: 'Minutes', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#4B5563', fontSize: 12 } }} 
@@ -88,6 +87,7 @@ export default function OperatorUtilization({ processes }: { processes: ProcessR
           </ResponsiveContainer>
         </div>
       </div>
+      </ChartContainer>
     </div>
   );
 }
