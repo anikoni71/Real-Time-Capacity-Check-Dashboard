@@ -39,16 +39,16 @@
 @media print {
   html, body {
     width: 100% !important;
-    height: auto !important;
+    height: 100vh !important;
     margin: 0 !important;
     padding: 0 !important;
-    overflow: visible !important; 
+    overflow: hidden !important; 
   }
   
   body.print-single-chart {
-    height: auto !important;
-    width: 100% !important;
-    overflow: visible !important;
+    height: 100vh !important;
+    width: 100vw !important;
+    overflow: hidden !important;
     margin: 0 !important;
     padding: 0 !important;
   }
@@ -70,8 +70,8 @@
     left: 0;
     top: 0;
     width: 100vw !important;
-    height: 95vh !important;
-    max-height: 95vh !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
     overflow: hidden !important;
     box-sizing: border-box !important;
     margin: 0 !important;
@@ -94,6 +94,7 @@
     padding-bottom: 0 !important; 
     display: block !important;
     box-sizing: border-box !important;
+    zoom: 0.8;
   }
 
   body.print-single-chart .printable-area .scrollable-chart-inner {

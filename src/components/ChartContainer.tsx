@@ -189,7 +189,7 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
       className={`bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col h-full chart-wrapper relative transition-all ${isFullscreen ? 'css-fullscreen' : ''}`}
     >
       <div className="print-header hidden mb-6 text-center border-b pb-4 relative">
-        <h1 className="text-2xl font-bold text-gray-900">Capacity Check Report</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Capacity Check Report - {title}</h1>
         <p className="text-gray-500 mb-4">Generated on {new Date().toLocaleDateString()}</p>
         <div id="print-scoreboard-placeholder" className="text-left flex justify-center w-full"></div>
         <div className="absolute top-0 right-0 text-xs text-gray-400 italic font-medium">
