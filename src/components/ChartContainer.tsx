@@ -35,11 +35,6 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
   const handlePrint = (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // Exit fullscreen before printing to avoid browser rendering bugs
-    if (document.fullscreenElement) {
-        document.exitFullscreen().catch(console.error);
-    }
-    
     const existingClone = document.getElementById('print-scoreboard-clone');
     if (existingClone) {
         existingClone.remove();
@@ -51,10 +46,8 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
         if (headerPlaceholder) {
             const clone = scoreboardEl.cloneNode(true) as HTMLElement;
             clone.id = 'print-scoreboard-clone';
-            clone.style.transform = 'scale(0.85)';
             clone.style.transformOrigin = 'top center';
-            clone.style.width = '117%'; // Compensate for the 0.85 scale
-            clone.style.marginBottom = '-20px'; // Reduce whitespace
+            clone.style.marginBottom = '20px'; // Give it a bit of space from the chart
             
             // Allow wrapping if necessary or let it be responsive
             const tableContainer = clone.querySelector('.overflow-x-auto') as HTMLElement;
@@ -68,16 +61,19 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
     document.body.classList.add('print-single-chart');
     if (containerRef.current) {
       containerRef.current.classList.add('printable-area');
+      // Dispatch a resize event to trigger ResponsiveContainer immediately
+      window.dispatchEvent(new Event('resize'));
     }
     
-    // We delay slightly to allow CSS to adjust layout and fullscreen exit before calling window.print()
+    // We delay slightly to allow CSS to adjust layout and ResponsiveContainer to rerender before calling window.print()
     setTimeout(() => {
       window.print();
       document.body.classList.remove('print-single-chart');
       if (containerRef.current) {
         containerRef.current.classList.remove('printable-area');
+        window.dispatchEvent(new Event('resize'));
       }
-    }, 400);
+    }, 800);
   };
 
   const handleDownloadPDF = async (e: React.MouseEvent) => {
@@ -115,10 +111,8 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
               const headerPlaceholder = clonedElement.querySelector('#print-scoreboard-placeholder');
               if (headerPlaceholder) {
                   const clone = scoreboardEl.cloneNode(true) as HTMLElement;
-                  clone.style.transform = 'scale(0.85)';
                   clone.style.transformOrigin = 'top center';
-                  clone.style.width = '117%';
-                  clone.style.marginBottom = '-20px';
+                  clone.style.marginBottom = '20px';
                   headerPlaceholder.appendChild(clone);
               }
           }
