@@ -15,21 +15,21 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
   const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isFullscreen) {
+        setIsFullscreen(false);
+      }
     };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isFullscreen]);
 
   const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      containerRef.current?.requestFullscreen().catch((err: any) => {
-        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
-      });
-    } else {
-      document.exitFullscreen();
-    }
+    setIsFullscreen(!isFullscreen);
+    // Dispatch resize event so chart resizes
+    setTimeout(() => {
+       window.dispatchEvent(new Event('resize'));
+    }, 50);
   };
 
   const handlePrint = (e: React.MouseEvent) => {
@@ -46,8 +46,10 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
         if (headerPlaceholder) {
             const clone = scoreboardEl.cloneNode(true) as HTMLElement;
             clone.id = 'print-scoreboard-clone';
+            clone.style.transform = 'scale(0.8)';
             clone.style.transformOrigin = 'top center';
-            clone.style.marginBottom = '20px'; // Give it a bit of space from the chart
+            clone.style.width = '125%';
+            clone.style.marginBottom = '-20px';
             
             // Allow wrapping if necessary or let it be responsive
             const tableContainer = clone.querySelector('.overflow-x-auto') as HTMLElement;
@@ -180,7 +182,7 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
   return (
     <div 
       ref={containerRef} 
-      className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col h-full chart-wrapper relative transition-all"
+      className={`bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col h-full chart-wrapper relative transition-all ${isFullscreen ? 'css-fullscreen' : ''}`}
     >
       <div className="print-header hidden mb-6 text-center border-b pb-4 relative">
         <h1 className="text-2xl font-bold text-gray-900">Capacity Check Report</h1>

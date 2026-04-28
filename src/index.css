@@ -1,7 +1,13 @@
 @import "tailwindcss";
 
 /* Fullscreen & Print Chart Styles */
-.chart-wrapper:fullscreen {
+.chart-wrapper.css-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
   background-color: white;
   padding: 1.5rem;
   overflow: hidden; 
@@ -12,20 +18,20 @@
   box-sizing: border-box;
 }
 
-.chart-wrapper:fullscreen .scrollable-chart-area {
+.chart-wrapper.css-fullscreen .scrollable-chart-area {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden !important;
 }
 
-.chart-wrapper:fullscreen .scrollable-chart-inner {
+.chart-wrapper.css-fullscreen .scrollable-chart-inner {
   width: 100% !important;
   height: 100% !important;
   min-height: unset;
 }
 
-.chart-wrapper:fullscreen .recharts-responsive-container {
+.chart-wrapper.css-fullscreen .recharts-responsive-container {
   width: 100% !important;
   height: 100% !important;
 }
@@ -63,9 +69,10 @@
     position: absolute !important;
     left: 0;
     top: 0;
-    width: fit-content !important;
-    min-width: 100% !important;
-    height: 100vh !important;
+    width: 100vw !important;
+    height: 95vh !important;
+    max-height: 95vh !important;
+    overflow: hidden !important;
     box-sizing: border-box !important;
     margin: 0 !important;
     padding: 5mm !important;
@@ -80,7 +87,7 @@
   }
 
   body.print-single-chart .printable-area .scrollable-chart-area {
-    overflow: visible !important;
+    overflow: hidden !important;
     width: 100% !important;
     height: 100% !important;
     flex: 1 1 auto !important;
@@ -90,6 +97,7 @@
   }
 
   body.print-single-chart .printable-area .scrollable-chart-inner {
+    width: 100% !important;
     height: 100% !important;   
     min-height: 0 !important;
   }
