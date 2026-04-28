@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { ProcessRow } from '../types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
 import { Activity, Target } from 'lucide-react';
+import ChartContainer from './ChartContainer';
 
 export default function LineTargets({ processes }: { processes: ProcessRow[] }) {
   const lineData = useMemo(() => {
@@ -29,13 +30,9 @@ export default function LineTargets({ processes }: { processes: ProcessRow[] }) 
 
   return (
     <div className="space-y-6">
-      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col h-full">
-        <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <Target className="h-5 w-5 text-indigo-600" />
-          Line 100% Target vs Capacity
-        </h2>
-        <div className="overflow-x-auto w-full pb-4" style={{ WebkitOverflowScrolling: 'touch' }}>
-           <div style={{ width: `${Math.max(800, lineData.length * 100)}px`, height: '400px' }}>
+      <ChartContainer title="Line 100% Target vs Capacity" icon={<Target className="h-5 w-5 text-indigo-600" />}>
+        <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+           <div className="scrollable-chart-inner" style={{ width: `${Math.max(800, lineData.length * 100)}px`, height: '400px' }}>
              <ResponsiveContainer width="100%" height="100%">
                <LineChart data={lineData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
@@ -53,15 +50,11 @@ export default function LineTargets({ processes }: { processes: ProcessRow[] }) 
              </ResponsiveContainer>
            </div>
         </div>
-      </div>
+      </ChartContainer>
 
-      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col h-full">
-        <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <Activity className="h-5 w-5 text-emerald-600" />
-          Today Plan LC Target vs Capacity
-        </h2>
-        <div className="overflow-x-auto w-full pb-4" style={{ WebkitOverflowScrolling: 'touch' }}>
-           <div style={{ width: `${Math.max(800, lineData.length * 100)}px`, height: '400px' }}>
+      <ChartContainer title="Today Plan LC Target vs Capacity" icon={<Activity className="h-5 w-5 text-emerald-600" />}>
+        <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+           <div className="scrollable-chart-inner" style={{ width: `${Math.max(800, lineData.length * 100)}px`, height: '400px' }}>
              <ResponsiveContainer width="100%" height="100%">
                <LineChart data={lineData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
@@ -79,7 +72,7 @@ export default function LineTargets({ processes }: { processes: ProcessRow[] }) 
              </ResponsiveContainer>
            </div>
         </div>
-      </div>
+      </ChartContainer>
     </div>
   );
 }

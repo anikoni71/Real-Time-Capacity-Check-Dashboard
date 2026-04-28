@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { ProcessRow } from '../types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList, Cell, ReferenceLine } from 'recharts';
 import { BarChart2 } from 'lucide-react';
+import ChartContainer from './ChartContainer';
 
 // Define fixed colors for operators to keep them consistent
 const OPERATOR_COLORS = [
@@ -68,22 +69,20 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
   const expectedWidth = Math.max(800, chartData.length * 80);
 
   return (
-    <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col h-full">
-      <div className="mb-6 flex justify-between items-end">
-        <div>
-          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            <BarChart2 className="h-5 w-5 text-blue-600" />
-            Capacity by Process × Operator
-          </h2>
+    <div className="lg:col-span-2 flex flex-col h-full">
+      <ChartContainer 
+        title="Capacity by Process × Operator" 
+        icon={<BarChart2 className="h-5 w-5 text-blue-600" />}
+      >
+        <div className="mb-2 flex justify-between items-end">
           <p className="text-sm text-gray-500">Total Capacity visible: <span className="font-semibold text-gray-800">{totalCapacity}</span></p>
+          <div className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded">Scroll horizontally to view all</div>
         </div>
-        <div className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded">Scroll horizontally to view all</div>
-      </div>
-      
-      <div className="overflow-x-auto w-full border border-gray-100 rounded-md pb-4" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <div style={{ width: `${expectedWidth}px`, height: '500px' }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} margin={{ top: 30, right: 30, left: 20, bottom: 80 }}>
+        
+        <div className="overflow-x-auto w-full border border-gray-100 rounded-md pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="scrollable-chart-inner" style={{ width: `${expectedWidth}px`, height: '500px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} margin={{ top: 30, right: 30, left: 20, bottom: 80 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
               <XAxis 
                 dataKey="name" 
@@ -153,6 +152,7 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
           </ResponsiveContainer>
         </div>
       </div>
+      </ChartContainer>
     </div>
   );
 }

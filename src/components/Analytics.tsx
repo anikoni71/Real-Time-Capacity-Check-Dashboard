@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { ProcessRow } from '../types';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList, ReferenceLine } from 'recharts';
 import { PieChart, ArrowUpRight } from 'lucide-react';
+import ChartContainer from './ChartContainer';
 
 export default function Analytics({ processes }: { processes: ProcessRow[] }) {
   const { processStats, topProcesses, target1, target2 } = useMemo(() => {
@@ -37,13 +38,9 @@ export default function Analytics({ processes }: { processes: ProcessRow[] }) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white p-6 rounded-lg border border-gray-200">
-        <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <PieChart className="h-5 w-5 text-indigo-600" />
-          Capacity vs Actual Output by Process
-        </h2>
-        <div className="overflow-x-auto w-full pb-4" style={{ WebkitOverflowScrolling: 'touch' }}>
-           <div style={{ width: `${Math.max(800, processStats.length * 100)}px`, height: '400px' }}>
+      <ChartContainer title="Capacity vs Actual Output by Process" icon={<PieChart className="h-5 w-5 text-indigo-600" />}>
+        <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+           <div className="scrollable-chart-inner" style={{ width: `${Math.max(800, processStats.length * 100)}px`, height: '400px' }}>
              <ResponsiveContainer width="100%" height="100%">
                <BarChart data={processStats} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
@@ -69,15 +66,11 @@ export default function Analytics({ processes }: { processes: ProcessRow[] }) {
              </ResponsiveContainer>
            </div>
         </div>
-      </div>
+      </ChartContainer>
 
-      <div className="bg-white p-6 rounded-lg border border-gray-200">
-        <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <ArrowUpRight className="h-5 w-5 text-emerald-600" />
-          100% Target vs Capacity (Top Processes)
-        </h2>
-        <div className="overflow-x-auto w-full pb-4" style={{ WebkitOverflowScrolling: 'touch' }}>
-           <div style={{ width: `${Math.max(800, topProcesses.length * 100)}px`, height: '400px' }}>
+      <ChartContainer title="100% Target vs Capacity (Top Processes)" icon={<ArrowUpRight className="h-5 w-5 text-emerald-600" />}>
+        <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+           <div className="scrollable-chart-inner" style={{ width: `${Math.max(800, topProcesses.length * 100)}px`, height: '400px' }}>
              <ResponsiveContainer width="100%" height="100%">
                <LineChart data={topProcesses} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
@@ -95,7 +88,7 @@ export default function Analytics({ processes }: { processes: ProcessRow[] }) {
              </ResponsiveContainer>
            </div>
         </div>
-      </div>
+      </ChartContainer>
     </div>
   );
 }

@@ -1,1 +1,76 @@
 @import "tailwindcss";
+
+/* Fullscreen & Print Chart Styles */
+.chart-wrapper:fullscreen {
+  background-color: white;
+  padding: 1.5rem;
+  overflow: hidden; 
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-wrapper:fullscreen .scrollable-chart-area {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-wrapper:fullscreen .scrollable-chart-inner {
+  height: 100% !important;
+  min-height: 400px;
+}
+
+@media print {
+  /* Isolate single chart for printing */
+  body.print-single-chart > * {
+    visibility: hidden;
+  }
+  
+  body.print-single-chart .this-is-printing,
+  body.print-single-chart .this-is-printing * {
+    visibility: visible;
+  }
+  
+  body.print-single-chart .this-is-printing {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 20px;
+    border: none;
+    box-shadow: none;
+    page-break-inside: avoid;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    z-index: 9999;
+  }
+
+  /* Force responsive container to squeeze onto the page instead of scrolling horizontally */
+  body.print-single-chart .this-is-printing .scrollable-chart-area {
+    overflow: hidden !important;
+    width: 100% !important;
+    height: 100% !important;
+    flex: 1 !important;
+    padding-bottom: 0 !important; 
+  }
+
+  body.print-single-chart .this-is-printing .scrollable-chart-inner {
+    width: 100% !important;    
+    height: 100% !important;   
+  }
+
+  body.print-single-chart .this-is-printing .recharts-responsive-container {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+}
