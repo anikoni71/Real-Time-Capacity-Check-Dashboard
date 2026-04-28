@@ -32,41 +32,50 @@
 
 @media print {
   /* Hide everything else */
-  body.print-single-chart > * {
-    display: none !important;
+  body.print-single-chart * {
+    visibility: hidden;
   }
   
   /* Show only the chart wrapper being printed */
+  body.print-single-chart .printable-area, 
+  body.print-single-chart .printable-area * {
+    visibility: visible !important;
+  }
+
   body.print-single-chart .printable-area {
     display: block !important;
-    visibility: visible !important;
-    position: fixed;
+    position: absolute !important;
     left: 0;
     top: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100% !important;
+    min-height: 500px !important;
     margin: 0;
     padding: 10mm;
     border: none;
     box-shadow: none;
     box-sizing: border-box;
     page-break-inside: avoid;
+    break-inside: avoid;
     background: white;
     z-index: 9999;
   }
 
-  /* Force responsive container to squeeze onto the page instead of scrolling horizontally */
+  /* Force responsive container to let the chart expand naturally, or squeeze. 
+     If the user wants two pages, we want width 100% and overflow visible. */
   body.print-single-chart .printable-area .scrollable-chart-area {
-    overflow: hidden !important;
+    overflow: visible !important;
     width: 100% !important;
-    height: 500px !important;
+    height: auto !important;
+    min-height: 500px !important;
     padding-bottom: 0 !important; 
     display: block !important;
   }
 
   body.print-single-chart .printable-area .scrollable-chart-inner {
+    /* Set width to larger if we want it to go over one page, but native print 
+       typically truncates. So we use 100% and scale the chart font sizes. */
     width: 100% !important;    
-    height: 500px !important;   
+    height: auto !important;   
     min-height: 500px !important;
   }
 
@@ -77,11 +86,16 @@
 
   /* Improve X-axis label legibility when squeezed */
   body.print-single-chart .printable-area .recharts-cartesian-axis-tick-value {
-    font-size: 9px !important;
+    font-size: 10px !important;
+  }
+
+  /* Ensure our header displays on print */
+  body.print-single-chart .printable-area .print-header {
+    display: block !important;
   }
 
   @page {
     size: A4 landscape;
-    margin: 0;
+    margin: 10mm;
   }
 }

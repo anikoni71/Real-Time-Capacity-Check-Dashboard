@@ -73,6 +73,12 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
           const buttons = clonedElement.querySelectorAll('button');
           buttons.forEach(btn => btn.style.display = 'none');
           
+          // Show the report header in the PDF
+          const header = clonedElement.querySelector('.print-header') as HTMLElement;
+          if (header) {
+            header.style.display = 'block';
+          }
+          
           const scrollableArea = clonedElement.querySelector('.scrollable-chart-area') as HTMLElement;
           const innerChart = clonedElement.querySelector('.scrollable-chart-inner') as HTMLElement;
           
@@ -98,19 +104,34 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
       const imgRatio = imgProps.width / imgProps.height;
       const pageRatio = availableWidth / availableHeight;
       
-      let finalWidth = availableWidth;
-      let finalHeight = availableWidth / imgRatio;
+      // We want to fit the height of the chart to the page height to make it clear,
+      // and if the width exceeds one page, we split it naturally across multiple pages!
+      const finalHeight = availableHeight;
+      const finalWidth = finalHeight * imgRatio;
       
-      if (imgRatio < pageRatio) {
-         finalHeight = availableHeight;
-         finalWidth = availableHeight * imgRatio;
+      if (finalWidth <= availableWidth) {
+         // Fits on one page
+         const x = margin + (availableWidth - finalWidth) / 2;
+         const y = margin + (availableHeight - finalHeight) / 2;
+         pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight);
+      } else {
+         // Chart is very wide. Print across multiple pages.
+         let remainingWidth = finalWidth;
+         let currentXOffset = 0;
+         
+         while (remainingWidth > 0) {
+            pdf.addImage(imgData, 'PNG', margin - currentXOffset, margin, finalWidth, finalHeight);
+            remainingWidth -= availableWidth;
+            currentXOffset += availableWidth;
+            
+            if (remainingWidth > 0) {
+               pdf.addPage();
+            }
+         }
       }
       
-      const x = margin + (availableWidth - finalWidth) / 2;
-      const y = margin + (availableHeight - finalHeight) / 2;
-      
-      pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight);
-      pdf.save(`CapacityCheck_Report.pdf`);
+      const safeTitle = title.replace(/[^a-zA-Z0-9]/g, '_');
+      pdf.save(`${safeTitle}_Report.pdf`);
     } catch (err) {
       console.error('Error generating PDF:', err);
     } finally {
@@ -123,7 +144,12 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
       ref={containerRef} 
       className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col h-full chart-wrapper relative transition-all"
     >
-      <div className="flex items-center justify-between mb-4">
+      <div className="print-header hidden mb-6 text-center border-b pb-4">
+        <h1 className="text-2xl font-bold text-gray-900">Factory Production Report</h1>
+        <p className="text-gray-500">Generated on {new Date().toLocaleDateString()}</p>
+      </div>
+
+      <div className="flex items-center justify-between mb-4 header-controls print:hidden">
         <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
           {icon}
           {title}
