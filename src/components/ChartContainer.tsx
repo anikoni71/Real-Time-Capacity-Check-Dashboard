@@ -35,6 +35,11 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
   const handlePrint = (e: React.MouseEvent) => {
     e.stopPropagation();
     
+    // Exit fullscreen before printing to avoid browser rendering bugs
+    if (document.fullscreenElement) {
+        document.exitFullscreen().catch(console.error);
+    }
+    
     const existingClone = document.getElementById('print-scoreboard-clone');
     if (existingClone) {
         existingClone.remove();
@@ -65,14 +70,14 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
       containerRef.current.classList.add('printable-area');
     }
     
-    // We delay slightly to allow CSS to adjust layout before calling window.print()
+    // We delay slightly to allow CSS to adjust layout and fullscreen exit before calling window.print()
     setTimeout(() => {
       window.print();
       document.body.classList.remove('print-single-chart');
       if (containerRef.current) {
         containerRef.current.classList.remove('printable-area');
       }
-    }, 100);
+    }, 400);
   };
 
   const handleDownloadPDF = async (e: React.MouseEvent) => {
