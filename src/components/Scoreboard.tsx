@@ -30,9 +30,9 @@ export default function Scoreboard({ scoreboards, activeCount }: { scoreboards: 
         </h2>
         {activeCount > 0 && <span className="px-2.5 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">{activeCount} Filter{activeCount !== 1 ? 's' : ''} Active</span>}
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm text-left whitespace-nowrap">
-          <thead className="text-xs text-gray-700 bg-gray-100 uppercase border-b border-gray-200">
+      <div className="overflow-auto max-h-[280px]">
+        <table className="w-full text-sm text-left whitespace-nowrap relative border-collapse">
+          <thead className="text-xs text-gray-700 bg-gray-100 uppercase sticky top-0 z-10 shadow-[0_1px_2px_rgba(0,0,0,0.1)]">
             <tr>
               <th className="px-4 py-3">Unit</th>
               <th className="px-4 py-3">Line</th>
