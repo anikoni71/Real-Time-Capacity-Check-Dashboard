@@ -47,10 +47,10 @@ export default function Performers({ processes }: { processes: ProcessRow[] }) {
       </h3>
       <div className="flex-1 w-full" style={{ minHeight: '300px' }}>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} layout="vertical" margin={{ top: 20, right: 30, left: 100, bottom: 5 }}>
+          <BarChart data={data} layout="vertical" margin={{ top: 20, right: 30, left: 150, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
             <XAxis type="number" tick={{ fontSize: 11 }} domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} />
-            <YAxis dataKey="name" type="category" tick={{ fontSize: 11, fill: '#4B5563' }} width={90} />
+            <YAxis dataKey="name" type="category" tick={{ fontSize: 11, fill: '#4B5563' }} width={140} />
             <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
             
             {target1 > 0 && (
@@ -75,7 +75,7 @@ export default function Performers({ processes }: { processes: ProcessRow[] }) {
             )}
 
             <Bar dataKey="Capacity" fill={color} radius={[0, 4, 4, 0]} maxBarSize={30}>
-              <LabelList dataKey="Capacity" position="right" fill="#374151" fontSize={11} fontWeight={600} />
+              <LabelList dataKey="Capacity" position="right" fill="#374151" fontSize={11} fontWeight={600} formatter={(v: number) => String(v)} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>

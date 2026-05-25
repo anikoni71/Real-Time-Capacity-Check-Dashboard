@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { ScoreboardRow } from '../types';
 import { ClipboardList } from 'lucide-react';
 
@@ -50,26 +51,39 @@ export default function Scoreboard({ scoreboards, activeCount }: { scoreboards: 
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 text-gray-800">
-            {validScoreboards.map((sb, i) => (
-              <tr key={i} className="hover:bg-gray-50 transition-colors">
-                <td className="px-4 py-2 font-medium">{sb.unit}</td>
-                <td className="px-4 py-2 font-medium">{sb.line}</td>
-                <td className="px-4 py-2">{sb.buyer}</td>
-                <td className="px-4 py-2 text-gray-600">{sb.style}</td>
-                <td className="px-4 py-2 text-gray-600">{sb.item}</td>
-                <td className="px-4 py-2 text-gray-500 border-r">{sb.runday}</td>
-                <td className="px-4 py-2 font-mono">{sb.obMp}</td>
-                <td className="px-4 py-2 font-mono">{sb.lineTotalSmv}</td>
-                <td className="px-4 py-2 font-mono">{sb.lineTarget100}</td>
-                <td className="px-4 py-2 font-mono font-medium bg-blue-50/20">{sb.todayPlanLcTarget}</td>
-                <td className={`px-4 py-2 font-mono ${getEfficiencyColor(sb.efficiencyValue)}`}>
-                  {sb.todayPlanLcEfficiency}
-                </td>
-                <td className="px-4 py-2 font-mono text-gray-500">{sb.tackTimeSec}</td>
-                <td className="px-4 py-2 font-mono text-gray-500">{sb.todayPreMp}</td>
-                <td className="px-4 py-2 font-mono text-gray-500">{sb.presentTackTimeSec}</td>
-              </tr>
-            ))}
+            <AnimatePresence mode="popLayout">
+              {validScoreboards.map((sb, i) => {
+                const uniqueKey = `${sb.unit}-${sb.line}-${sb.style}-${sb.item}-${sb.runday}-${i}`;
+                return (
+                  <motion.tr 
+                    key={uniqueKey}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    layout
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-4 py-2 font-medium">{sb.unit}</td>
+                    <td className="px-4 py-2 font-medium">{sb.line}</td>
+                    <td className="px-4 py-2">{sb.buyer}</td>
+                    <td className="px-4 py-2 text-gray-600">{sb.style}</td>
+                    <td className="px-4 py-2 text-gray-600">{sb.item}</td>
+                    <td className="px-4 py-2 text-gray-500 border-r">{sb.runday}</td>
+                    <td className="px-4 py-2 font-mono">{sb.obMp}</td>
+                    <td className="px-4 py-2 font-mono">{sb.lineTotalSmv}</td>
+                    <td className="px-4 py-2 font-mono">{sb.lineTarget100}</td>
+                    <td className="px-4 py-2 font-mono font-medium bg-blue-50/20">{sb.todayPlanLcTarget}</td>
+                    <td className={`px-4 py-2 font-mono ${getEfficiencyColor(sb.efficiencyValue)}`}>
+                      {sb.todayPlanLcEfficiency}
+                    </td>
+                    <td className="px-4 py-2 font-mono text-gray-500">{sb.tackTimeSec}</td>
+                    <td className="px-4 py-2 font-mono text-gray-500">{sb.todayPreMp}</td>
+                    <td className="px-4 py-2 font-mono text-gray-500">{sb.presentTackTimeSec}</td>
+                  </motion.tr>
+                );
+              })}
+            </AnimatePresence>
           </tbody>
         </table>
       </div>

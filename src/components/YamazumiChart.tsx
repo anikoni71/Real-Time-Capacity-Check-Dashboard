@@ -41,9 +41,9 @@ export default function YamazumiChart({ processes }: { processes: ProcessRow[] }
           <p className="text-sm text-gray-500 mt-1">Shows Value-Added (VA), Non-Value-Added but Necessary (NVAN), and Waste (NVA) breakdown.</p>
         </div>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <div className="scrollable-chart-inner" style={{ width: `${Math.max(800, chartData.length * 80)}px`, height: '450px' }}>
+          <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, chartData.length * 60)}px`, height: '600px' }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 20, right: 30, left: 10, bottom: 20 }}>
+              <BarChart data={chartData} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                 <XAxis 
                   dataKey="name" 
@@ -51,7 +51,7 @@ export default function YamazumiChart({ processes }: { processes: ProcessRow[] }
                   textAnchor="end" 
                   tick={{ fontSize: 11, fill: '#4B5563' }} 
                   interval={0}
-                  height={160}
+                  height={280}
                 />
               <YAxis 
                 tick={{ fontSize: 11 }}
@@ -72,7 +72,7 @@ export default function YamazumiChart({ processes }: { processes: ProcessRow[] }
                    fill="#111827" 
                    fontSize={11} 
                    fontWeight="bold" 
-                   formatter={(v: number) => v > 0 ? Math.round(v) : ''}
+                   formatter={(v: number) => v > 0 ? String(Math.round(v)) : ''}
                    offset={15} 
                    angle={-90}
                  />

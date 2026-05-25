@@ -10,7 +10,7 @@ const OPERATOR_COLORS = [
 ];
 
 export default function CapacityProcess({ processes }: { processes: ProcessRow[] }) {
-  const { chartData, ops, totalCapacity, target1, target2, calculatedMax } = useMemo(() => {
+  const { chartData, ops, avgCapacity, target1, target2, calculatedMax } = useMemo(() => {
     // Process chart needs original sequence exactly. 
     // We can group by Process Name but maintain order of appearance.
     
@@ -49,6 +49,8 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
       });
     });
 
+    const avgCapacity = chartData.length > 0 ? Math.round(chartData.reduce((sum, item) => sum + item.Capacity, 0) / chartData.length) : 0;
+
     const target1 = processes.length > 0 ? processes[0].todayPlanLcTarget : 0;
     const target2 = processes.length > 0 ? processes[0].lineTarget100 : 0;
     
@@ -60,13 +62,13 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
 
     const calculatedMax = Math.round(Math.max(currentDataMax, target1, target2) * 1.2);
 
-    return { chartData, ops, totalCapacity, target1, target2, calculatedMax };
+    return { chartData, ops, avgCapacity, target1, target2, calculatedMax };
   }, [processes]);
 
   if (processes.length === 0) return <div className="p-8 text-center text-gray-500">No data found matching current filters.</div>;
 
   // Calculate width based on number of processes and max operators
-  const expectedWidth = Math.max(800, chartData.length * 80);
+  const expectedWidth = Math.max(1200, chartData.length * 60);
 
   return (
     <div className="lg:col-span-2 flex flex-col h-full">
@@ -75,14 +77,14 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
         icon={<BarChart2 className="h-5 w-5 text-blue-600" />}
       >
         <div className="mb-2 flex justify-between items-end">
-          <p className="text-sm text-gray-500">Total Capacity visible: <span className="font-semibold text-gray-800">{totalCapacity}</span></p>
+          <p className="text-sm text-gray-500">Average Capacity: <span className="font-semibold text-gray-800">{avgCapacity}</span></p>
           <div className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded">Scroll horizontally to view all</div>
         </div>
         
         <div className="overflow-x-auto w-full border border-gray-100 rounded-md pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <div className="scrollable-chart-inner" style={{ width: `${expectedWidth}px`, height: '500px' }}>
+          <div className="scrollable-chart-inner" style={{ width: `${expectedWidth}px`, height: '600px' }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 30, right: 30, left: 20, bottom: 20 }}>
+              <BarChart data={chartData} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
               <XAxis 
                 dataKey="name" 
@@ -90,7 +92,7 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
                 interval={0} 
                 angle={-90} 
                 textAnchor="end"
-                height={160}
+                height={280}
               />
               <YAxis 
                 domain={[0, calculatedMax === 0 ? 'auto' : calculatedMax]}
@@ -148,6 +150,7 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
                   fontWeight="bold"
                   angle={-90}
                   offset={15}
+                  formatter={(v: number) => String(v)}
                 />
               </Bar>
             </BarChart>

@@ -82,14 +82,13 @@
   /* Shrink chart containers to fit page */
   body.print-single-chart .printable-area {
     width: 100% !important;
-    height: 100% !important;
+    height: auto !important;
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
+    display: block !important;
     border: none !important;
     box-shadow: none !important;
     page-break-after: avoid;
@@ -99,15 +98,14 @@
 
   body.print-single-chart .printable-area .scrollable-chart-area {
     overflow: visible !important;
-    height: 100% !important;
-    min-height: 0;
-    flex: 1 1 0% !important;
+    height: auto !important;
+    display: block !important;
   }
 
   body.print-single-chart .printable-area .scrollable-chart-inner {
     width: 100% !important; 
     max-width: 100% !important;
-    height: 100% !important;
+    height: 600px !important; /* Force concrete height in print so Recharts doesn't collapse to 0 */
     transform: none !important; /* Managed by the parent now */
   }
 
@@ -117,66 +115,68 @@
   }
 }
 
-body.print-single-chart {
-  /* Print-preview setup, normally handled by print media, but we add some visibility guards here */
-  height: 100vh !important;
-  width: 100vw !important;
-  overflow: hidden !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
+@media screen {
+  body.print-single-chart {
+    /* Print-preview setup, normally handled by print media, but we add some visibility guards here */
+    height: 100vh !important;
+    width: 100vw !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
 
-/* Hide everything else */
-body.print-single-chart * {
-  visibility: hidden;
-}
+  /* Hide everything else */
+  body.print-single-chart * {
+    visibility: hidden;
+  }
 
-body.print-single-chart .printable-area, 
-body.print-single-chart .printable-area * {
-  visibility: visible !important;
-}
+  body.print-single-chart .printable-area, 
+  body.print-single-chart .printable-area * {
+    visibility: visible !important;
+  }
 
-body.print-single-chart .printable-area {
-  display: flex !important;
-  flex-direction: column !important;
-  position: absolute !important;
-  left: 0;
-  top: 0;
-  width: 100vw !important;
-  height: 100vh !important;
-  max-height: 100vh !important;
-  overflow: hidden !important; /* Only hidden on screen, printed handled inside @media print */
-  box-sizing: border-box !important;
-  margin: 0 !important;
-  padding: 5mm !important;
-  background: white !important;
-  z-index: 9999;
-}
+  body.print-single-chart .printable-area {
+    display: flex !important;
+    flex-direction: column !important;
+    position: absolute !important;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: hidden !important; /* Only hidden on screen, printed handled inside @media print */
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 5mm !important;
+    background: white !important;
+    z-index: 9999;
+  }
 
-body.print-single-chart .printable-area .scrollable-chart-area {
-  overflow: hidden !important; /* hidden for screen */
-  width: 100% !important;
-  height: 100% !important;
-  flex: 1 1 auto !important;
-  padding-bottom: 0 !important; 
-  display: block !important;
-  box-sizing: border-box !important;
-}
+  body.print-single-chart .printable-area .scrollable-chart-area {
+    overflow: hidden !important; /* hidden for screen */
+    width: 100% !important;
+    height: auto !important;
+    flex: 1 1 auto !important;
+    padding-bottom: 0 !important; 
+    display: block !important;
+    box-sizing: border-box !important;
+  }
 
-body.print-single-chart .printable-area .scrollable-chart-inner {
-  width: 100vw !important; /* Force screen to page width */
-  max-width: 100% !important;
-  height: 100% !important;   
-  min-height: 0 !important;
-  flex: 1 1 auto;
-}
+  body.print-single-chart .printable-area .scrollable-chart-inner {
+    width: 100% !important; /* Force screen to page width */
+    max-width: 100% !important;
+    height: 600px !important;   
+    min-height: 0 !important;
+    flex: 1 1 auto;
+  }
 
-body.print-single-chart .printable-area .recharts-responsive-container {
-  width: 100% !important;
-  height: 100% !important;
-}
+  body.print-single-chart .printable-area .recharts-responsive-container {
+    width: 100% !important;
+    height: 100% !important;
+  }
 
-/* Ensure our header displays on print */
-body.print-single-chart .printable-area .print-header {
-  display: block !important;
+  /* Ensure our header displays on print */
+  body.print-single-chart .printable-area .print-header {
+    display: block !important;
+  }
 }
