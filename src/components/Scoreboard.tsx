@@ -30,10 +30,11 @@ export default function Scoreboard({ scoreboards, activeCount }: { scoreboards: 
         </h2>
         {activeCount > 0 && <span className="px-2.5 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">{activeCount} Filter{activeCount !== 1 ? 's' : ''} Active</span>}
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm text-left whitespace-nowrap">
-          <thead className="text-xs text-gray-700 bg-gray-100 uppercase border-b border-gray-200">
+      <div className="overflow-auto max-h-[240px]">
+        <table className="w-full text-sm text-left whitespace-nowrap relative">
+          <thead className="text-xs text-gray-700 bg-gray-100 uppercase border-b border-gray-200 sticky top-0 z-10 shadow-sm">
             <tr>
+              <th className="px-4 py-3">Date</th>
               <th className="px-4 py-3">Unit</th>
               <th className="px-4 py-3">Line</th>
               <th className="px-4 py-3">Buyer</th>
@@ -53,7 +54,7 @@ export default function Scoreboard({ scoreboards, activeCount }: { scoreboards: 
           <tbody className="divide-y divide-gray-200 text-gray-800">
             <AnimatePresence mode="popLayout">
               {validScoreboards.map((sb, i) => {
-                const uniqueKey = `${sb.unit}-${sb.line}-${sb.style}-${sb.item}-${sb.runday}-${i}`;
+                const uniqueKey = `${sb.date}-${sb.unit}-${sb.line}-${sb.style}-${sb.item}-${sb.runday}-${i}`;
                 return (
                   <motion.tr 
                     key={uniqueKey}
@@ -64,6 +65,7 @@ export default function Scoreboard({ scoreboards, activeCount }: { scoreboards: 
                     layout
                     className="hover:bg-gray-50 transition-colors"
                   >
+                    <td className="px-4 py-2 text-gray-500">{sb.date}</td>
                     <td className="px-4 py-2 font-medium">{sb.unit}</td>
                     <td className="px-4 py-2 font-medium">{sb.line}</td>
                     <td className="px-4 py-2">{sb.buyer}</td>

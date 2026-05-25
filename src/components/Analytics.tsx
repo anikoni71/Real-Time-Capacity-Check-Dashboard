@@ -17,11 +17,12 @@ export default function Analytics({ processes }: { processes: ProcessRow[] }) {
         const pg = p.operatorName ? `${p.processName} (${p.operatorName})` : p.processName;
         return pg === g;
       });
+      const len = rows.length || 1;
       return {
         name: g,
-        Capacity: rows.reduce((s, r) => s + r.capacity, 0),
-        ActualOutput: rows.reduce((s, r) => s + r.actualOutput, 0),
-        Target100: rows.reduce((s, r) => s + r.target100, 0),
+        Capacity: Math.round(rows.reduce((s, r) => s + r.capacity, 0) / len),
+        ActualOutput: Math.round(rows.reduce((s, r) => s + r.actualOutput, 0) / len),
+        Target100: Math.round(rows.reduce((s, r) => s + r.target100, 0) / len),
       };
     });
 
@@ -58,10 +59,10 @@ export default function Analytics({ processes }: { processes: ProcessRow[] }) {
                  )}
 
                  <Bar isAnimationActive={false} dataKey="Capacity" fill="#10b981" name="Capacity" maxBarSize={40}>
-                   <LabelList dataKey="Capacity" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-90} offset={15} formatter={(v: number) => v > 0 ? String(v) : ''} />
+                   <LabelList dataKey="Capacity" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={0} offset={10} formatter={(v: number) => v > 0 ? String(v) : ''} />
                  </Bar>
                  <Bar isAnimationActive={false} dataKey="ActualOutput" fill="#ef4444" name="Output" maxBarSize={40}>
-                   <LabelList dataKey="ActualOutput" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-90} offset={15} formatter={(v: number) => v > 0 ? String(v) : ''} />
+                   <LabelList dataKey="ActualOutput" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={0} offset={10} formatter={(v: number) => v > 0 ? String(v) : ''} />
                  </Bar>
                </BarChart>
              </ResponsiveContainer>
@@ -80,10 +81,10 @@ export default function Analytics({ processes }: { processes: ProcessRow[] }) {
                  <Tooltip isAnimationActive={false} />
                  <Legend verticalAlign="top" height={36} />
                  <Line isAnimationActive={false} type="monotone" dataKey="Target100" name="100% Target" stroke="#6366f1" strokeWidth={3} dot={{ r: 4 }}>
-                   <LabelList dataKey="Target100" position="top" fill="#6366f1" fontSize={11} fontWeight="bold" angle={-90} offset={15} />
+                   <LabelList dataKey="Target100" position="top" fill="#6366f1" fontSize={11} fontWeight="bold" angle={0} offset={10} />
                  </Line>
                  <Line isAnimationActive={false} type="monotone" dataKey="Capacity" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }}>
-                   <LabelList dataKey="Capacity" position="bottom" fill="#10b981" fontSize={11} fontWeight="bold" angle={-90} offset={15} />
+                   <LabelList dataKey="Capacity" position="bottom" fill="#10b981" fontSize={11} fontWeight="bold" angle={0} offset={10} />
                  </Line>
                </LineChart>
              </ResponsiveContainer>

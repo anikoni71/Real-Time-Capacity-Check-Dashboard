@@ -16,17 +16,30 @@ export default function YamazumiChart({ processes }: { processes: ProcessRow[] }
     processes.forEach(p => {
       const key = p.operatorName ? `${p.processName} (${p.operatorName})` : p.processName;
       if (!map.has(key)) {
-        map.set(key, { name: key, va: 0, nvan: 0, nva: 0, total: 0 });
+        map.set(key, { name: key, va: 0, nvan: 0, nva: 0, count: 0 });
         orderedKeys.push(key);
       }
       const existing = map.get(key);
       existing.va += p.va || 0;
       existing.nvan += p.nvan || 0;
       existing.nva += p.nva || 0;
-      existing.total += (p.va || 0) + (p.nvan || 0) + (p.nva || 0);
+      existing.count += 1;
     });
 
-    return orderedKeys.map(k => map.get(k));
+    return orderedKeys.map(k => {
+      const v = map.get(k);
+      const count = v.count || 1;
+      const va = v.va / count;
+      const nvan = v.nvan / count;
+      const nva = v.nva / count;
+      return {
+        name: v.name,
+        va,
+        nvan,
+        nva,
+        total: va + nvan + nva
+      };
+    });
   }, [processes]);
 
   if (processes.length === 0) return <div className="p-8 text-center text-gray-500">No data found matching current filters.</div>;
@@ -73,8 +86,8 @@ export default function YamazumiChart({ processes }: { processes: ProcessRow[] }
                    fontSize={11} 
                    fontWeight="bold" 
                    formatter={(v: number) => v > 0 ? String(Math.round(v)) : ''}
-                   offset={15} 
-                   angle={-90}
+                   offset={10} 
+                   angle={0}
                  />
               </Bar>
             </BarChart>

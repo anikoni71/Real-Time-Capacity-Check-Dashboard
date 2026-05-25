@@ -6,20 +6,26 @@ import { Sparkles, AlertCircle, ArrowUp, ArrowDown } from 'lucide-react';
 export default function Performers({ processes }: { processes: ProcessRow[] }) {
   const { topProc, lowProc, topOp, lowOp, target1, target2 } = useMemo(() => {
     // Aggregate by process
-    const procMap = new Map<string, number>();
-    const opMap = new Map<string, number>();
+    const procMap = new Map<string, { sum: number, count: number }>();
+    const opMap = new Map<string, { sum: number, count: number }>();
 
     processes.forEach(p => {
       if (p.processName) {
-        procMap.set(p.processName, (procMap.get(p.processName) || 0) + p.capacity);
+        if (!procMap.has(p.processName)) procMap.set(p.processName, { sum: 0, count: 0 });
+        const existing = procMap.get(p.processName)!;
+        existing.sum += p.capacity;
+        existing.count += 1;
       }
       if (p.operatorName) {
-        opMap.set(p.operatorName, (opMap.get(p.operatorName) || 0) + p.capacity);
+        if (!opMap.has(p.operatorName)) opMap.set(p.operatorName, { sum: 0, count: 0 });
+        const existing = opMap.get(p.operatorName)!;
+        existing.sum += p.capacity;
+        existing.count += 1;
       }
     });
 
-    const procList = Array.from(procMap.entries()).map(([name, cap]) => ({ name, Capacity: cap }));
-    const opList = Array.from(opMap.entries()).map(([name, cap]) => ({ name, Capacity: cap }));
+    const procList = Array.from(procMap.entries()).map(([name, data]) => ({ name, Capacity: Math.round(data.sum / data.count) }));
+    const opList = Array.from(opMap.entries()).map(([name, data]) => ({ name, Capacity: Math.round(data.sum / data.count) }));
 
     const sortedProc = [...procList].sort((a, b) => b.Capacity - a.Capacity);
     const sortedOp = [...opList].sort((a, b) => b.Capacity - a.Capacity);

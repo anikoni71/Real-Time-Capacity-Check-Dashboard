@@ -23,6 +23,12 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
            row[`${p.operatorName} Cap`] = (row[`${p.operatorName} Cap`] || 0) + p.capacity;
         }
       });
+      const len = pRows.length || 1;
+      Object.keys(row).forEach(k => {
+        if (k !== 'name') {
+           row[k] = Math.round(row[k] / len);
+        }
+      });
       return row;
     });
     
@@ -32,10 +38,11 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
         const pg = p.operatorName ? `${p.processName} (${p.operatorName})` : p.processName;
         return pg === g;
       });
+      const len = pRows.length || 1;
       return {
          name: g,
-         Capacity: Math.round(pRows.reduce((acc, curr) => acc + curr.capacity, 0)),
-         Output: Math.round(pRows.reduce((acc, curr) => acc + curr.actualOutput, 0))
+         Capacity: Math.round(pRows.reduce((acc, curr) => acc + curr.capacity, 0) / len),
+         Output: Math.round(pRows.reduce((acc, curr) => acc + curr.actualOutput, 0) / len)
       };
     });
 
@@ -45,10 +52,11 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
         const pg = p.operatorName ? `${p.processName} (${p.operatorName})` : p.processName;
         return pg === g;
       });
+      const len = pRows.length || 1;
       return {
         name: g,
-        Target: Math.round(pRows[0]?.target100 || 0),
-        Capacity: Math.round(pRows.reduce((s, x) => s + x.capacity, 0)),
+        Target: Math.round(pRows.reduce((s, x) => s + x.target100, 0) / len),
+        Capacity: Math.round(pRows.reduce((s, x) => s + x.capacity, 0) / len),
       };
     });
     
@@ -94,7 +102,7 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
 
                  {capKeys.map((k, i) => (
                    <Bar isAnimationActive={false} key={k} dataKey={k} fill={['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][i % 5]} maxBarSize={50}>
-                     <LabelList dataKey={k} position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-90} offset={15} formatter={(val: number) => val > 0 ? String(Math.round(val)) : ''} />
+                     <LabelList dataKey={k} position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={0} offset={10} formatter={(val: number) => val > 0 ? String(Math.round(val)) : ''} />
                    </Bar>
                  ))}
                </BarChart>
@@ -122,10 +130,10 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
                  )}
 
                  <Bar isAnimationActive={false} dataKey="Capacity" fill="#8b5cf6" maxBarSize={40}>
-                   <LabelList dataKey="Capacity" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-90} offset={15} formatter={(v: number) => v > 0 ? String(v) : ''} />
+                   <LabelList dataKey="Capacity" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={0} offset={10} formatter={(v: number) => v > 0 ? String(v) : ''} />
                  </Bar>
                  <Bar isAnimationActive={false} dataKey="Output" fill="#ec4899" maxBarSize={40}>
-                   <LabelList dataKey="Output" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-90} offset={15} formatter={(v: number) => v > 0 ? String(v) : ''} />
+                   <LabelList dataKey="Output" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={0} offset={10} formatter={(v: number) => v > 0 ? String(v) : ''} />
                  </Bar>
                </BarChart>
              </ResponsiveContainer>
@@ -144,10 +152,10 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
                  <Tooltip isAnimationActive={false} />
                  <Legend verticalAlign="top" height={36} />
                  <Line isAnimationActive={false} type="monotone" dataKey="Target" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }}>
-                   <LabelList dataKey="Target" position="top" fill="#f59e0b" fontSize={11} fontWeight="bold" angle={-90} offset={15} />
+                   <LabelList dataKey="Target" position="top" fill="#f59e0b" fontSize={11} fontWeight="bold" angle={0} offset={10} />
                  </Line>
                  <Line isAnimationActive={false} type="monotone" dataKey="Capacity" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }}>
-                   <LabelList dataKey="Capacity" position="bottom" fill="#3b82f6" fontSize={11} fontWeight="bold" angle={-90} offset={15} />
+                   <LabelList dataKey="Capacity" position="bottom" fill="#3b82f6" fontSize={11} fontWeight="bold" angle={0} offset={10} />
                  </Line>
                </LineChart>
              </ResponsiveContainer>

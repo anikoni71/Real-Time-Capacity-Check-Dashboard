@@ -212,7 +212,7 @@ export default function Dashboard() {
             {activeTab === 'Process Analysis' && <ProcessAnalysis processes={filteredProcesses} />}
             {activeTab === 'Line Targets' && <LineTargets processes={filteredProcesses} />}
             {activeTab === 'Analytics' && <Analytics processes={filteredProcesses} />}
-            {activeTab === 'Root Cause & Solutions' && <RootCauseAnalysis scoreboards={filteredScoreboards} />}
+            {activeTab === 'Root Cause & Solutions' && <RootCauseAnalysis scoreboards={filteredScoreboards} processes={filteredProcesses} />}
             {activeTab === 'Yamazumi Chart' && <YamazumiChart processes={filteredProcesses} />}
             {activeTab === 'Performers' && <Performers processes={filteredProcesses} />}
             {activeTab === 'Database' && <Database processes={filteredProcesses} />}

@@ -37,7 +37,9 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
       
       // We want to sum capacities per operator per process
       ops.forEach(op => {
-        const cap = pRows.filter(p => p.operatorName === op).reduce((sum, p) => sum + p.capacity, 0);
+        const opRows = pRows.filter(p => p.operatorName === op);
+        let cap = opRows.reduce((sum, p) => sum + p.capacity, 0);
+        if (opRows.length > 0) cap = cap / opRows.length;
         if (cap > 0) {
           chartData.push({
             name: `${proc} (${op})`,
@@ -148,8 +150,8 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
                   fill="#111827" 
                   fontSize={11} 
                   fontWeight="bold"
-                  angle={-90}
-                  offset={15}
+                  angle={0}
+                  offset={10}
                   formatter={(v: number) => String(v)}
                 />
               </Bar>
