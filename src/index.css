@@ -61,7 +61,7 @@
   }
   
   /* Container Shrinking for the generic dashboard print */
-  #root {
+  body:not(.print-single-chart) #root {
     /* Scale down the entire dashboard so multi-column layouts fit on one wide page */
     transform: scale(0.65);
     transform-origin: top left;
@@ -82,25 +82,32 @@
   /* Shrink chart containers to fit page */
   body.print-single-chart .printable-area {
     width: 100% !important;
+    height: 100% !important;
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
-    display: block !important;
+    display: flex !important;
+    flex-direction: column !important;
     border: none !important;
     box-shadow: none !important;
+    page-break-after: avoid;
+    page-break-before: avoid;
+    page-break-inside: avoid;
   }
 
   body.print-single-chart .printable-area .scrollable-chart-area {
     overflow: visible !important;
-    height: auto !important;
+    height: 100% !important;
+    min-height: 0;
+    flex: 1 1 0% !important;
   }
 
   body.print-single-chart .printable-area .scrollable-chart-inner {
     width: 100% !important; 
     max-width: 100% !important;
-    height: auto !important;
+    height: 100% !important;
     transform: none !important; /* Managed by the parent now */
   }
 
