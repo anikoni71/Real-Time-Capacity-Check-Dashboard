@@ -12,7 +12,8 @@ import Performers from './Performers';
 import Database from './Database';
 import OperatorUtilization from './OperatorUtilization';
 import MachineDistribution from './MachineDistribution';
-import { RefreshCcw, Loader2, Factory, LineChart, BarChart2, Trophy, Database as DbIcon, Activity, Layers } from 'lucide-react';
+import YamazumiChart from './YamazumiChart';
+import { RefreshCcw, Loader2, Factory, LineChart, BarChart2, Trophy, Database as DbIcon, Activity, Layers, ActivitySquare } from 'lucide-react';
 
 export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -125,6 +126,7 @@ export default function Dashboard() {
     { id: 'Process Analysis', icon: LineChart },
     { id: 'Line Targets', icon: Activity },
     { id: 'Analytics', icon: BarChart2 },
+    { id: 'Yamazumi Chart', icon: ActivitySquare },
     { id: 'Performers', icon: Trophy },
     { id: 'Database', icon: DbIcon }
   ];
@@ -208,6 +210,7 @@ export default function Dashboard() {
             {activeTab === 'Process Analysis' && <ProcessAnalysis processes={filteredProcesses} />}
             {activeTab === 'Line Targets' && <LineTargets processes={filteredProcesses} />}
             {activeTab === 'Analytics' && <Analytics processes={filteredProcesses} />}
+            {activeTab === 'Yamazumi Chart' && <YamazumiChart processes={filteredProcesses} />}
             {activeTab === 'Performers' && <Performers processes={filteredProcesses} />}
             {activeTab === 'Database' && <Database processes={filteredProcesses} />}
           </div>

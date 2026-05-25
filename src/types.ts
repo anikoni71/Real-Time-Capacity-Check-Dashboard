@@ -21,6 +21,9 @@ export interface ProcessRow {
   actualOutput: number;
   todayPlanLcTarget: number;
   lineTarget100: number;
+  va: number;
+  nvan: number;
+  nva: number;
   raw: any;
 }
 

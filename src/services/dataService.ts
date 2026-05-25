@@ -82,6 +82,9 @@ export async function fetchDashboardData(): Promise<DashboardData> {
               actualOutput: parseFloat(getVal('Actual Output')) || 0,
               todayPlanLcTarget: parseFloat(getVal('Today Plan LC Target')) || 0,
               lineTarget100: parseFloat(getVal('LinE Target 100%')) || 0,
+              va: parseFloat(getVal('Value-Added (VA)')) || 0,
+              nvan: parseFloat(getVal('Non-Value-Added but Necessary (NVAN)')) || 0,
+              nva: parseFloat(getVal('Non-Value-Added (NVA) / Waste')) || 0,
               raw: row
             });
           }
