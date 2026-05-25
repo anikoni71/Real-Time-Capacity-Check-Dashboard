@@ -1,7 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import { motion } from 'motion/react';
+import { toPng } from 'html-to-image';
 import { ScoreboardRow } from '../types';
-import { Share2, AlertTriangle, Lightbulb, Settings, Users, ArrowRightLeft, Activity } from 'lucide-react';
+import { Share2, AlertTriangle, Lightbulb, Settings, Users, ArrowRightLeft, Activity, Download, Printer, Maximize, Minimize, X } from 'lucide-react';
 
 interface Props {
   scoreboards: ScoreboardRow[];
@@ -9,6 +10,51 @@ interface Props {
 
 export default function RootCauseAnalysis({ scoreboards }: Props) {
   const [activeNode, setActiveNode] = useState<string | null>(null);
+  const [fullscreenDiagram, setFullscreenDiagram] = useState<'causes' | 'solutions' | null>(null);
+
+  const handleDownload = async (type: 'causes' | 'solutions') => {
+    const el = document.getElementById(`fishbone-diagram-container-${type}`);
+    if (!el) return;
+    try {
+      const dataUrl = await toPng(el, { backgroundColor: '#ffffff', quality: 1.0 });
+      const link = document.createElement('a');
+      link.download = `fishbone-${type}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Failed to download image', err);
+    }
+  };
+
+  const handlePrint = async (type: 'causes' | 'solutions') => {
+    const el = document.getElementById(`fishbone-diagram-container-${type}`);
+    if (!el) return;
+    try {
+      const dataUrl = await toPng(el, { backgroundColor: '#ffffff', quality: 1.0 });
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(`
+          <html>
+            <head><title>Print Diagram</title></head>
+            <body style="margin:0; padding:20px; display:flex; justify-content:center;">
+              <img src="${dataUrl}" style="max-width:100%; height:auto;" />
+              <script>
+                window.onload = () => {
+                  setTimeout(() => {
+                    window.print();
+                    window.close();
+                  }, 250);
+                };
+              </script>
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+      }
+    } catch (err) {
+      console.error('Failed to print image', err);
+    }
+  };
 
   const { flags, averages } = useMemo(() => {
     if (!scoreboards || scoreboards.length === 0) {
@@ -255,6 +301,57 @@ export default function RootCauseAnalysis({ scoreboards }: Props) {
     );
   };
 
+  const renderDiagramSection = (type: 'causes' | 'solutions') => {
+    const isCauses = type === 'causes';
+    const isFullScreen = fullscreenDiagram === type;
+
+    return (
+      <div 
+        id={`fishbone-diagram-container-${type}`}
+        className={isFullScreen ? 
+          "fixed inset-0 z-[100] bg-white p-6 md:p-12 overflow-y-auto w-full h-full flex flex-col" : 
+          "bg-white p-6 rounded-lg border border-gray-200 shadow-sm overflow-hidden relative"
+        }
+      >
+        <div className="flex justify-between items-start md:items-center border-b pb-2 mb-6 flex-col md:flex-row gap-4">
+          <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+            {isCauses ? <AlertTriangle className="h-5 w-5 text-indigo-600" /> : <Lightbulb className="h-5 w-5 text-amber-500" />}
+            {isCauses ? 'DIAGRAM 1: Capacity Loss Root Cause Analysis' : 'DIAGRAM 2: Actionable CAPA Solutions Matrix'}
+          </h3>
+          <div className="flex items-center gap-2 action-buttons" data-html2canvas-ignore>
+            <button onClick={() => handleDownload(type)} className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors" title="Download PNG">
+              <Download className="h-5 w-5" />
+            </button>
+            <button onClick={() => handlePrint(type)} className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors" title="Print">
+              <Printer className="h-5 w-5" />
+            </button>
+            <button 
+              onClick={() => setFullscreenDiagram(isFullScreen ? null : type)} 
+              className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors" 
+              title={isFullScreen ? "Exit Fullscreen" : "Fullscreen"}
+            >
+              {isFullScreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
+            </button>
+            {isFullScreen && (
+              <button 
+                onClick={() => setFullscreenDiagram(null)} 
+                className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors ml-2 border-l border-gray-200 pl-4" 
+                title="Close"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            )}
+          </div>
+        </div>
+        
+        <div className={isFullScreen ? "max-w-6xl mx-auto w-full flex-1" : ""}>
+          {renderFishbone(type)}
+          {activeNode && activeNode.startsWith(type) && activeNodeDetails()}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-8">
       {/* Overview stats panel to show why things are flagged */}
@@ -292,25 +389,8 @@ export default function RootCauseAnalysis({ scoreboards }: Props) {
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm overflow-hidden relative">
-        <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2 border-b pb-2">
-          <AlertTriangle className="h-5 w-5 text-indigo-600" />
-          DIAGRAM 1: Capacity Loss Root Cause Analysis
-        </h3>
-        
-        {renderFishbone('causes')}
-        {activeNode && activeNode.startsWith('causes') && activeNodeDetails()}
-      </div>
-
-      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm overflow-hidden relative">
-        <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2 border-b pb-2">
-          <Lightbulb className="h-5 w-5 text-amber-500" />
-          DIAGRAM 2: Actionable CAPA Solutions Matrix
-        </h3>
-        
-        {renderFishbone('solutions')}
-        {activeNode && activeNode.startsWith('solutions') && activeNodeDetails()}
-      </div>
+      {renderDiagramSection('causes')}
+      {renderDiagramSection('solutions')}
     </div>
   );
 }

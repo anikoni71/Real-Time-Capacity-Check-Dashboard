@@ -82,9 +82,9 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
         </div>
         
         <div className="overflow-x-auto w-full border border-gray-100 rounded-md pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <div className="scrollable-chart-inner" style={{ width: `${expectedWidth}px`, height: '600px' }}>
+          <div className="scrollable-chart-inner" style={{ width: `${expectedWidth}px`, height: '700px' }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
+              <BarChart data={chartData} margin={{ top: 40, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
               <XAxis 
                 dataKey="name" 
@@ -148,8 +148,7 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
                   fill="#111827" 
                   fontSize={11} 
                   fontWeight="bold"
-                  angle={-90}
-                  offset={15}
+                  offset={10}
                   formatter={(v: number) => String(v)}
                 />
               </Bar>

@@ -41,9 +41,9 @@ export default function YamazumiChart({ processes }: { processes: ProcessRow[] }
           <p className="text-sm text-gray-500 mt-1">Shows Value-Added (VA), Non-Value-Added but Necessary (NVAN), and Waste (NVA) breakdown.</p>
         </div>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, chartData.length * 60)}px`, height: '600px' }}>
+          <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, chartData.length * 60)}px`, height: '700px' }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
+              <BarChart data={chartData} margin={{ top: 40, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                 <XAxis 
                   dataKey="name" 
@@ -73,8 +73,7 @@ export default function YamazumiChart({ processes }: { processes: ProcessRow[] }
                    fontSize={11} 
                    fontWeight="bold" 
                    formatter={(v: number) => v > 0 ? String(Math.round(v)) : ''}
-                   offset={15} 
-                   angle={-90}
+                   offset={10} 
                  />
               </Bar>
             </BarChart>
