@@ -41,9 +41,9 @@ export default function YamazumiChart({ processes }: { processes: ProcessRow[] }
           <p className="text-sm text-gray-500 mt-1">Shows Value-Added (VA), Non-Value-Added but Necessary (NVAN), and Waste (NVA) breakdown.</p>
         </div>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, chartData.length * 60)}px`, height: '700px' }}>
+          <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, chartData.length * 60)}px`, height: '600px' }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 40, right: 30, left: 20, bottom: 5 }}>
+              <BarChart data={chartData} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                 <XAxis 
                   dataKey="name" 
@@ -57,15 +57,15 @@ export default function YamazumiChart({ processes }: { processes: ProcessRow[] }
                 tick={{ fontSize: 11 }}
                 label={{ value: 'Time (Sec/Min)', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#4B5563', fontSize: 12 } }} 
               />
-              <Tooltip 
+              <Tooltip isAnimationActive={false} 
                 cursor={{ fill: 'transparent' }}
                 contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
               />
               <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '12px' }} />
 
-              <Bar dataKey="va" stackId="a" fill="#10B981" name="Value-Added (VA)" maxBarSize={50} />
-              <Bar dataKey="nvan" stackId="a" fill="#F59E0B" name="Non-Value-Added Necessary (NVAN)" maxBarSize={50} />
-              <Bar dataKey="nva" stackId="a" fill="#EF4444" name="Waste (NVA)" maxBarSize={50}>
+              <Bar isAnimationActive={false} dataKey="va" stackId="a" fill="#10B981" name="Value-Added (VA)" maxBarSize={50} />
+              <Bar isAnimationActive={false} dataKey="nvan" stackId="a" fill="#F59E0B" name="Non-Value-Added Necessary (NVAN)" maxBarSize={50} />
+              <Bar isAnimationActive={false} dataKey="nva" stackId="a" fill="#EF4444" name="Waste (NVA)" maxBarSize={50}>
                  <LabelList 
                    dataKey="total" 
                    position="top" 
@@ -73,7 +73,8 @@ export default function YamazumiChart({ processes }: { processes: ProcessRow[] }
                    fontSize={11} 
                    fontWeight="bold" 
                    formatter={(v: number) => v > 0 ? String(Math.round(v)) : ''}
-                   offset={10} 
+                   offset={15} 
+                   angle={-90}
                  />
               </Bar>
             </BarChart>

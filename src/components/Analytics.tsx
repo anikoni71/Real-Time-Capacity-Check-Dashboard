@@ -41,13 +41,13 @@ export default function Analytics({ processes }: { processes: ProcessRow[] }) {
     <div className="space-y-6">
       <ChartContainer title="Capacity vs Actual Output by Process" icon={<PieChart className="h-5 w-5 text-indigo-600" />}>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-           <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, processStats.length * 80)}px`, height: '700px' }}>
+           <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, processStats.length * 60)}px`, height: '600px' }}>
              <ResponsiveContainer width="100%" height="100%">
-               <BarChart data={processStats} margin={{ top: 40, right: 30, left: 20, bottom: 5 }}>
+               <BarChart data={processStats} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-90} textAnchor="end" height={280}/>
                  <YAxis domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} tick={{ fontSize: 11 }} />
-                 <Tooltip />
+                 <Tooltip isAnimationActive={false} />
                  <Legend verticalAlign="top" height={36} />
                  
                  {target1 > 0 && (
@@ -57,11 +57,11 @@ export default function Analytics({ processes }: { processes: ProcessRow[] }) {
                    <ReferenceLine y={target2} stroke="#047857" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'top', value: `100% Target: ${target2}`, fill: '#047857', fontSize: 11, fontWeight: 'bold' }} />
                  )}
 
-                 <Bar dataKey="Capacity" fill="#10b981" name="Capacity" maxBarSize={40}>
-                   <LabelList dataKey="Capacity" position="top" fill="#111827" fontSize={11} fontWeight="bold" offset={10} formatter={(v: number) => v > 0 ? String(v) : ''} />
+                 <Bar isAnimationActive={false} dataKey="Capacity" fill="#10b981" name="Capacity" maxBarSize={40}>
+                   <LabelList dataKey="Capacity" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-90} offset={15} formatter={(v: number) => v > 0 ? String(v) : ''} />
                  </Bar>
-                 <Bar dataKey="ActualOutput" fill="#ef4444" name="Output" maxBarSize={40}>
-                   <LabelList dataKey="ActualOutput" position="top" fill="#111827" fontSize={11} fontWeight="bold" offset={10} formatter={(v: number) => v > 0 ? String(v) : ''} />
+                 <Bar isAnimationActive={false} dataKey="ActualOutput" fill="#ef4444" name="Output" maxBarSize={40}>
+                   <LabelList dataKey="ActualOutput" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-90} offset={15} formatter={(v: number) => v > 0 ? String(v) : ''} />
                  </Bar>
                </BarChart>
              </ResponsiveContainer>
@@ -71,19 +71,19 @@ export default function Analytics({ processes }: { processes: ProcessRow[] }) {
 
       <ChartContainer title="100% Target vs Capacity (Top Processes)" icon={<ArrowUpRight className="h-5 w-5 text-emerald-600" />}>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-           <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, topProcesses.length * 60)}px`, height: '700px' }}>
+           <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, topProcesses.length * 60)}px`, height: '600px' }}>
              <ResponsiveContainer width="100%" height="100%">
-               <LineChart data={topProcesses} margin={{ top: 40, right: 30, left: 20, bottom: 5 }}>
+               <LineChart data={topProcesses} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-90} textAnchor="end" height={280}/>
                  <YAxis tick={{ fontSize: 11 }} />
-                 <Tooltip />
+                 <Tooltip isAnimationActive={false} />
                  <Legend verticalAlign="top" height={36} />
-                 <Line type="monotone" dataKey="Target100" name="100% Target" stroke="#6366f1" strokeWidth={3} dot={{ r: 4 }}>
-                   <LabelList dataKey="Target100" position="top" fill="#6366f1" fontSize={11} fontWeight="bold" offset={10} />
+                 <Line isAnimationActive={false} type="monotone" dataKey="Target100" name="100% Target" stroke="#6366f1" strokeWidth={3} dot={{ r: 4 }}>
+                   <LabelList dataKey="Target100" position="top" fill="#6366f1" fontSize={11} fontWeight="bold" angle={-90} offset={15} />
                  </Line>
-                 <Line type="monotone" dataKey="Capacity" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }}>
-                   <LabelList dataKey="Capacity" position="bottom" fill="#10b981" fontSize={11} fontWeight="bold" offset={10} />
+                 <Line isAnimationActive={false} type="monotone" dataKey="Capacity" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }}>
+                   <LabelList dataKey="Capacity" position="bottom" fill="#10b981" fontSize={11} fontWeight="bold" angle={-90} offset={15} />
                  </Line>
                </LineChart>
              </ResponsiveContainer>

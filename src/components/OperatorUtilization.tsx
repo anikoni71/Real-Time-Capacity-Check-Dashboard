@@ -48,9 +48,9 @@ export default function OperatorUtilization({ processes }: { processes: ProcessR
           <p className="text-sm text-gray-500 mt-1">Yellow bar represents 60 minutes total time. Green represents utilized minutes.</p>
         </div>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, stackedData.length * 60)}px`, height: '700px' }}>
+          <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, stackedData.length * 60)}px`, height: '600px' }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stackedData} margin={{ top: 40, right: 30, left: 20, bottom: 5 }}>
+              <BarChart data={stackedData} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                 <XAxis 
                   dataKey="name" 
@@ -64,7 +64,7 @@ export default function OperatorUtilization({ processes }: { processes: ProcessR
                 tick={{ fontSize: 11 }}
                 label={{ value: 'Minutes', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#4B5563', fontSize: 12 } }} 
               />
-              <Tooltip 
+              <Tooltip isAnimationActive={false} 
                 cursor={{ fill: 'transparent' }}
                 contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 formatter={(value: number, name: string) => {
@@ -77,11 +77,11 @@ export default function OperatorUtilization({ processes }: { processes: ProcessR
               
               <ReferenceLine y={60} stroke="#EF4444" strokeDasharray="3 3" label={{ position: 'top', value: '60 Min Capacity', fill: '#EF4444', fontSize: 12, fontWeight: 'bold' }} />
 
-              <Bar dataKey="Utilized" stackId="a" fill="#10B981" name="Utilized Minute" maxBarSize={50}>
-                <LabelList dataKey="Utilized" position="center" fill="#ffffff" fontSize={11} fontWeight="bold" offset={0} formatter={(v: number) => String(v)} />
+              <Bar isAnimationActive={false} dataKey="Utilized" stackId="a" fill="#10B981" name="Utilized Minute" maxBarSize={50}>
+                <LabelList dataKey="Utilized" position="insideTop" fill="#ffffff" fontSize={11} fontWeight="bold" angle={-90} offset={10} formatter={(v: number) => String(v)} />
               </Bar>
-              <Bar dataKey="Unutilized" stackId="a" fill="#FBBF24" name="Unutilized Minute" maxBarSize={50}>
-                <LabelList dataKey="Percentage" position="top" fill="#111827" fontSize={11} fontWeight="bold" offset={10} formatter={(v: string) => String(v)} />
+              <Bar isAnimationActive={false} dataKey="Unutilized" stackId="a" fill="#FBBF24" name="Unutilized Minute" maxBarSize={50}>
+                <LabelList dataKey="Percentage" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-90} offset={10} formatter={(v: string) => String(v)} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>

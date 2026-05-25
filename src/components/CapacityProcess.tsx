@@ -82,9 +82,9 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
         </div>
         
         <div className="overflow-x-auto w-full border border-gray-100 rounded-md pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <div className="scrollable-chart-inner" style={{ width: `${expectedWidth}px`, height: '700px' }}>
+          <div className="scrollable-chart-inner" style={{ width: `${expectedWidth}px`, height: '600px' }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 40, right: 30, left: 20, bottom: 5 }}>
+              <BarChart data={chartData} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
               <XAxis 
                 dataKey="name" 
@@ -99,7 +99,7 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
                 tick={{ fontSize: 12, fill: '#4B5563' }} 
                 label={{ value: 'Capacity', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#6B7280' } }}
               />
-              <Tooltip 
+              <Tooltip isAnimationActive={false} 
                 cursor={{ fill: '#F3F4F6' }}
                 contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
               />
@@ -137,7 +137,7 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
                 />
               )}
 
-              <Bar dataKey="Capacity" maxBarSize={60}>
+              <Bar isAnimationActive={false} dataKey="Capacity" maxBarSize={60}>
                 {chartData.map((entry, index) => {
                   const opIndex = ops.indexOf(entry.operatorName);
                   return <Cell key={`cell-${index}`} fill={OPERATOR_COLORS[opIndex % OPERATOR_COLORS.length]} />;
@@ -148,7 +148,8 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
                   fill="#111827" 
                   fontSize={11} 
                   fontWeight="bold"
-                  offset={10}
+                  angle={-90}
+                  offset={15}
                   formatter={(v: number) => String(v)}
                 />
               </Bar>

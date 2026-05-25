@@ -54,7 +54,7 @@ export default function MachineDistribution({ processes }: { processes: ProcessR
           <div className="w-full lg:w-1/2 scrollable-chart-inner" style={{ height: '350px' }}>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie
+              <Pie isAnimationActive={false}
                 data={data}
                 cx="50%"
                 cy="50%"
@@ -69,7 +69,7 @@ export default function MachineDistribution({ processes }: { processes: ProcessR
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip 
+              <Tooltip isAnimationActive={false} 
                 formatter={(value: number, name: string) => {
                   const percent = ((value / total) * 100).toFixed(1);
                   return [`${value} qty (${percent}%)`, name];

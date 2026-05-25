@@ -76,13 +76,13 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
     <div className="space-y-6">
       <ChartContainer title="Capacity per Operator per Process" icon={<Cpu className="h-5 w-5 text-blue-600" />}>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-           <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, capacityData.length * 60)}px`, height: '700px' }}>
+           <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, capacityData.length * 60)}px`, height: '600px' }}>
              <ResponsiveContainer width="100%" height="100%">
-               <BarChart data={capacityData} margin={{ top: 40, right: 30, left: 20, bottom: 5 }}>
+               <BarChart data={capacityData} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-90} textAnchor="end" height={280}/>
                  <YAxis domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} tick={{ fontSize: 11 }} />
-                 <Tooltip />
+                 <Tooltip isAnimationActive={false} />
                  <Legend verticalAlign="top" height={36} />
                  
                  {target1 > 0 && (
@@ -93,8 +93,8 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
                  )}
 
                  {capKeys.map((k, i) => (
-                   <Bar key={k} dataKey={k} fill={['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][i % 5]} maxBarSize={50}>
-                     <LabelList dataKey={k} position="top" fill="#111827" fontSize={11} fontWeight="bold" offset={10} formatter={(val: number) => val > 0 ? String(Math.round(val)) : ''} />
+                   <Bar isAnimationActive={false} key={k} dataKey={k} fill={['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][i % 5]} maxBarSize={50}>
+                     <LabelList dataKey={k} position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-90} offset={15} formatter={(val: number) => val > 0 ? String(Math.round(val)) : ''} />
                    </Bar>
                  ))}
                </BarChart>
@@ -105,13 +105,13 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
 
       <ChartContainer title="Capacity vs Actual Output (Process x Operator)" icon={<Activity className="h-5 w-5 text-indigo-600" />}>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-           <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, compareData.length * 80)}px`, height: '700px' }}>
+           <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, compareData.length * 60)}px`, height: '600px' }}>
              <ResponsiveContainer width="100%" height="100%">
-               <BarChart data={compareData} margin={{ top: 40, right: 30, left: 20, bottom: 5 }}>
+               <BarChart data={compareData} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-90} textAnchor="end" height={280}/>
                  <YAxis domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} tick={{ fontSize: 11 }} />
-                 <Tooltip />
+                 <Tooltip isAnimationActive={false} />
                  <Legend verticalAlign="top" height={36} />
                  
                  {target1 > 0 && (
@@ -121,11 +121,11 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
                    <ReferenceLine y={target2} stroke="#047857" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'top', value: `100% Target: ${target2}`, fill: '#047857', fontSize: 11, fontWeight: 'bold' }} />
                  )}
 
-                 <Bar dataKey="Capacity" fill="#8b5cf6" maxBarSize={40}>
-                   <LabelList dataKey="Capacity" position="top" fill="#111827" fontSize={11} fontWeight="bold" offset={10} formatter={(v: number) => v > 0 ? String(v) : ''} />
+                 <Bar isAnimationActive={false} dataKey="Capacity" fill="#8b5cf6" maxBarSize={40}>
+                   <LabelList dataKey="Capacity" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-90} offset={15} formatter={(v: number) => v > 0 ? String(v) : ''} />
                  </Bar>
-                 <Bar dataKey="Output" fill="#ec4899" maxBarSize={40}>
-                   <LabelList dataKey="Output" position="top" fill="#111827" fontSize={11} fontWeight="bold" offset={10} formatter={(v: number) => v > 0 ? String(v) : ''} />
+                 <Bar isAnimationActive={false} dataKey="Output" fill="#ec4899" maxBarSize={40}>
+                   <LabelList dataKey="Output" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-90} offset={15} formatter={(v: number) => v > 0 ? String(v) : ''} />
                  </Bar>
                </BarChart>
              </ResponsiveContainer>
@@ -135,19 +135,19 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
 
       <ChartContainer title="100% Process Target vs Capacity (Line Chart)" icon={<TrendingUp className="h-5 w-5 text-amber-500" />}>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-           <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, targetData.length * 60)}px`, height: '700px' }}>
+           <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, targetData.length * 60)}px`, height: '600px' }}>
              <ResponsiveContainer width="100%" height="100%">
-               <LineChart data={targetData} margin={{ top: 40, right: 30, left: 20, bottom: 5 }}>
+               <LineChart data={targetData} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-90} textAnchor="end" height={280}/>
                  <YAxis domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} tick={{ fontSize: 11 }} />
-                 <Tooltip />
+                 <Tooltip isAnimationActive={false} />
                  <Legend verticalAlign="top" height={36} />
-                 <Line type="monotone" dataKey="Target" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }}>
-                   <LabelList dataKey="Target" position="top" fill="#f59e0b" fontSize={11} fontWeight="bold" offset={10} />
+                 <Line isAnimationActive={false} type="monotone" dataKey="Target" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }}>
+                   <LabelList dataKey="Target" position="top" fill="#f59e0b" fontSize={11} fontWeight="bold" angle={-90} offset={15} />
                  </Line>
-                 <Line type="monotone" dataKey="Capacity" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }}>
-                   <LabelList dataKey="Capacity" position="bottom" fill="#3b82f6" fontSize={11} fontWeight="bold" offset={10} />
+                 <Line isAnimationActive={false} type="monotone" dataKey="Capacity" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }}>
+                   <LabelList dataKey="Capacity" position="bottom" fill="#3b82f6" fontSize={11} fontWeight="bold" angle={-90} offset={15} />
                  </Line>
                </LineChart>
              </ResponsiveContainer>
