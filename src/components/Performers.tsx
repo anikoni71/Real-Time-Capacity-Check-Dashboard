@@ -56,7 +56,7 @@ export default function Performers({ processes }: { processes: ProcessRow[] }) {
           <BarChart data={data} layout="vertical" margin={{ top: 20, right: 30, left: 150, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
             <XAxis type="number" tick={{ fontSize: 11 }} domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} />
-            <YAxis dataKey="name" type="category" tick={{ fontSize: 11, fill: '#4B5563' }} width={140} />
+            <YAxis dataKey="name" type="category" tick={{ fontSize: 11, fill: '#4B5563' }} width={140}  domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Number(m) * 1.2); }]} />
             <Tooltip isAnimationActive={false} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
             
             {target1 > 0 && (

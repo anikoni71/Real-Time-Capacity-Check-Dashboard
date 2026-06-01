@@ -88,10 +88,10 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
              <ResponsiveContainer width="100%" height="100%">
                <BarChart data={capacityData} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-90} textAnchor="end" height={280}/>
+                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-55} textAnchor="end" height={150}/>
                  <YAxis domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} tick={{ fontSize: 11 }} />
                  <Tooltip isAnimationActive={false} />
-                 <Legend verticalAlign="top" height={36} />
+                 <Legend verticalAlign="top" height={150} />
                  
                  {target1 > 0 && (
                    <ReferenceLine y={target1} stroke="#ef4444" strokeDasharray="3 3" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'top', value: `LC Target: ${target1}`, fill: '#ef4444', fontSize: 11, fontWeight: 'bold' }} />
@@ -102,7 +102,7 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
 
                  {capKeys.map((k, i) => (
                    <Bar isAnimationActive={false} key={k} dataKey={k} fill={['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][i % 5]} maxBarSize={50}>
-                     <LabelList dataKey={k} position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={0} offset={10} formatter={(val: number) => val > 0 ? String(Math.round(val)) : ''} />
+                     <LabelList dataKey={k} position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-55} offset={10} formatter={(val: number) => val > 0 ? String(Math.round(val)) : ''} />
                    </Bar>
                  ))}
                </BarChart>
@@ -117,10 +117,10 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
              <ResponsiveContainer width="100%" height="100%">
                <BarChart data={compareData} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-90} textAnchor="end" height={280}/>
+                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-55} textAnchor="end" height={150}/>
                  <YAxis domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} tick={{ fontSize: 11 }} />
                  <Tooltip isAnimationActive={false} />
-                 <Legend verticalAlign="top" height={36} />
+                 <Legend verticalAlign="top" height={150} />
                  
                  {target1 > 0 && (
                    <ReferenceLine y={target1} stroke="#ef4444" strokeDasharray="3 3" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'top', value: `LC Target: ${target1}`, fill: '#ef4444', fontSize: 11, fontWeight: 'bold' }} />
@@ -130,10 +130,10 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
                  )}
 
                  <Bar isAnimationActive={false} dataKey="Capacity" fill="#8b5cf6" maxBarSize={40}>
-                   <LabelList dataKey="Capacity" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={0} offset={10} formatter={(v: number) => v > 0 ? String(v) : ''} />
+                   <LabelList dataKey="Capacity" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-55} offset={10} formatter={(v: number) => v > 0 ? String(v) : ''} />
                  </Bar>
                  <Bar isAnimationActive={false} dataKey="Output" fill="#ec4899" maxBarSize={40}>
-                   <LabelList dataKey="Output" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={0} offset={10} formatter={(v: number) => v > 0 ? String(v) : ''} />
+                   <LabelList dataKey="Output" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-55} offset={10} formatter={(v: number) => v > 0 ? String(v) : ''} />
                  </Bar>
                </BarChart>
              </ResponsiveContainer>
@@ -147,15 +147,15 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
              <ResponsiveContainer width="100%" height="100%">
                <LineChart data={targetData} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-90} textAnchor="end" height={280}/>
+                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-55} textAnchor="end" height={150}/>
                  <YAxis domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} tick={{ fontSize: 11 }} />
                  <Tooltip isAnimationActive={false} />
-                 <Legend verticalAlign="top" height={36} />
+                 <Legend verticalAlign="top" height={150} />
                  <Line isAnimationActive={false} type="monotone" dataKey="Target" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }}>
-                   <LabelList dataKey="Target" position="top" fill="#f59e0b" fontSize={11} fontWeight="bold" angle={0} offset={10} />
+                   <LabelList dataKey="Target" position="top" fill="#f59e0b" fontSize={11} fontWeight="bold" angle={-55} offset={10} />
                  </Line>
                  <Line isAnimationActive={false} type="monotone" dataKey="Capacity" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }}>
-                   <LabelList dataKey="Capacity" position="bottom" fill="#3b82f6" fontSize={11} fontWeight="bold" angle={0} offset={10} />
+                   <LabelList dataKey="Capacity" position="bottom" fill="#3b82f6" fontSize={11} fontWeight="bold" angle={-55} offset={10} />
                  </Line>
                </LineChart>
              </ResponsiveContainer>

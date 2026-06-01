@@ -36,15 +36,15 @@ export default function LineTargets({ processes }: { processes: ProcessRow[] }) 
              <ResponsiveContainer width="100%" height="100%">
                <LineChart data={lineData} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-90} textAnchor="end" height={280}/>
+                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-55} textAnchor="end" height={150}/>
                  <YAxis domain={[0, (max: number | number[]) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(m * 1.2); }]} tick={{ fontSize: 11 }} />
                  <Tooltip isAnimationActive={false} />
-                 <Legend verticalAlign="top" height={36} />
+                 <Legend verticalAlign="top" height={150} />
                  <Line isAnimationActive={false} type="monotone" dataKey="Capacity" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }}>
-                   <LabelList dataKey="Capacity" position="bottom" fill="#3b82f6" fontSize={11} fontWeight="bold" angle={0} offset={10} formatter={(v: number) => String(v)} />
+                   <LabelList dataKey="Capacity" position="bottom" fill="#3b82f6" fontSize={11} fontWeight="bold" angle={-55} offset={10} formatter={(v: number) => String(v)} />
                  </Line>
                  <Line isAnimationActive={false} type="monotone" dataKey="Line 100% Target" stroke="#ef4444" strokeWidth={3} dot={false} activeDot={false}>
-                   <LabelList dataKey="Line 100% Target" position="top" fill="#ef4444" fontSize={11} fontWeight="bold" angle={0} offset={10} formatter={(v: number) => String(v)} />
+                   <LabelList dataKey="Line 100% Target" position="top" fill="#ef4444" fontSize={11} fontWeight="bold" angle={-55} offset={10} formatter={(v: number) => String(v)} />
                  </Line>
                </LineChart>
              </ResponsiveContainer>
@@ -58,15 +58,15 @@ export default function LineTargets({ processes }: { processes: ProcessRow[] }) 
              <ResponsiveContainer width="100%" height="100%">
                <LineChart data={lineData} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-90} textAnchor="end" height={280}/>
+                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-55} textAnchor="end" height={150}/>
                  <YAxis domain={[0, (max: number | number[]) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(m * 1.2); }]} tick={{ fontSize: 11 }} />
                  <Tooltip isAnimationActive={false} />
-                 <Legend verticalAlign="top" height={36} />
+                 <Legend verticalAlign="top" height={150} />
                  <Line isAnimationActive={false} type="monotone" dataKey="Capacity" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }}>
-                   <LabelList dataKey="Capacity" position="bottom" fill="#3b82f6" fontSize={11} fontWeight="bold" angle={0} offset={10} formatter={(v: number) => String(v)} />
+                   <LabelList dataKey="Capacity" position="bottom" fill="#3b82f6" fontSize={11} fontWeight="bold" angle={-55} offset={10} formatter={(v: number) => String(v)} />
                  </Line>
                  <Line isAnimationActive={false} type="monotone" dataKey="Today Plan LC Target" stroke="#ef4444" strokeWidth={3} dot={false} activeDot={false}>
-                   <LabelList dataKey="Today Plan LC Target" position="top" fill="#ef4444" fontSize={11} fontWeight="bold" angle={0} offset={10} formatter={(v: number) => String(v)} />
+                   <LabelList dataKey="Today Plan LC Target" position="top" fill="#ef4444" fontSize={11} fontWeight="bold" angle={-55} offset={10} formatter={(v: number) => String(v)} />
                  </Line>
                </LineChart>
              </ResponsiveContainer>

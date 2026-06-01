@@ -92,9 +92,9 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
                 dataKey="name" 
                 tick={{ fontSize: 12, fill: '#4B5563' }} 
                 interval={0} 
-                angle={-90} 
+                angle={-55} 
                 textAnchor="end"
-                height={280}
+                height={150}
               />
               <YAxis 
                 domain={[0, calculatedMax === 0 ? 'auto' : calculatedMax]}
@@ -108,7 +108,7 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
               {/* A fake Legend to show operators */}
               <Legend 
                 verticalAlign="top" 
-                height={36} 
+                height={150} 
                 iconType="circle" 
                 wrapperStyle={{ fontSize: '13px' }}
                 payload={ops.map((op, i) => ({
@@ -150,7 +150,7 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
                   fill="#111827" 
                   fontSize={11} 
                   fontWeight="bold"
-                  angle={0}
+                  angle={-55}
                   offset={10}
                   formatter={(v: number) => String(v)}
                 />

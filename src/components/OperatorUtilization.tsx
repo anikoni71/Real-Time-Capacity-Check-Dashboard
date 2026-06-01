@@ -54,11 +54,11 @@ export default function OperatorUtilization({ processes }: { processes: ProcessR
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                 <XAxis 
                   dataKey="name" 
-                  angle={-90} 
+                  angle={-55} 
                   textAnchor="end" 
                   tick={{ fontSize: 11, fill: '#4B5563' }} 
                   interval={0}
-                  height={280}
+                  height={150}
                 />
               <YAxis 
                 tick={{ fontSize: 11 }}
@@ -73,15 +73,15 @@ export default function OperatorUtilization({ processes }: { processes: ProcessR
                   return [value, name];
                 }}
               />
-              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '12px' }} />
+              <Legend verticalAlign="top" height={150} wrapperStyle={{ fontSize: '12px' }} />
               
               <ReferenceLine y={60} stroke="#EF4444" strokeDasharray="3 3" label={{ position: 'top', value: '60 Min Capacity', fill: '#EF4444', fontSize: 12, fontWeight: 'bold' }} />
 
               <Bar isAnimationActive={false} dataKey="Utilized" stackId="a" fill="#10B981" name="Utilized Minute" maxBarSize={50}>
-                <LabelList dataKey="Utilized" position="insideTop" fill="#ffffff" fontSize={11} fontWeight="bold" angle={0} offset={10} formatter={(v: number) => String(v)} />
+                <LabelList dataKey="Utilized" position="insideTop" fill="#ffffff" fontSize={11} fontWeight="bold" angle={-55} offset={10} formatter={(v: number) => String(v)} />
               </Bar>
               <Bar isAnimationActive={false} dataKey="Unutilized" stackId="a" fill="#FBBF24" name="Unutilized Minute" maxBarSize={50}>
-                <LabelList dataKey="Percentage" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={0} offset={10} formatter={(v: string) => String(v)} />
+                <LabelList dataKey="Percentage" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-55} offset={10} formatter={(v: string) => String(v)} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>

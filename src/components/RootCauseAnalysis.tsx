@@ -1,7 +1,87 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ScoreboardRow, ProcessRow } from '../types';
-import { Share2, AlertTriangle, Lightbulb, Settings, Users, ArrowRightLeft, Activity, Info } from 'lucide-react';
+import { Share2, AlertTriangle, Lightbulb, Settings, Users, ArrowRightLeft, Activity, Info, Maximize, Printer, Download, Minimize } from 'lucide-react';
+import html2canvas from 'html2canvas';
+
+const DiagramWrapper = ({ title, icon: Icon, children, id }: any) => {
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  
+  const toggleFullScreen = () => {
+    const elem = document.getElementById(id);
+    if (!document.fullscreenElement) {
+      elem?.requestFullscreen().catch(err => console.error(err));
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
+  useEffect(() => {
+    const handleFSChange = () => {
+      const elem = document.getElementById(id);
+      setIsFullScreen(document.fullscreenElement === elem);
+    };
+    document.addEventListener('fullscreenchange', handleFSChange);
+    return () => document.removeEventListener('fullscreenchange', handleFSChange);
+  }, [id]);
+
+  const handlePrint = () => {
+    const elem = document.getElementById(id);
+    if (!elem) return;
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html><head><title>Print Diagram: ${title}</title>
+        <style>body { font-family: sans-serif; padding: 20px; } svg { max-width: 100%; height: auto; }</style>
+        </head><body>
+          <h2>${title}</h2>
+          ${elem.innerHTML}
+          <script>setTimeout(() => { window.print(); window.close(); }, 500);</script>
+        </body></html>
+      `);
+      printWindow.document.close();
+    }
+  };
+
+  const handleDownload = async () => {
+    const elem = document.getElementById(id);
+    if (!elem) return;
+    try {
+      const canvas = await html2canvas(elem, { backgroundColor: '#ffffff', scale: 2 });
+      const link = document.createElement('a');
+      link.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (e) {
+      console.error('Failed to download image', e);
+    }
+  };
+
+  return (
+    <div id={id} className={`bg-white p-6 rounded-lg border border-gray-200 shadow-sm overflow-hidden relative ${isFullScreen ? 'overflow-y-auto w-screen h-screen m-0 p-8 pt-16 flex flex-col' : ''}`}>
+      <div className="flex justify-between items-center mb-6 border-b pb-2">
+        <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+          <Icon className={`h-5 w-5 ${title.includes('1') ? 'text-indigo-600' : title.includes('2') ? 'text-emerald-500' : 'text-rose-500'}`} />
+          {title}
+        </h3>
+        <div className="flex bg-gray-50 rounded shadow-sm border p-1 space-x-1 shrink-0 z-50">
+          <button onClick={toggleFullScreen} className="p-1.5 hover:bg-gray-200 rounded text-gray-600 transition-colors" title="Toggle Fullscreen">
+            {isFullScreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+          </button>
+          <button onClick={handlePrint} className="p-1.5 hover:bg-gray-200 rounded text-gray-600 transition-colors" title="Print Diagram">
+            <Printer className="h-4 w-4" />
+          </button>
+          <button onClick={handleDownload} className="p-1.5 hover:bg-gray-200 rounded text-gray-600 transition-colors" title="Download PNG">
+            <Download className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+      <div className={isFullScreen ? 'flex-1 overflow-auto bg-white' : ''}>
+        {children}
+      </div>
+    </div>
+  );
+};
 
 interface Props {
   scoreboards: ScoreboardRow[];
@@ -57,7 +137,7 @@ export default function RootCauseAnalysis({ scoreboards, processes = [] }: Props
 
     return {
       flags: { machine, manpower, method, material },
-      averages: { eff: avgEff, todayMp: todayMpSum, obMp: obMpSum, todayTarget: todayTargetSum, lineTarget: lineTargetSum },
+      averages: { eff: avgEff, todayMp: todayMpSum, obMp: obMpSum, todayTarget: todayTargetSum, lineTarget: lineTargetSum, presentTackSum, tackSum },
       worstRow,
       minCapacityProcess
     };
@@ -74,13 +154,13 @@ export default function RootCauseAnalysis({ scoreboards, processes = [] }: Props
   // Diagram 1: Dynamic Causes based on worstRow
   const lossCauses = {
     machine: [
-      { id: 'm1', label: 'Speed Loss', desc: `Operating at ${worstRow.todayPlanLcEfficiency} vs 75% Baseline` },
+      { id: 'm1', label: 'Speed Loss', desc: `Operating at ${worstRow.todayPlanLcEfficiency}% vs 75% Baseline` },
       { id: 'm2', label: 'Maintenance Alert', desc: 'Mechanical macro-stop risk detected' },
       { id: 'm3', label: 'Tool Wear Trends', desc: 'Needle breakages, folder adjustments needed.' }
     ],
     manpower: [
       { id: 'mp1', label: 'Actual Variance', desc: `Missing ${Math.max(0, parseFloat(worstRow.obMp) - parseFloat(worstRow.todayPreMp))} Operators` },
-      { id: 'mp2', label: 'Line Layout', desc: `Unbalancing on Runday ${worstRow.runday}` },
+      { id: 'mp2', label: 'Line Layout Unbalancing', desc: `on Runday ${worstRow.runday}` },
       { id: 'mp3', label: 'Skill Deficit', desc: 'New operator in critical bottleneck.' }
     ],
     method: [
@@ -98,7 +178,7 @@ export default function RootCauseAnalysis({ scoreboards, processes = [] }: Props
   // Diagram 2: Dynamic CAPA Solutions
   const solutions = {
     machine: [
-      { id: 's-m1', label: 'Urgent Preventive Maintenance (PM)', desc: 'For Line Equipment' },
+      { id: 's-m1', label: 'Urgent Preventive Maintenance (PM)', desc: 'for Line Equipment' },
       { id: 's-m2', label: 'Recalibrate Limits', desc: `Recalibrate RPM limits for Style ${worstRow.style}` },
       { id: 's-m3', label: 'Machine Swap', desc: 'Bring in standby machine for slow bottlenecks.' }
     ],
@@ -113,7 +193,7 @@ export default function RootCauseAnalysis({ scoreboards, processes = [] }: Props
       { id: 's-mt3', label: 'Flow layout update', desc: 'Move material staging closer to operator.' }
     ],
     material: [
-      { id: 's-mat1', label: 'Buffer sizing', desc: `Increase WIP buffering to handle ${worstRow.presentTackTimeSec}s tack deviations` },
+      { id: 's-mat1', label: 'Buffer sizing', desc: `Increase WIP buffering to handle ${Math.max(0, parseFloat(worstRow.presentTackTimeSec) - parseFloat(worstRow.tackTimeSec)).toFixed(1)}s variations` },
       { id: 's-mat2', label: 'Upstream QA Alert', desc: `Issue QA Alert to cutter for ${worstRow.buyer}` },
       { id: 's-mat3', label: 'Material Handler Aid', desc: 'Assign handler to un-bundle pieces.' }
     ]
@@ -191,9 +271,9 @@ export default function RootCauseAnalysis({ scoreboards, processes = [] }: Props
             </foreignObject>
 
             {/* BRANCH: MACHINE/TECHNICAL (Top-Left) */}
-            <line x1="230" y1="140" x2="430" y2="325" stroke={flags.machine ? (type === 'causes' || type === 'bottleneck' ? "#ef4444" : "#10b981") : "#d1d5db"} strokeWidth={flags.machine ? "4" : "2"} />
+            <line x1="230" y1="160" x2="430" y2="325" stroke={flags.machine ? (type === 'causes' || type === 'bottleneck' ? "#ef4444" : "#10b981") : "#d1d5db"} strokeWidth={flags.machine ? "4" : "2"} />
             <polygon points="418,321 430,325 423,314" fill={flags.machine ? (type === 'causes' || type === 'bottleneck' ? "#ef4444" : "#10b981") : "#d1d5db"} />
-            <foreignObject x="40" y="10" width="280" height="140">
+            <foreignObject x="20" y="5" width="310" height="155">
               <motion.div 
                 whileHover={{ scale: 1.05 }}
                 className={`h-full w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all ${flags.machine ? (type === 'causes' || type === 'bottleneck' ? 'border-red-400' : 'border-emerald-400') : 'border-gray-200'}`}
@@ -216,9 +296,9 @@ export default function RootCauseAnalysis({ scoreboards, processes = [] }: Props
             </foreignObject>
 
             {/* BRANCH: METHOD/PROCESS (Top-Right) */}
-            <line x1="680" y1="140" x2="830" y2="325" stroke={flags.method ? (type === 'causes' || type === 'bottleneck' ? "#ef4444" : "#10b981") : "#d1d5db"} strokeWidth={flags.method ? "4" : "2"} />
+            <line x1="680" y1="160" x2="830" y2="325" stroke={flags.method ? (type === 'causes' || type === 'bottleneck' ? "#ef4444" : "#10b981") : "#d1d5db"} strokeWidth={flags.method ? "4" : "2"} />
             <polygon points="818,321 830,325 823,314" fill={flags.method ? (type === 'causes' || type === 'bottleneck' ? "#ef4444" : "#10b981") : "#d1d5db"} />
-            <foreignObject x="490" y="10" width="280" height="140">
+            <foreignObject x="470" y="5" width="310" height="155">
               <motion.div 
                 whileHover={{ scale: 1.05 }}
                 className={`h-full w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all ${flags.method ? (type === 'causes' || type === 'bottleneck' ? 'border-red-400' : 'border-emerald-400') : 'border-gray-200'}`}
@@ -241,9 +321,9 @@ export default function RootCauseAnalysis({ scoreboards, processes = [] }: Props
             </foreignObject>
 
             {/* BRANCH: MANPOWER/OPERATOR (Bottom-Left) */}
-            <line x1="230" y1="510" x2="430" y2="325" stroke={flags.manpower ? (type === 'causes' || type === 'bottleneck' ? "#ef4444" : "#10b981") : "#d1d5db"} strokeWidth={flags.manpower ? "4" : "2"} />
+            <line x1="230" y1="490" x2="430" y2="325" stroke={flags.manpower ? (type === 'causes' || type === 'bottleneck' ? "#ef4444" : "#10b981") : "#d1d5db"} strokeWidth={flags.manpower ? "4" : "2"} />
             <polygon points="418,329 430,325 423,336" fill={flags.manpower ? (type === 'causes' || type === 'bottleneck' ? "#ef4444" : "#10b981") : "#d1d5db"} />
-            <foreignObject x="40" y="500" width="280" height="140">
+            <foreignObject x="20" y="490" width="310" height="155">
               <motion.div 
                 whileHover={{ scale: 1.05 }}
                 className={`h-full w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all ${flags.manpower ? (type === 'causes' || type === 'bottleneck' ? 'border-red-400' : 'border-emerald-400') : 'border-gray-200'}`}
@@ -266,9 +346,9 @@ export default function RootCauseAnalysis({ scoreboards, processes = [] }: Props
             </foreignObject>
 
             {/* BRANCH: MATERIAL/QUALITY (Bottom-Right) */}
-            <line x1="680" y1="510" x2="830" y2="325" stroke={flags.material ? (type === 'causes' || type === 'bottleneck' ? "#ef4444" : "#10b981") : "#d1d5db"} strokeWidth={flags.material ? "4" : "2"} />
+            <line x1="680" y1="490" x2="830" y2="325" stroke={flags.material ? (type === 'causes' || type === 'bottleneck' ? "#ef4444" : "#10b981") : "#d1d5db"} strokeWidth={flags.material ? "4" : "2"} />
             <polygon points="818,329 830,325 823,336" fill={flags.material ? (type === 'causes' || type === 'bottleneck' ? "#ef4444" : "#10b981") : "#d1d5db"} />
-            <foreignObject x="490" y="500" width="280" height="140">
+            <foreignObject x="470" y="490" width="310" height="155">
               <motion.div 
                 whileHover={{ scale: 1.05 }}
                 className={`h-full w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all ${flags.material ? (type === 'causes' || type === 'bottleneck' ? 'border-red-400' : 'border-emerald-400') : 'border-gray-200'}`}
@@ -331,7 +411,7 @@ export default function RootCauseAnalysis({ scoreboards, processes = [] }: Props
   return (
     <div className="space-y-8">
       {/* Overview stats panel to show why things are flagged */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
         <div className={`p-3 rounded-md flex flex-col ${flags.machine ? 'bg-red-50 border border-red-200' : 'bg-gray-50'}`}>
           <span className="text-xs font-semibold text-gray-500 uppercase">Avg Efficiency</span>
           <span className={`text-2xl font-bold ${flags.machine ? 'text-red-600' : 'text-gray-800'}`}>
@@ -355,6 +435,14 @@ export default function RootCauseAnalysis({ scoreboards, processes = [] }: Props
           </span>
           {flags.method && <span className="text-xs text-red-500 mt-1">Significant deficit.</span>}
         </div>
+
+        <div className={`p-3 rounded-md flex flex-col ${flags.material ? 'bg-red-50 border border-red-200' : 'bg-gray-50'}`}>
+          <span className="text-xs font-semibold text-gray-500 uppercase">IE Tack Time</span>
+          <span className={`text-2xl font-bold ${flags.material ? 'text-red-600' : 'text-gray-800'} text-base tracking-tight`}>
+            Plan: {(averages.tackSum/scoreboards.length).toFixed(1)}s <br/> Actual: {(averages.presentTackSum/scoreboards.length).toFixed(1)}s
+          </span>
+          {flags.material && <span className="text-xs text-red-500 mt-1">Actual exceeds plan.</span>}
+        </div>
         
         <div className="p-3 rounded-md flex flex-col justify-center bg-blue-50 border border-blue-200 text-blue-800">
            <h3 className="font-bold flex items-center gap-2 text-sm leading-tight">
@@ -365,11 +453,7 @@ export default function RootCauseAnalysis({ scoreboards, processes = [] }: Props
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm overflow-hidden relative">
-        <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2 border-b pb-2">
-          <AlertTriangle className="h-5 w-5 text-indigo-600" />
-          DIAGRAM 1: Capacity Loss Root Cause Analysis
-        </h3>
+      <DiagramWrapper id="diagram-1" title="DIAGRAM 1: Capacity Loss Root Cause Analysis" icon={AlertTriangle}>
         {renderFishbone('causes')}
         <AnimatePresence>
           {activeNode && activeNode.startsWith('causes') && (
@@ -378,13 +462,9 @@ export default function RootCauseAnalysis({ scoreboards, processes = [] }: Props
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </DiagramWrapper>
 
-      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm overflow-hidden relative">
-        <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2 border-b pb-2">
-          <Lightbulb className="h-5 w-5 text-emerald-500" />
-          DIAGRAM 2: Actionable CAPA Solutions Matrix
-        </h3>
+      <DiagramWrapper id="diagram-2" title="DIAGRAM 2: Actionable CAPA Solutions Matrix" icon={Lightbulb}>
         {renderFishbone('solutions')}
         <AnimatePresence>
           {activeNode && activeNode.startsWith('solutions') && (
@@ -393,13 +473,9 @@ export default function RootCauseAnalysis({ scoreboards, processes = [] }: Props
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </DiagramWrapper>
 
-      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm overflow-hidden relative">
-        <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2 border-b pb-2">
-          <Activity className="h-5 w-5 text-rose-500" />
-          DIAGRAM 3: Bottleneck Diagnostics
-        </h3>
+      <DiagramWrapper id="diagram-3" title="DIAGRAM 3: Bottleneck Diagnostics" icon={Activity}>
         {minCapacityProcess ? (
            <>
              {renderFishbone('bottleneck')}
@@ -416,7 +492,7 @@ export default function RootCauseAnalysis({ scoreboards, processes = [] }: Props
              Process detail data unavailable for bottleneck extraction.
            </div>
         )}
-      </div>
+      </DiagramWrapper>
     </div>
   );
 }

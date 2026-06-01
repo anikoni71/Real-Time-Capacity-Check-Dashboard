@@ -63,7 +63,8 @@ export default function Scoreboard({ scoreboards, activeCount }: { scoreboards: 
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
                     layout
-                    className="hover:bg-gray-50 transition-colors"
+                    whileHover={{ scale: 1.01 }}
+                    className="hover:z-10 relative bg-white hover:drop-shadow-sm transition-colors"
                   >
                     <td className="px-4 py-2 text-gray-500">{sb.date}</td>
                     <td className="px-4 py-2 font-medium">{sb.unit}</td>

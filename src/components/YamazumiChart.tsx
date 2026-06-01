@@ -60,11 +60,11 @@ export default function YamazumiChart({ processes }: { processes: ProcessRow[] }
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                 <XAxis 
                   dataKey="name" 
-                  angle={-90} 
+                  angle={-55} 
                   textAnchor="end" 
                   tick={{ fontSize: 11, fill: '#4B5563' }} 
                   interval={0}
-                  height={280}
+                  height={150}
                 />
               <YAxis 
                 tick={{ fontSize: 11 }}
@@ -74,7 +74,7 @@ export default function YamazumiChart({ processes }: { processes: ProcessRow[] }
                 cursor={{ fill: 'transparent' }}
                 contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
               />
-              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '12px' }} />
+              <Legend verticalAlign="top" height={150} wrapperStyle={{ fontSize: '12px' }} />
 
               <Bar isAnimationActive={false} dataKey="va" stackId="a" fill="#10B981" name="Value-Added (VA)" maxBarSize={50} />
               <Bar isAnimationActive={false} dataKey="nvan" stackId="a" fill="#F59E0B" name="Non-Value-Added Necessary (NVAN)" maxBarSize={50} />
@@ -87,7 +87,7 @@ export default function YamazumiChart({ processes }: { processes: ProcessRow[] }
                    fontWeight="bold" 
                    formatter={(v: number) => v > 0 ? String(Math.round(v)) : ''}
                    offset={10} 
-                   angle={0}
+                   angle={-55}
                  />
               </Bar>
             </BarChart>
