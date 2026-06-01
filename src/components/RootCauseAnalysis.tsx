@@ -2,7 +2,8 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ScoreboardRow, ProcessRow } from '../types';
 import { Share2, AlertTriangle, Lightbulb, Settings, Users, ArrowRightLeft, Activity, Info, Maximize, Printer, Download, Minimize } from 'lucide-react';
-import { toPng } from 'html-to-image';
+import { toJpeg } from 'html-to-image';
+import { jsPDF } from 'jspdf';
 
 const DiagramWrapper = ({ title, icon: Icon, children, id }: any) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -25,65 +26,104 @@ const DiagramWrapper = ({ title, icon: Icon, children, id }: any) => {
     return () => document.removeEventListener('fullscreenchange', handleFSChange);
   }, [id]);
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     const elem = document.getElementById(id);
     if (!elem) return;
     
-    const styleId = 'print-single-chart-style';
-    let style = document.getElementById(styleId);
-    if (!style) {
-       style = document.createElement('style');
-       style.id = styleId;
-       style.innerHTML = `
-        @media print {
-            body * { visibility: hidden !important; }
-            .print-target, .print-target * { visibility: visible !important; }
-            .print-target {
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                height: auto !important;
-                margin: 0 !important;
-                padding: 10px !important;
-                box-sizing: border-box !important;
-            }
-            .print-target .print\\:hidden { display: none !important; }
-            @page { size: A4 landscape; margin: 10mm; }
-        }
-       `;
-       document.head.appendChild(style);
-    }
+    // Hide buttons temporarily
+    const buttons = elem.querySelectorAll('button');
+    buttons.forEach(btn => btn.style.display = 'none');
+
+    await new Promise(resolve => setTimeout(resolve, 300)); // allow interactions and text rendering to subside
+
+    const dataUrl = await toJpeg(elem, {
+      quality: 0.95,
+      backgroundColor: '#ffffff',
+      pixelRatio: 1.5,
+      style: { fontFamily: 'sans-serif' }
+    });
     
-    elem.classList.add('print-target');
-    window.dispatchEvent(new Event('resize'));
-    
-    setTimeout(() => {
-      window.print();
-      
-      elem.classList.remove('print-target');
-      window.dispatchEvent(new Event('resize'));
-    }, 500);
+    // Restore buttons
+    buttons.forEach(btn => btn.style.display = '');
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <style>
+            @page { size: A4 landscape; margin: 0; }
+            body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: white; }
+            img { width: 100%; height: auto; max-height: 100%; object-fit: contain; }
+          </style>
+        </head>
+        <body>
+          <img src="${dataUrl}" />
+          <script>
+            setTimeout(() => { 
+              window.print(); 
+              window.close(); 
+            }, 500);
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   const handleDownload = async () => {
     const elem = document.getElementById(id);
     if (!elem) return;
     try {
-      await new Promise(resolve => setTimeout(resolve, 100)); // allow interactions to subside
-      const dataUrl = await toPng(elem, { 
-        backgroundColor: '#ffffff', 
+      // Hide buttons temporarily
+      const buttons = elem.querySelectorAll('button');
+      buttons.forEach(btn => btn.style.display = 'none');
+
+      await new Promise(resolve => setTimeout(resolve, 300)); // Force text rendering wait
+      
+      const dataUrl = await toJpeg(elem, {
+        quality: 0.95,
+        backgroundColor: '#ffffff',
         pixelRatio: 1.5,
-        filter: (node) => {
-          if (node.tagName === 'BUTTON') return false;
-          return true;
-        }
+        style: { fontFamily: 'sans-serif' }
       });
-      const link = document.createElement('a');
-      link.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`;
-      link.href = dataUrl;
-      link.click();
+      
+      // Restore buttons
+      buttons.forEach(btn => btn.style.display = '');
+      
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      const margin = 5;
+      const availableWidth = pdfWidth - margin * 2;
+      const availableHeight = pdfHeight - margin * 2;
+      
+      const imgProps = pdf.getImageProperties(dataUrl);
+      const imgRatio = imgProps.width / imgProps.height;
+      
+      let finalHeight = availableHeight;
+      let finalWidth = finalHeight * imgRatio;
+      
+      if (finalWidth <= availableWidth) {
+         const x = margin + (availableWidth - finalWidth) / 2;
+         const y = margin + (availableHeight - finalHeight) / 2;
+         pdf.addImage(dataUrl, 'JPEG', x, y, finalWidth, finalHeight);
+      } else {
+         finalWidth = availableWidth;
+         finalHeight = finalWidth / imgRatio;
+         const x = margin;
+         const y = margin + (availableHeight - finalHeight) / 2;
+         pdf.addImage(dataUrl, 'JPEG', x, y, finalWidth, finalHeight);
+      }
+      
+      pdf.save('root-cause-and-solutions-report.pdf');
     } catch (e) {
       console.error('Failed to download image', e);
     }
@@ -285,7 +325,7 @@ export default function RootCauseAnalysis({ scoreboards, processes = [] }: Props
     return (
       <div className="w-full overflow-x-auto pb-4">
         <div style={{ minWidth: '1000px' }}>
-          <svg viewBox="0 0 1100 650" className="w-full h-auto drop-shadow-sm font-sans" style={{ minHeight: '550px' }}>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 650" className="w-full h-auto drop-shadow-sm font-sans" style={{ minHeight: '550px' }}>
             {/* Spine */}
             <line x1="50" y1="325" x2="940" y2="325" stroke="#9ca3af" strokeWidth="4" />
             <polygon points="920,315 940,325 920,335" fill="#9ca3af" />

@@ -37,63 +37,73 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
     }, 50);
   };
 
-  const handlePrint = (e: React.MouseEvent) => {
+  const handlePrint = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!containerRef.current) return;
     
-    const styleId = 'print-single-chart-style';
-    let style = document.getElementById(styleId);
-    if (!style) {
-       style = document.createElement('style');
-       style.id = styleId;
-       style.innerHTML = `
-        @media print {
-            body * { visibility: hidden !important; }
-            .print-target, .print-target * { visibility: visible !important; }
-            .print-target {
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                height: auto !important;
-                margin: 0 !important;
-                padding: 10px !important;
-                box-sizing: border-box !important;
-            }
-            .print-target .print-header { display: block !important; visibility: visible !important; margin-bottom: 20px; }
-            .print-target .print\\:hidden { display: none !important; }
-            .print-target .scrollable-chart-area { overflow: visible !important; width: 100% !important; max-width: 100% !important; }
-            .print-target .scrollable-chart-inner { width: 100% !important; max-width: 100% !important; transform: none !important; }
-            @page { size: A4 landscape; margin: 10mm; }
-        }
-       `;
-       document.head.appendChild(style);
+    // Hide buttons temporarily
+    const buttons = containerRef.current.querySelectorAll('button');
+    buttons.forEach(btn => btn.style.display = 'none');
+
+    const header = containerRef.current.querySelector('.print-header') as HTMLElement;
+    if (header) {
+      header.classList.remove('hidden');
+      header.style.display = 'block';
+    }
+
+    const scrollInner = containerRef.current.querySelector('.scrollable-chart-inner') as HTMLElement;
+    let originalWidth = '';
+    if (scrollInner) {
+      originalWidth = scrollInner.style.width;
+      scrollInner.style.width = '100%';
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 300)); // allow interactions and text rendering to subside
+
+    const dataUrl = await toJpeg(containerRef.current, {
+      quality: 0.95,
+      backgroundColor: '#ffffff',
+      pixelRatio: 1.5,
+      style: { fontFamily: 'sans-serif' }
+    });
+
+    // Restore buttons
+    buttons.forEach(btn => btn.style.display = '');
+
+    if (scrollInner) {
+      scrollInner.style.width = originalWidth;
     }
     
-    if (containerRef.current) {
-      containerRef.current.classList.add('print-target');
-      
-      const header = containerRef.current.querySelector('.print-header') as HTMLElement;
-      if (header) header.classList.remove('hidden');
-      
-      window.dispatchEvent(new Event('resize'));
+    if (header) {
+      header.classList.add('hidden');
+      header.style.display = '';
     }
-    
-    isPrintingRef.current = true;
-    setTimeout(() => {
-      window.print();
-      
-      if (containerRef.current) {
-        containerRef.current.classList.remove('print-target');
-        const header = containerRef.current.querySelector('.print-header') as HTMLElement;
-        if (header) header.classList.add('hidden');
-      }
-      window.dispatchEvent(new Event('resize'));
-      
-      setTimeout(() => {
-        isPrintingRef.current = false;
-      }, 100);
-    }, 500);
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Print - ${title}</title>
+          <style>
+            @page { size: A4 landscape; margin: 0; }
+            body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: white; }
+            img { width: 100%; height: auto; max-height: 100%; object-fit: contain; }
+          </style>
+        </head>
+        <body>
+          <img src="${dataUrl}" />
+          <script>
+            setTimeout(() => {
+              window.print();
+              window.close();
+            }, 500);
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   const handleDownloadPDF = async (e: React.MouseEvent) => {
@@ -102,7 +112,9 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
     
     setIsDownloading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Hide buttons temporarily
+      const buttons = containerRef.current.querySelectorAll('button');
+      buttons.forEach(btn => btn.style.display = 'none');
       
       const header = containerRef.current.querySelector('.print-header') as HTMLElement;
       if (header) {
@@ -117,16 +129,18 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
         scrollInner.style.width = '100%';
       }
 
+      await new Promise(resolve => setTimeout(resolve, 300));
+
       const imgData = await toJpeg(containerRef.current, {
         quality: 0.95,
         backgroundColor: '#ffffff',
         pixelRatio: 1.5,
-        filter: (node) => {
-          if (node.tagName === 'BUTTON') return false;
-          return true;
-        }
+        style: { fontFamily: 'sans-serif' }
       });
       
+      // Restore buttons
+      buttons.forEach(btn => btn.style.display = '');
+
       if (scrollInner) {
         scrollInner.style.width = originalWidth;
       }
