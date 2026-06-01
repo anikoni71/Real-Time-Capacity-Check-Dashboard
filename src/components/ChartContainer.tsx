@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Maximize2, Printer, Minimize2, Download } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import { toJpeg } from 'html-to-image';
 
 // Dynamically import jsPDF to ensure it doesn't break SSR or initial load
 // and to avoid bundle size issues if possible. 
@@ -53,17 +53,18 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
                 position: absolute !important;
                 left: 0 !important;
                 top: 0 !important;
-                width: 100vw !important;
+                width: 100% !important;
+                max-width: 100% !important;
                 height: auto !important;
-                min-height: 100vh !important;
                 margin: 0 !important;
                 padding: 10px !important;
                 box-sizing: border-box !important;
             }
             .print-target .print-header { display: block !important; visibility: visible !important; margin-bottom: 20px; }
             .print-target .print\\:hidden { display: none !important; }
-            .print-target .scrollable-chart-area { overflow: visible !important; }
-            @page { size: A4 landscape; margin: 5mm; }
+            .print-target .scrollable-chart-area { overflow: visible !important; width: 100% !important; max-width: 100% !important; }
+            .print-target .scrollable-chart-inner { width: 100% !important; max-width: 100% !important; transform: none !important; }
+            @page { size: A4 landscape; margin: 10mm; }
         }
        `;
        document.head.appendChild(style);
@@ -103,23 +104,38 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
     try {
       await new Promise(resolve => setTimeout(resolve, 100));
       
-      const canvas = await html2canvas(containerRef.current, {
-        scale: 1.5, // Reduced from 2 to avoid freezing on massive wide charts
+      const header = containerRef.current.querySelector('.print-header') as HTMLElement;
+      if (header) {
+        header.classList.remove('hidden');
+        header.style.display = 'block';
+      }
+
+      const scrollInner = containerRef.current.querySelector('.scrollable-chart-inner') as HTMLElement;
+      let originalWidth = '';
+      if (scrollInner) {
+        originalWidth = scrollInner.style.width;
+        scrollInner.style.width = '100%';
+      }
+
+      const imgData = await toJpeg(containerRef.current, {
+        quality: 0.95,
         backgroundColor: '#ffffff',
-        logging: false,
-        onclone: (doc, clonedElement) => {
-          const buttons = clonedElement.querySelectorAll('button');
-          buttons.forEach(btn => btn.style.display = 'none');
-          
-          const header = clonedElement.querySelector('.print-header') as HTMLElement;
-          if (header) {
-            header.style.display = 'block';
-            header.classList.remove('hidden');
-          }
+        pixelRatio: 1.5,
+        filter: (node) => {
+          if (node.tagName === 'BUTTON') return false;
+          return true;
         }
       });
       
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      if (scrollInner) {
+        scrollInner.style.width = originalWidth;
+      }
+      
+      if (header) {
+        header.classList.add('hidden');
+        header.style.display = '';
+      }
+      
       const pdf = new jsPDF({
         orientation: 'landscape',
         unit: 'mm',

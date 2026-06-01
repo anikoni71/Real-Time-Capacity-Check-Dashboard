@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ScoreboardRow, ProcessRow } from '../types';
 import { Share2, AlertTriangle, Lightbulb, Settings, Users, ArrowRightLeft, Activity, Info, Maximize, Printer, Download, Minimize } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 
 const DiagramWrapper = ({ title, icon: Icon, children, id }: any) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -42,15 +42,15 @@ const DiagramWrapper = ({ title, icon: Icon, children, id }: any) => {
                 position: absolute !important;
                 left: 0 !important;
                 top: 0 !important;
-                width: 100vw !important;
+                width: 100% !important;
+                max-width: 100% !important;
                 height: auto !important;
-                min-height: 100vh !important;
                 margin: 0 !important;
                 padding: 10px !important;
                 box-sizing: border-box !important;
             }
             .print-target .print\\:hidden { display: none !important; }
-            @page { size: A4 landscape; margin: 5mm; }
+            @page { size: A4 landscape; margin: 10mm; }
         }
        `;
        document.head.appendChild(style);
@@ -72,14 +72,17 @@ const DiagramWrapper = ({ title, icon: Icon, children, id }: any) => {
     if (!elem) return;
     try {
       await new Promise(resolve => setTimeout(resolve, 100)); // allow interactions to subside
-      const canvas = await html2canvas(elem, { 
+      const dataUrl = await toPng(elem, { 
         backgroundColor: '#ffffff', 
-        scale: 1.5,
-        logging: false
+        pixelRatio: 1.5,
+        filter: (node) => {
+          if (node.tagName === 'BUTTON') return false;
+          return true;
+        }
       });
       const link = document.createElement('a');
       link.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`;
-      link.href = canvas.toDataURL('image/png', 1.0);
+      link.href = dataUrl;
       link.click();
     } catch (e) {
       console.error('Failed to download image', e);
