@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ProcessRow } from '../types';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList, Cell, ReferenceLine } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList, Cell, ReferenceLine, ReferenceArea } from 'recharts';
 import { BarChart2 } from 'lucide-react';
 import ChartContainer from './ChartContainer';
 
@@ -118,6 +118,13 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
                   color: OPERATOR_COLORS[i % OPERATOR_COLORS.length]
                 }))}
               />
+              
+              {target1 > 0 && chartData.map((entry, idx) => {
+                if (entry.Capacity <= target1 * 0.9) {
+                  return <ReferenceArea key={`bg-cap2-${idx}`} x1={entry.name} x2={entry.name} fill="#fee2e2" fillOpacity={0.5} />;
+                }
+                return null;
+              })}
               
               {target1 > 0 && (
                 <ReferenceLine 

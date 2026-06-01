@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ProcessRow } from '../types';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList, Cell, ReferenceLine } from 'recharts';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList, Cell, ReferenceLine, ReferenceArea } from 'recharts';
 import { Activity, Cpu, TrendingUp } from 'lucide-react';
 import ChartContainer from './ChartContainer';
 
@@ -93,6 +93,14 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
                  <Tooltip isAnimationActive={false} />
                  <Legend verticalAlign="top" height={150} />
                  
+                 {target1 > 0 && capacityData.map((entry, idx) => {
+                    const totalCap = capKeys.reduce((sum, key) => sum + (entry[key] || 0), 0);
+                    if (totalCap > 0 && totalCap <= target1 * 0.9) {
+                       return <ReferenceArea key={`bg-cap-${idx}`} x1={entry.name} x2={entry.name} fill="#fee2e2" fillOpacity={0.5} />;
+                    }
+                    return null;
+                 })}
+
                  {target1 > 0 && (
                    <ReferenceLine y={target1} stroke="#ef4444" strokeDasharray="3 3" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'top', value: `LC Target: ${target1}`, fill: '#ef4444', fontSize: 11, fontWeight: 'bold' }} />
                  )}
@@ -122,6 +130,13 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
                  <Tooltip isAnimationActive={false} />
                  <Legend verticalAlign="top" height={150} />
                  
+                 {target1 > 0 && compareData.map((entry, idx) => {
+                    if (entry.Capacity <= target1 * 0.9) {
+                       return <ReferenceArea key={`bg-comp-${idx}`} x1={entry.name} x2={entry.name} fill="#fee2e2" fillOpacity={0.5} />;
+                    }
+                    return null;
+                 })}
+
                  {target1 > 0 && (
                    <ReferenceLine y={target1} stroke="#ef4444" strokeDasharray="3 3" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'top', value: `LC Target: ${target1}`, fill: '#ef4444', fontSize: 11, fontWeight: 'bold' }} />
                  )}
@@ -151,6 +166,21 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
                  <YAxis domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} tick={{ fontSize: 11 }} />
                  <Tooltip isAnimationActive={false} />
                  <Legend verticalAlign="top" height={150} />
+                 
+                 {target1 > 0 && targetData.map((entry, idx) => {
+                    if (entry.Capacity <= target1 * 0.9) {
+                       return <ReferenceArea key={`bg-tgt-${idx}`} x1={entry.name} x2={entry.name} fill="#fee2e2" fillOpacity={0.5} />;
+                    }
+                    return null;
+                 })}
+                 
+                 {target1 > 0 && (
+                   <ReferenceLine y={target1} stroke="#ef4444" strokeDasharray="3 3" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'top', value: `LC Target: ${target1}`, fill: '#ef4444', fontSize: 11, fontWeight: 'bold' }} />
+                 )}
+                 {target2 > 0 && (
+                   <ReferenceLine y={target2} stroke="#047857" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'top', value: `100% Target: ${target2}`, fill: '#047857', fontSize: 11, fontWeight: 'bold' }} />
+                 )}
+
                  <Line isAnimationActive={false} type="monotone" dataKey="Target" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }}>
                    <LabelList dataKey="Target" position="top" fill="#f59e0b" fontSize={11} fontWeight="bold" angle={-55} offset={10} />
                  </Line>

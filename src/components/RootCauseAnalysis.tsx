@@ -188,7 +188,7 @@ export default function RootCauseAnalysis({ scoreboards, processes = [] }: Props
       { id: 's-mp3', label: 'Pacing feedback', desc: 'Increase digital target visibility.' }
     ],
     method: [
-      { id: 's-mt1', label: 'Yamazumi Re-balance', desc: `Re-balance targets to meet ${worstRow.lineTarget100} Pcs` },
+      { id: 's-mt1', label: 'Yamazumi Re-balance', desc: `Yamazumi Re-balance to meet ${worstRow.lineTarget100} Pcs` },
       { id: 's-mt2', label: 'Element Shift', desc: `Shift critical elements for Style ${worstRow.style}` },
       { id: 's-mt3', label: 'Flow layout update', desc: 'Move material staging closer to operator.' }
     ],
@@ -437,11 +437,13 @@ export default function RootCauseAnalysis({ scoreboards, processes = [] }: Props
         </div>
 
         <div className={`p-3 rounded-md flex flex-col ${flags.material ? 'bg-red-50 border border-red-200' : 'bg-gray-50'}`}>
-          <span className="text-xs font-semibold text-gray-500 uppercase">IE Tack Time</span>
-          <span className={`text-2xl font-bold ${flags.material ? 'text-red-600' : 'text-gray-800'} text-base tracking-tight`}>
-            Plan: {(averages.tackSum/scoreboards.length).toFixed(1)}s <br/> Actual: {(averages.presentTackSum/scoreboards.length).toFixed(1)}s
+          <span className="text-xs font-semibold text-gray-500 uppercase">IE Takt Time Tracker</span>
+          <span className={`text-sm font-bold mt-1 leading-tight ${flags.material ? 'text-red-600' : 'text-gray-800'}`}>
+            PLAN TAKT TIME: {(averages.tackSum/scoreboards.length).toFixed(1)}s<br/>
+            vs<br/>
+            ACTUAL TAKT TIME: {(averages.presentTackSum/scoreboards.length).toFixed(1)}s
           </span>
-          {flags.material && <span className="text-xs text-red-500 mt-1">Actual exceeds plan.</span>}
+          {flags.material && <span className="text-xs text-red-500 mt-2 font-medium">Actual exceeds plan.</span>}
         </div>
         
         <div className="p-3 rounded-md flex flex-col justify-center bg-blue-50 border border-blue-200 text-blue-800">
