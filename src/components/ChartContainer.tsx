@@ -40,7 +40,6 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
   const handlePrint = (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // Create a temporary stylesheet for printing
     const styleId = 'print-single-chart-style';
     let style = document.getElementById(styleId);
     if (!style) {
@@ -48,29 +47,34 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
        style.id = styleId;
        style.innerHTML = `
         @media print {
-            body * {
-                visibility: hidden;
-            }
-            .printing-active, .printing-active * {
-                visibility: visible;
-            }
-            .printing-active {
+            body * { visibility: hidden !important; }
+            .print-target, .print-target * { visibility: visible !important; }
+            .print-target {
                 position: absolute !important;
                 left: 0 !important;
                 top: 0 !important;
                 width: 100vw !important;
                 height: auto !important;
+                min-height: 100vh !important;
                 margin: 0 !important;
-                padding: 20px !important;
+                padding: 10px !important;
                 box-sizing: border-box !important;
             }
+            .print-target .print-header { display: block !important; visibility: visible !important; margin-bottom: 20px; }
+            .print-target .print\\:hidden { display: none !important; }
+            .print-target .scrollable-chart-area { overflow: visible !important; }
+            @page { size: A4 landscape; margin: 5mm; }
         }
        `;
        document.head.appendChild(style);
     }
     
     if (containerRef.current) {
-      containerRef.current.classList.add('printing-active');
+      containerRef.current.classList.add('print-target');
+      
+      const header = containerRef.current.querySelector('.print-header') as HTMLElement;
+      if (header) header.classList.remove('hidden');
+      
       window.dispatchEvent(new Event('resize'));
     }
     
@@ -79,14 +83,16 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
       window.print();
       
       if (containerRef.current) {
-        containerRef.current.classList.remove('printing-active');
+        containerRef.current.classList.remove('print-target');
+        const header = containerRef.current.querySelector('.print-header') as HTMLElement;
+        if (header) header.classList.add('hidden');
       }
       window.dispatchEvent(new Event('resize'));
       
       setTimeout(() => {
         isPrintingRef.current = false;
       }, 100);
-    }, 800);
+    }, 500);
   };
 
   const handleDownloadPDF = async (e: React.MouseEvent) => {
@@ -95,50 +101,25 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
     
     setIsDownloading(true);
     try {
-      // Small delay to ensure any hovering or interactions are cleared
       await new Promise(resolve => setTimeout(resolve, 100));
       
-      const scrollInner = containerRef.current.querySelector('.scrollable-chart-inner') as HTMLElement;
-      let targetWidth = containerRef.current.offsetWidth;
-      let targetHeight = containerRef.current.offsetHeight;
-      
-      // If the chart internally scrolls, capture its full canvas width
-      if (scrollInner) {
-         const innerW = parseInt(scrollInner.style.width || '0', 10) || scrollInner.scrollWidth;
-         targetWidth = Math.max(targetWidth, innerW + 48); // 48px to account for padding
-      }
-      
       const canvas = await html2canvas(containerRef.current, {
-        scale: 2,
+        scale: 1.5, // Reduced from 2 to avoid freezing on massive wide charts
         backgroundColor: '#ffffff',
-        width: targetWidth,
-        height: targetHeight,
-        windowWidth: targetWidth,
         logging: false,
         onclone: (doc, clonedElement) => {
-          // Remove the utility buttons from the cloned canvas
           const buttons = clonedElement.querySelectorAll('button');
           buttons.forEach(btn => btn.style.display = 'none');
           
-          // Show the report header in the PDF
           const header = clonedElement.querySelector('.print-header') as HTMLElement;
           if (header) {
             header.style.display = 'block';
             header.classList.remove('hidden');
           }
-          
-          const scrollableArea = clonedElement.querySelector('.scrollable-chart-area') as HTMLElement;
-          const innerChart = clonedElement.querySelector('.scrollable-chart-inner') as HTMLElement;
-          
-          if (scrollableArea && innerChart) {
-             scrollableArea.style.overflow = 'visible';
-             clonedElement.style.width = `${targetWidth}px`;
-             scrollableArea.style.width = `${targetWidth}px`;
-          }
         }
       });
       
-      const imgData = canvas.toDataURL('image/png', 1.0);
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
       const pdf = new jsPDF({
         orientation: 'landscape',
         unit: 'mm',
@@ -148,7 +129,7 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       
-      const margin = 10;
+      const margin = 5;
       const availableWidth = pdfWidth - margin * 2;
       const availableHeight = pdfHeight - margin * 2;
       
@@ -158,19 +139,16 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
       let finalHeight = availableHeight;
       let finalWidth = finalHeight * imgRatio;
       
-      // If the width happens to be smaller than the page width, we just center it
       if (finalWidth <= availableWidth) {
          const x = margin + (availableWidth - finalWidth) / 2;
          const y = margin + (availableHeight - finalHeight) / 2;
-         pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight);
+         pdf.addImage(imgData, 'JPEG', x, y, finalWidth, finalHeight);
       } else {
-         // Auto-scale to fit width instead of multiple pages to make a coherent PDF
          finalWidth = availableWidth;
          finalHeight = finalWidth / imgRatio;
-         
          const x = margin;
          const y = margin + (availableHeight - finalHeight) / 2;
-         pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight);
+         pdf.addImage(imgData, 'JPEG', x, y, finalWidth, finalHeight);
       }
       
       const safeTitle = title.replace(/[^a-zA-Z0-9]/g, '_');

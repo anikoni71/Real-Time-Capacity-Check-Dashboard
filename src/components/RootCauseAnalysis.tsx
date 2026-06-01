@@ -28,29 +28,58 @@ const DiagramWrapper = ({ title, icon: Icon, children, id }: any) => {
   const handlePrint = () => {
     const elem = document.getElementById(id);
     if (!elem) return;
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(`
-        <html><head><title>Print Diagram: ${title}</title>
-        <style>body { font-family: sans-serif; padding: 20px; } svg { max-width: 100%; height: auto; }</style>
-        </head><body>
-          <h2>${title}</h2>
-          ${elem.innerHTML}
-          <script>setTimeout(() => { window.print(); window.close(); }, 500);</script>
-        </body></html>
-      `);
-      printWindow.document.close();
+    
+    const styleId = 'print-single-chart-style';
+    let style = document.getElementById(styleId);
+    if (!style) {
+       style = document.createElement('style');
+       style.id = styleId;
+       style.innerHTML = `
+        @media print {
+            body * { visibility: hidden !important; }
+            .print-target, .print-target * { visibility: visible !important; }
+            .print-target {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100vw !important;
+                height: auto !important;
+                min-height: 100vh !important;
+                margin: 0 !important;
+                padding: 10px !important;
+                box-sizing: border-box !important;
+            }
+            .print-target .print\\:hidden { display: none !important; }
+            @page { size: A4 landscape; margin: 5mm; }
+        }
+       `;
+       document.head.appendChild(style);
     }
+    
+    elem.classList.add('print-target');
+    window.dispatchEvent(new Event('resize'));
+    
+    setTimeout(() => {
+      window.print();
+      
+      elem.classList.remove('print-target');
+      window.dispatchEvent(new Event('resize'));
+    }, 500);
   };
 
   const handleDownload = async () => {
     const elem = document.getElementById(id);
     if (!elem) return;
     try {
-      const canvas = await html2canvas(elem, { backgroundColor: '#ffffff', scale: 2 });
+      await new Promise(resolve => setTimeout(resolve, 100)); // allow interactions to subside
+      const canvas = await html2canvas(elem, { 
+        backgroundColor: '#ffffff', 
+        scale: 1.5,
+        logging: false
+      });
       const link = document.createElement('a');
       link.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`;
-      link.href = canvas.toDataURL('image/png');
+      link.href = canvas.toDataURL('image/png', 1.0);
       link.click();
     } catch (e) {
       console.error('Failed to download image', e);
