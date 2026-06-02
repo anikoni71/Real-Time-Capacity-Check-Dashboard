@@ -24,6 +24,7 @@ export interface ProcessRow {
   va: number;
   nvan: number;
   nva: number;
+  operatorEfficiency: number;
   raw: any;
 }
 

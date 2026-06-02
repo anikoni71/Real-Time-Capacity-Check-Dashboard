@@ -123,7 +123,7 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
                 if (entry.Capacity <= target1 * 0.9) {
                   return (
                     <React.Fragment key={`bg-cap2-${idx}`}>
-                      <ReferenceArea x1={entry.name} x2={entry.name} fill="#fee2e2" fillOpacity={0.5} />
+                      <ReferenceArea {...{x1: entry.name, x2: entry.name, fill: "#fee2e2", fillOpacity: 0.5} as any} />
                     </React.Fragment>
                   );
                 }

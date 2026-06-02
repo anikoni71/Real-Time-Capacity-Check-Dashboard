@@ -85,6 +85,7 @@ export async function fetchDashboardData(): Promise<DashboardData> {
               va: parseFloat(getVal('Value-Added (VA)')) || 0,
               nvan: parseFloat(getVal('Non-Value-Added but Necessary (NVAN)')) || 0,
               nva: parseFloat(getVal('Non-Value-Added (NVA) / Waste')) || 0,
+              operatorEfficiency: parseFloat((getVal('Operator efficiency (%)') || '0').replace('%', '')) || 0,
               raw: row
             });
           }

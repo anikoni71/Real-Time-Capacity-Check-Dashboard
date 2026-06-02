@@ -98,7 +98,7 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
                     if (totalCap > 0 && totalCap <= target1 * 0.9) {
                        return (
                          <React.Fragment key={`bg-cap-${idx}`}>
-                           <ReferenceArea x1={entry.name} x2={entry.name} fill="#fee2e2" fillOpacity={0.5} />
+                           <ReferenceArea {...{x1: entry.name, x2: entry.name, fill: "#fee2e2", fillOpacity: 0.5} as any} />
                          </React.Fragment>
                        );
                     }
@@ -138,7 +138,7 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
                     if (entry.Capacity <= target1 * 0.9) {
                        return (
                          <React.Fragment key={`bg-comp-${idx}`}>
-                           <ReferenceArea x1={entry.name} x2={entry.name} fill="#fee2e2" fillOpacity={0.5} />
+                           <ReferenceArea {...{x1: entry.name, x2: entry.name, fill: "#fee2e2", fillOpacity: 0.5} as any} />
                          </React.Fragment>
                        );
                     }
@@ -179,7 +179,7 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
                     if (entry.Capacity <= target1 * 0.9) {
                        return (
                          <React.Fragment key={`bg-tgt-${idx}`}>
-                           <ReferenceArea x1={entry.name} x2={entry.name} fill="#fee2e2" fillOpacity={0.5} />
+                           <ReferenceArea {...{x1: entry.name, x2: entry.name, fill: "#fee2e2", fillOpacity: 0.5} as any} />
                          </React.Fragment>
                        );
                     }
