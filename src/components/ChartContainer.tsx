@@ -1,11 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Maximize2, Printer, Minimize2, Download, FileImage, FileSpreadsheet } from 'lucide-react';
-import { toJpeg } from 'html-to-image';
-
-// Dynamically import jsPDF to ensure it doesn't break SSR or initial load
-// and to avoid bundle size issues if possible. 
-// But since we installed it, we can just import it.
+import { Maximize2, Printer, Minimize2, Download, FileImage, FileSpreadsheet, FileText } from 'lucide-react';
+import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+import { toJpeg } from 'html-to-image';
 
 interface ChartContainerProps {
   title: string;
@@ -73,12 +70,13 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
 
     await new Promise(resolve => setTimeout(resolve, 300)); // allow interactions and text rendering to subside
 
-    const dataUrl = await toJpeg(containerRef.current, {
-      quality: 0.95,
-      pixelRatio: 1.5,
+    const canvas = await html2canvas(containerRef.current, {
+      scale: 2,
+      useCORS: true,
       backgroundColor: '#ffffff',
-      filter: (node) => !node.classList?.contains('action-buttons')
+      ignoreElements: (element) => element.classList?.contains('action-buttons')
     });
+    const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
 
     // Restore buttons
     buttons.forEach(btn => (btn as HTMLElement).style.display = '');
@@ -106,17 +104,89 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
           </style>
         </head>
         <body>
-          <img src="${dataUrl}" />
-          <script>
-            setTimeout(() => {
-              window.print();
-              window.close();
-            }, 500);
-          </script>
+          <img src="${dataUrl}" onload="setTimeout(() => { window.print(); window.close(); }, 200);" />
         </body>
       </html>
     `);
     printWindow.document.close();
+  };
+
+  const downloadPDF = async () => {
+    if (!containerRef.current || isDownloading) return;
+    setIsDownloading(true);
+    try {
+      const buttons = containerRef.current.querySelectorAll('.action-buttons');
+      buttons.forEach(btn => (btn as HTMLElement).style.display = 'none');
+      
+      const header = containerRef.current.querySelector('.print-header') as HTMLElement;
+      if (header) {
+        header.classList.remove('hidden');
+        header.style.display = 'block';
+      }
+
+      const scrollInner = containerRef.current.querySelector('.scrollable-chart-inner') as HTMLElement;
+      let originalWidth = '';
+      if (scrollInner) {
+        originalWidth = scrollInner.style.width;
+        scrollInner.style.width = '100%';
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      const canvas = await html2canvas(containerRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        ignoreElements: (element) => element.classList?.contains('action-buttons')
+      });
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+      
+      buttons.forEach(btn => (btn as HTMLElement).style.display = '');
+      if (scrollInner) {
+        scrollInner.style.width = originalWidth;
+      }
+      if (header) {
+        header.classList.add('hidden');
+        header.style.display = '';
+      }
+      
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      // Calculate aspect ratio
+      const imgProps = pdf.getImageProperties(imgData);
+      const imgRatio = imgProps.width / imgProps.height;
+      
+      const margin = 10;
+      const availableWidth = pdfWidth - margin * 2;
+      const availableHeight = pdfHeight - margin * 2;
+      
+      let finalHeight = availableHeight;
+      let finalWidth = finalHeight * imgRatio;
+      
+      if (finalWidth > availableWidth) {
+         finalWidth = availableWidth;
+         finalHeight = finalWidth / imgRatio;
+      }
+      
+      const x = margin + (availableWidth - finalWidth) / 2;
+      const y = margin + (availableHeight - finalHeight) / 2;
+      
+      pdf.addImage(imgData, 'JPEG', x, y, finalWidth, finalHeight);
+      
+      const safeTitle = title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+      pdf.save(`${safeTitle}.pdf`);
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const downloadImage = async () => {
@@ -203,34 +273,14 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
           {title}
         </h2>
         <div className="flex items-center gap-2 action-buttons relative">
-          <div className="relative">
-            <button 
-              onClick={(e) => { e.stopPropagation(); setShowDropdown(!showDropdown); }}
-              className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors print:hidden"
-              title="Download Data or Image"
-              disabled={isDownloading}
-            >
-              <Download className={`h-5 w-5 ${isDownloading ? 'opacity-50 animate-pulse' : ''}`} />
-            </button>
-            {showDropdown && (
-              <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-100 rounded-lg shadow-xl z-50 py-1" onClick={e => e.stopPropagation()}>
-                <button
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 flex items-center gap-2"
-                  onClick={() => { setShowDropdown(false); downloadImage(); }}
-                >
-                  <FileImage className="h-4 w-4" /> Download as Image
-                </button>
-                {data && data.length > 0 && (
-                  <button
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 flex items-center gap-2"
-                    onClick={() => { setShowDropdown(false); downloadCSV(); }}
-                  >
-                    <FileSpreadsheet className="h-4 w-4" /> Download Data (CSV)
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+          <button 
+            onClick={(e) => { e.stopPropagation(); downloadPDF(); }}
+            className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors print:hidden"
+            title="Download as PDF"
+            disabled={isDownloading}
+          >
+            <Download className={`h-5 w-5 ${isDownloading ? 'opacity-50 animate-pulse' : ''}`} />
+          </button>
           <button 
             onClick={handlePrint}
             className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors print:hidden"

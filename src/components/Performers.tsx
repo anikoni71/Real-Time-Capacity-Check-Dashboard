@@ -1,11 +1,14 @@
 import React, { useMemo } from 'react';
 import { ProcessRow } from '../types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList, ReferenceLine } from 'recharts';
-import { Sparkles, AlertCircle, ArrowUp, ArrowDown, Percent } from 'lucide-react';
+import { Sparkles, AlertCircle, ArrowUp, ArrowDown, Percent, Users, Activity, Target } from 'lucide-react';
 import ChartContainer from './ChartContainer';
 
 export default function Performers({ processes }: { processes: ProcessRow[] }) {
-  const { topProc, lowProc, topOp, lowOp, topEff, lowEff, target1, target2 } = useMemo(() => {
+  const { 
+    topProc, lowProc, topOp, lowOp, topEff, lowEff, target1, target2,
+    totalActiveOperators, overallAverageEfficiency, linesBelowTarget
+  } = useMemo(() => {
     // Aggregate by process for Capacity
     const procMap = new Map<string, { sum: number, count: number }>();
     const opMap = new Map<string, { sum: number, count: number }>();
@@ -53,10 +56,23 @@ export default function Performers({ processes }: { processes: ProcessRow[] }) {
     const topEff = sortedEff.slice(0, 5);
     const lowEff = sortedEff.slice().reverse().slice(0, 5);
     
-    const target1 = processes.length > 0 ? processes[0].todayPlanLcTarget : 0;
-    const target2 = processes.length > 0 ? processes[0].lineTarget100 : 0;
+    const t1 = processes.length > 0 ? processes[0].todayPlanLcTarget : 0;
+    const t2 = processes.length > 0 ? processes[0].lineTarget100 : 0;
 
-    return { topProc, lowProc, topOp, lowOp, topEff, lowEff, target1, target2 };
+    const activeOps = new Set(processes.map(p => p.operatorName).filter(Boolean)).size;
+    const validEffs = processes.filter(p => p.operatorEfficiency != null && p.operatorEfficiency > 0);
+    const avgEff = validEffs.length > 0 ? validEffs.reduce((sum, p) => sum + p.operatorEfficiency, 0) / validEffs.length : 0;
+    
+    // Number of lines that have at least one process below LC target
+    const linesFailing = new Set(processes.filter(p => p.capacity < (p.todayPlanLcTarget || t1)).map(p => p.line).filter(Boolean)).size;
+
+    return { 
+      topProc, lowProc, topOp, lowOp, topEff, lowEff, 
+      target1: t1, target2: t2,
+      totalActiveOperators: activeOps,
+      overallAverageEfficiency: avgEff,
+      linesBelowTarget: linesFailing
+    };
   }, [processes]);
 
   if (processes.length === 0) return <div className="p-8 text-center text-gray-500">No data found matching current filters.</div>;
@@ -128,6 +144,36 @@ export default function Performers({ processes }: { processes: ProcessRow[] }) {
 
   return (
     <div className="flex flex-col gap-6 w-full">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-medium text-gray-500 mb-1">Total Active Operators</h3>
+            <p className="text-2xl font-bold text-gray-900">{totalActiveOperators}</p>
+          </div>
+          <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center">
+            <Users className="h-6 w-6 text-blue-500" />
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-medium text-gray-500 mb-1">Overall Avg Efficiency</h3>
+            <p className="text-2xl font-bold text-gray-900">{overallAverageEfficiency.toFixed(1)}%</p>
+          </div>
+          <div className="h-12 w-12 rounded-full bg-purple-50 flex items-center justify-center">
+            <Activity className="h-6 w-6 text-purple-500" />
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-medium text-gray-500 mb-1">Lines Below Target</h3>
+            <p className="text-2xl font-bold text-gray-900">{linesBelowTarget}</p>
+          </div>
+          <div className="h-12 w-12 rounded-full bg-rose-50 flex items-center justify-center">
+            <Target className="h-6 w-6 text-rose-500" />
+          </div>
+        </div>
+      </div>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
         <div className="h-[400px]">
           {renderHorizontalChart(topProc, 'Top Performing Processes', '#10b981', <><ArrowUp className="h-4 w-4 text-emerald-500" /><Sparkles className="h-4 w-4 text-emerald-500" /></>)}
