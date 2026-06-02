@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Maximize2, Printer, Minimize2, Download, FileImage, FileSpreadsheet, FileText } from 'lucide-react';
+import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
-import { toJpeg } from 'html-to-image';
 import { useFullscreen } from '../hooks/useFullscreen';
 
 interface ChartContainerProps {
@@ -51,12 +51,14 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
 
     await new Promise(resolve => setTimeout(resolve, 250)); // allow interactions and text rendering to subside
 
-    const dataUrl = await toJpeg(containerRef.current, {
-      quality: 1.0,
-      pixelRatio: 2,
+    const canvas = await html2canvas(containerRef.current, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
       backgroundColor: '#ffffff',
-      filter: (node) => !(node instanceof HTMLElement && node.classList.contains('action-buttons'))
+      ignoreElements: (element) => element.classList?.contains('action-buttons')
     });
+    const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
 
     // Restore buttons
     buttons.forEach(btn => (btn as HTMLElement).style.display = '');
@@ -112,12 +114,14 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
 
       await new Promise(resolve => setTimeout(resolve, 250)); // allow interactions and text rendering to subside
 
-      const imgData = await toJpeg(containerRef.current, {
-        quality: 1.0,
-        pixelRatio: 2,
+      const canvas = await html2canvas(containerRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
         backgroundColor: '#ffffff',
-        filter: (node) => !(node instanceof HTMLElement && node.classList.contains('action-buttons'))
+        ignoreElements: (element) => element.classList?.contains('action-buttons')
       });
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
       
       buttons.forEach(btn => (btn as HTMLElement).style.display = '');
       if (scrollInner) {
@@ -183,12 +187,14 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
 
       await new Promise(resolve => setTimeout(resolve, 300));
 
-      const imgData = await toJpeg(containerRef.current, {
-        quality: 0.95,
-        pixelRatio: 1.5,
+      const canvas = await html2canvas(containerRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
         backgroundColor: '#ffffff',
-        filter: (node) => !(node instanceof HTMLElement && node.classList.contains('action-buttons'))
+        ignoreElements: (element) => element.classList?.contains('action-buttons')
       });
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
       
       buttons.forEach(btn => (btn as HTMLElement).style.display = '');
       if (scrollInner) {

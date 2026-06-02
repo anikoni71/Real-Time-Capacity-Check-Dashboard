@@ -2,8 +2,8 @@ import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ScoreboardRow, ProcessRow } from '../types';
 import { Share2, AlertTriangle, Lightbulb, Settings, Users, ArrowRightLeft, Activity, Info, Maximize, Printer, Download, Minimize } from 'lucide-react';
+import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
-import { toJpeg } from 'html-to-image';
 import { useFullscreen } from '../hooks/useFullscreen';
 
 const DiagramWrapper = ({ title, icon: Icon, children }: any) => {
@@ -19,12 +19,14 @@ const DiagramWrapper = ({ title, icon: Icon, children }: any) => {
 
     await new Promise(resolve => setTimeout(resolve, 250)); // Explicit delay for rendering
 
-    const dataUrl = await toJpeg(elem, {
-      quality: 1.0,
-      pixelRatio: 2,
+    const canvas = await html2canvas(elem, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
       backgroundColor: '#ffffff',
-      filter: (node) => !(node instanceof HTMLElement && node.classList.contains('action-buttons'))
+      ignoreElements: (element) => element.classList?.contains('action-buttons')
     });
+    const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
     
     // Restore buttons
     buttons.forEach(btn => (btn as HTMLElement).style.display = '');
@@ -58,12 +60,14 @@ const DiagramWrapper = ({ title, icon: Icon, children }: any) => {
 
       await new Promise(resolve => setTimeout(resolve, 250)); // Force text rendering wait
       
-      const dataUrl = await toJpeg(elem, {
-        quality: 1.0,
-        pixelRatio: 2,
+      const canvas = await html2canvas(elem, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
         backgroundColor: '#ffffff',
-        filter: (node) => !(node instanceof HTMLElement && node.classList.contains('action-buttons'))
+        ignoreElements: (element) => element.classList?.contains('action-buttons')
       });
+      const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
       
       buttons.forEach(btn => (btn as HTMLElement).style.display = '');
       

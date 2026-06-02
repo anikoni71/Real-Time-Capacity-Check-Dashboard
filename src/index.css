@@ -37,81 +37,52 @@
 }
 
 @media print {
+  /* 1. Define A4 Portrait Page Size */
   @page {
-    size: A4 landscape;
-    margin: 10mm;
+    size: A4 portrait;
+    margin: 12mm;
   }
 
-  html, body {
+  /* 2. Reset Body & Global Layouts */
+  body, html, #root, .dashboard-container {
     width: 100% !important;
-    height: 100% !important;
+    max-width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
+    display: block !important;
     background: white !important;
+  }
+
+  /* 3. Force 2-Column Grids to Stack into 1-Column */
+  .grid-container, 
+  .charts-grid,
+  div[style*="grid-template-columns"] { 
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
+  }
+
+  /* 4. Force Every Chart Card to Scale Safely */
+  .chart-card, .card, .js-chart-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* 5. Force internal SVGs/Canvas elements to obey the parent width */
+  .chart-card svg, 
+  .chart-card canvas,
+  .apexcharts-canvas {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* 6. Keep Colors and Bar Fills Visible */
+  * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-  }
-
-  /* Hide UI elements that shouldn't be printed */
-  .header-controls, 
-  .print\:hidden,
-  .text-xs.bg-gray-50, /* "Scroll horizontally" messages */
-  ::-webkit-scrollbar {
-    display: none !important;
-  }
-  
-  /* Container Shrinking for the generic dashboard print */
-  body:not(.print-single-chart) #root {
-    /* Scale down the entire dashboard so multi-column layouts fit on one wide page */
-    transform: scale(0.65);
-    transform-origin: top left;
-    width: 153.8% !important; /* Forces layout to be wide enough to fill 100% after scaling down by 0.65 */
-    height: auto !important;
-  }
-  
-  /* Universal Recharts Print Scaling */
-  /* This prevents the SVG from clipping on the right and forces full 100% rendering */
-  .recharts-responsive-container,
-  .recharts-responsive-container > svg,
-  .recharts-wrapper,
-  .recharts-surface {
-    overflow: visible !important;
-    width: 100% !important;
-  }
-
-  /* Shrink chart containers to fit page */
-  body.print-single-chart .printable-area {
-    width: 100% !important;
-    height: auto !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    display: block !important;
-    border: none !important;
-    box-shadow: none !important;
-    page-break-after: avoid;
-    page-break-before: avoid;
-    page-break-inside: avoid;
-  }
-
-  body.print-single-chart .printable-area .scrollable-chart-area {
-    overflow: visible !important;
-    height: auto !important;
-    display: block !important;
-  }
-
-  body.print-single-chart .printable-area .scrollable-chart-inner {
-    width: 100% !important; 
-    max-width: 100% !important;
-    height: 600px !important; /* Force concrete height in print so Recharts doesn't collapse to 0 */
-    transform: none !important; /* Managed by the parent now */
-  }
-
-  /* Universal X-Axis label override */
-  .recharts-cartesian-axis-tick-value {
-    font-size: 7px !important;
   }
 }
 

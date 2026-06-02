@@ -19,7 +19,7 @@ import { RefreshCcw, Loader2, Factory, LineChart, BarChart2, Trophy, Database as
 export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [countdown, setCountdown] = useState(60);
+  const [countdown, setCountdown] = useState(30);
 
   const [filters, setFilters] = useState({
     date: '',
@@ -40,7 +40,7 @@ export default function Dashboard() {
       const result = await fetchDashboardData();
       setData(result);
       setLoading(false);
-      setCountdown(60);
+      setCountdown(30);
     } catch (e) {
       console.error(e);
       setLoading(false);
@@ -53,7 +53,7 @@ export default function Dashboard() {
       setCountdown((prev) => {
         if (prev <= 1) {
           fetchData();
-          return 60;
+          return 30;
         }
         return prev - 1;
       });
@@ -129,7 +129,7 @@ export default function Dashboard() {
     { id: 'Analytics', icon: BarChart2 },
     { id: 'Root Cause & Solutions', icon: GitBranch },
     { id: 'Yamazumi Chart', icon: ActivitySquare },
-    { id: 'Performers', icon: Trophy },
+    { id: 'Operator\'s Performers & Efficiency Analysis', icon: Trophy },
     { id: 'Database', icon: DbIcon }
   ];
 
@@ -213,9 +213,9 @@ export default function Dashboard() {
             {activeTab === 'Line Targets' && <LineTargets processes={filteredProcesses} />}
             {activeTab === 'Analytics' && <Analytics processes={filteredProcesses} />}
             {activeTab === 'Root Cause & Solutions' && <RootCauseAnalysis scoreboards={filteredScoreboards} processes={filteredProcesses} />}
-            {activeTab === 'Yamazumi Chart' && <YamazumiChart processes={filteredProcesses} />}
-            {activeTab === 'Performers' && <Performers processes={filteredProcesses} />}
-            {activeTab === 'Database' && <Database processes={filteredProcesses} />}
+            { activeTab === 'Yamazumi Chart' && <YamazumiChart processes={filteredProcesses} /> }
+            { activeTab === 'Operator\'s Performers & Efficiency Analysis' && <Performers processes={filteredProcesses} /> }
+            { activeTab === 'Database' && <Database processes={filteredProcesses} /> }
           </div>
         </div>
       </div>
