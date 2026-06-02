@@ -1,4 +1,4 @@
-import { useState, useEffect, RefObject, useCallback } from 'react';
+import React, { useState, useEffect, RefObject, useCallback } from 'react';
 
 interface FullscreenElement extends HTMLElement {
   webkitRequestFullscreen?: () => Promise<void>;

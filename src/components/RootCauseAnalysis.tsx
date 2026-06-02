@@ -17,14 +17,12 @@ const DiagramWrapper = ({ title, icon: Icon, children }: any) => {
     const buttons = elem.querySelectorAll('.action-buttons');
     buttons.forEach(btn => (btn as HTMLElement).style.display = 'none');
 
-    await new Promise(resolve => setTimeout(resolve, 250)); // Explicit delay for rendering
+    await new Promise(resolve => setTimeout(resolve, 250));
 
     const canvas = await html2canvas(elem, {
       scale: 2,
       useCORS: true,
-      logging: false,
-      backgroundColor: '#ffffff',
-      ignoreElements: (element) => element.classList?.contains('action-buttons')
+      logging: false
     });
     const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
     
@@ -40,7 +38,7 @@ const DiagramWrapper = ({ title, icon: Icon, children }: any) => {
           <style>
             @page { size: A4 landscape; margin: 0; }
             body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #fff; }
-            img { width: 100%; height: auto; max-height: 100vh; object-fit: contain; image-rendering: -webkit-optimize-contrast; }
+            img { width: 100%; height: auto; max-height: 100vh; object-fit: contain; }
           </style>
         </head>
         <body>
@@ -58,24 +56,18 @@ const DiagramWrapper = ({ title, icon: Icon, children }: any) => {
       const buttons = elem.querySelectorAll('.action-buttons');
       buttons.forEach(btn => (btn as HTMLElement).style.display = 'none');
 
-      await new Promise(resolve => setTimeout(resolve, 250)); // Force text rendering wait
+      await new Promise(resolve => setTimeout(resolve, 250));
       
       const canvas = await html2canvas(elem, {
         scale: 2,
         useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-        ignoreElements: (element) => element.classList?.contains('action-buttons')
+        logging: false
       });
       const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
       
       buttons.forEach(btn => (btn as HTMLElement).style.display = '');
       
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: 'a4'
-      });
+      const pdf = new jsPDF('l', 'mm', 'a4');
       
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();

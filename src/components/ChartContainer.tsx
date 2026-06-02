@@ -32,31 +32,31 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
     e.stopPropagation();
     if (!containerRef.current) return;
     
+    const elem = containerRef.current;
+    
     // Hide buttons temporarily
-    const buttons = containerRef.current.querySelectorAll('.action-buttons');
+    const buttons = elem.querySelectorAll('.action-buttons');
     buttons.forEach(btn => (btn as HTMLElement).style.display = 'none');
 
-    const header = containerRef.current.querySelector('.print-header') as HTMLElement;
+    const header = elem.querySelector('.print-header') as HTMLElement;
     if (header) {
       header.classList.remove('hidden');
       header.style.display = 'block';
     }
 
-    const scrollInner = containerRef.current.querySelector('.scrollable-chart-inner') as HTMLElement;
+    const scrollInner = elem.querySelector('.scrollable-chart-inner') as HTMLElement;
     let originalWidth = '';
     if (scrollInner) {
       originalWidth = scrollInner.style.width;
       scrollInner.style.width = '100%';
     }
 
-    await new Promise(resolve => setTimeout(resolve, 250)); // allow interactions and text rendering to subside
+    await new Promise(resolve => setTimeout(resolve, 250));
 
-    const canvas = await html2canvas(containerRef.current, {
+    const canvas = await html2canvas(elem, {
       scale: 2,
       useCORS: true,
-      logging: false,
-      backgroundColor: '#ffffff',
-      ignoreElements: (element) => element.classList?.contains('action-buttons')
+      logging: false
     });
     const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
 
@@ -81,7 +81,7 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
           <style>
             @page { size: A4 landscape; margin: 0; }
             body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #fff; }
-            img { width: 100%; height: auto; max-height: 100vh; object-fit: contain; image-rendering: -webkit-optimize-contrast; }
+            img { width: 100%; height: auto; max-height: 100vh; object-fit: contain; }
           </style>
         </head>
         <body>
@@ -95,31 +95,31 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
   const downloadPDF = async () => {
     if (!containerRef.current || isDownloading) return;
     setIsDownloading(true);
+    
+    const elem = containerRef.current;
     try {
-      const buttons = containerRef.current.querySelectorAll('.action-buttons');
+      const buttons = elem.querySelectorAll('.action-buttons');
       buttons.forEach(btn => (btn as HTMLElement).style.display = 'none');
       
-      const header = containerRef.current.querySelector('.print-header') as HTMLElement;
+      const header = elem.querySelector('.print-header') as HTMLElement;
       if (header) {
         header.classList.remove('hidden');
         header.style.display = 'block';
       }
 
-      const scrollInner = containerRef.current.querySelector('.scrollable-chart-inner') as HTMLElement;
+      const scrollInner = elem.querySelector('.scrollable-chart-inner') as HTMLElement;
       let originalWidth = '';
       if (scrollInner) {
         originalWidth = scrollInner.style.width;
         scrollInner.style.width = '100%';
       }
 
-      await new Promise(resolve => setTimeout(resolve, 250)); // allow interactions and text rendering to subside
+      await new Promise(resolve => setTimeout(resolve, 250));
 
-      const canvas = await html2canvas(containerRef.current, {
+      const canvas = await html2canvas(elem, {
         scale: 2,
         useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-        ignoreElements: (element) => element.classList?.contains('action-buttons')
+        logging: false
       });
       const imgData = canvas.toDataURL('image/jpeg', 1.0);
       
@@ -132,16 +132,10 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
         header.style.display = '';
       }
       
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: 'a4'
-      });
-      
+      const pdf = new jsPDF('l', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       
-      // Calculate aspect ratio
       const imgProps = pdf.getImageProperties(imgData);
       const imgRatio = imgProps.width / imgProps.height;
       
@@ -161,9 +155,7 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
       const y = margin + (availableHeight - finalHeight) / 2;
       
       pdf.addImage(imgData, 'JPEG', x, y, finalWidth, finalHeight);
-      
-      const safeTitle = title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
-      pdf.save(`${safeTitle}.pdf`);
+      pdf.save(`${title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.pdf`);
     } catch (err) {
       console.error('Error generating PDF:', err);
     } finally {
