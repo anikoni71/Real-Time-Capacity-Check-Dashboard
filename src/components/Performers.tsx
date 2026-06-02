@@ -144,6 +144,12 @@ export default function Performers({ processes }: { processes: ProcessRow[] }) {
 
   return (
     <div className="flex flex-col gap-6 w-full">
+      <div className="pt-2 pb-1">
+        <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2 px-2">
+          <Activity className="h-5 w-5 text-blue-500" />
+          KPI Overview
+        </h2>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 flex items-center justify-between">
           <div>

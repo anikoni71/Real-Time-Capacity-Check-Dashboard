@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Maximize2, Printer, Minimize2, Download, FileImage, FileSpreadsheet, FileText } from 'lucide-react';
-import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { toJpeg } from 'html-to-image';
 
@@ -68,15 +67,14 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
       scrollInner.style.width = '100%';
     }
 
-    await new Promise(resolve => setTimeout(resolve, 300)); // allow interactions and text rendering to subside
+    await new Promise(resolve => setTimeout(resolve, 250)); // allow interactions and text rendering to subside
 
-    const canvas = await html2canvas(containerRef.current, {
-      scale: 2,
-      useCORS: true,
+    const dataUrl = await toJpeg(containerRef.current, {
+      quality: 1.0,
+      pixelRatio: 2,
       backgroundColor: '#ffffff',
-      ignoreElements: (element) => element.classList?.contains('action-buttons')
+      filter: (node) => !(node instanceof HTMLElement && node.classList.contains('action-buttons'))
     });
-    const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
 
     // Restore buttons
     buttons.forEach(btn => (btn as HTMLElement).style.display = '');
@@ -96,15 +94,14 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
     printWindow.document.write(`
       <html>
         <head>
-          <title>Print - ${title}</title>
           <style>
             @page { size: A4 landscape; margin: 0; }
-            body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: white; }
-            img { width: 100%; height: auto; max-height: 100%; object-fit: contain; }
+            body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #fff; }
+            img { width: 100%; height: auto; max-height: 100vh; object-fit: contain; image-rendering: -webkit-optimize-contrast; }
           </style>
         </head>
         <body>
-          <img src="${dataUrl}" onload="setTimeout(() => { window.print(); window.close(); }, 200);" />
+          <img src="${dataUrl}" onload="window.print(); window.close();" />
         </body>
       </html>
     `);
@@ -131,15 +128,14 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
         scrollInner.style.width = '100%';
       }
 
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise(resolve => setTimeout(resolve, 250)); // allow interactions and text rendering to subside
 
-      const canvas = await html2canvas(containerRef.current, {
-        scale: 2,
-        useCORS: true,
+      const imgData = await toJpeg(containerRef.current, {
+        quality: 1.0,
+        pixelRatio: 2,
         backgroundColor: '#ffffff',
-        ignoreElements: (element) => element.classList?.contains('action-buttons')
+        filter: (node) => !(node instanceof HTMLElement && node.classList.contains('action-buttons'))
       });
-      const imgData = canvas.toDataURL('image/jpeg', 1.0);
       
       buttons.forEach(btn => (btn as HTMLElement).style.display = '');
       if (scrollInner) {
@@ -209,7 +205,7 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
         quality: 0.95,
         pixelRatio: 1.5,
         backgroundColor: '#ffffff',
-        filter: (node) => !node.classList?.contains('action-buttons')
+        filter: (node) => !(node instanceof HTMLElement && node.classList.contains('action-buttons'))
       });
       
       buttons.forEach(btn => (btn as HTMLElement).style.display = '');

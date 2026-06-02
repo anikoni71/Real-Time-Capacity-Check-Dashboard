@@ -1,17 +1,19 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ScoreboardRow, ProcessRow } from '../types';
 import { Share2, AlertTriangle, Lightbulb, Settings, Users, ArrowRightLeft, Activity, Info, Maximize, Printer, Download, Minimize } from 'lucide-react';
-import { toJpeg } from 'html-to-image';
 import { jsPDF } from 'jspdf';
+import { toJpeg } from 'html-to-image';
 
-const DiagramWrapper = ({ title, icon: Icon, children, id }: any) => {
+const DiagramWrapper = ({ title, icon: Icon, children }: any) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   
   const toggleFullScreen = () => {
-    const elem = document.getElementById(id);
+    const elem = containerRef.current;
+    if (!elem) return;
     if (!document.fullscreenElement) {
-      elem?.requestFullscreen().catch(err => console.error(err));
+      elem.requestFullscreen().catch(err => console.error(err));
     } else {
       document.exitFullscreen();
     }
@@ -19,32 +21,30 @@ const DiagramWrapper = ({ title, icon: Icon, children, id }: any) => {
 
   useEffect(() => {
     const handleFSChange = () => {
-      const elem = document.getElementById(id);
-      setIsFullScreen(document.fullscreenElement === elem);
+      setIsFullScreen(document.fullscreenElement === containerRef.current);
     };
     document.addEventListener('fullscreenchange', handleFSChange);
     return () => document.removeEventListener('fullscreenchange', handleFSChange);
-  }, [id]);
+  }, []);
 
   const handlePrint = async () => {
-    const elem = document.getElementById(id);
+    const elem = containerRef.current;
     if (!elem) return;
     
-    // Hide buttons temporarily
-    const buttons = elem.querySelectorAll('button');
-    buttons.forEach(btn => btn.style.display = 'none');
+    const buttons = elem.querySelectorAll('.action-buttons');
+    buttons.forEach(btn => (btn as HTMLElement).style.display = 'none');
 
-    await new Promise(resolve => setTimeout(resolve, 300)); // allow interactions and text rendering to subside
+    await new Promise(resolve => setTimeout(resolve, 250)); // Explicit delay for rendering
 
     const dataUrl = await toJpeg(elem, {
-      quality: 0.95,
-      pixelRatio: 1.5,
+      quality: 1.0,
+      pixelRatio: 2,
       backgroundColor: '#ffffff',
-      filter: (node) => node.tagName !== 'BUTTON'
+      filter: (node) => !(node instanceof HTMLElement && node.classList.contains('action-buttons'))
     });
     
     // Restore buttons
-    buttons.forEach(btn => btn.style.display = '');
+    buttons.forEach(btn => (btn as HTMLElement).style.display = '');
 
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
@@ -54,18 +54,12 @@ const DiagramWrapper = ({ title, icon: Icon, children, id }: any) => {
         <head>
           <style>
             @page { size: A4 landscape; margin: 0; }
-            body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: white; }
-            img { width: 100%; height: auto; max-height: 100%; object-fit: contain; }
+            body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #fff; }
+            img { width: 100%; height: auto; max-height: 100vh; object-fit: contain; image-rendering: -webkit-optimize-contrast; }
           </style>
         </head>
         <body>
-          <img src="${dataUrl}" />
-          <script>
-            setTimeout(() => { 
-              window.print(); 
-              window.close(); 
-            }, 500);
-          </script>
+          <img src="${dataUrl}" onload="window.print(); window.close();" />
         </body>
       </html>
     `);
@@ -73,24 +67,22 @@ const DiagramWrapper = ({ title, icon: Icon, children, id }: any) => {
   };
 
   const handleDownload = async () => {
-    const elem = document.getElementById(id);
+    const elem = containerRef.current;
     if (!elem) return;
     try {
-      // Hide buttons temporarily
-      const buttons = elem.querySelectorAll('button');
-      buttons.forEach(btn => btn.style.display = 'none');
+      const buttons = elem.querySelectorAll('.action-buttons');
+      buttons.forEach(btn => (btn as HTMLElement).style.display = 'none');
 
-      await new Promise(resolve => setTimeout(resolve, 300)); // Force text rendering wait
+      await new Promise(resolve => setTimeout(resolve, 250)); // Force text rendering wait
       
       const dataUrl = await toJpeg(elem, {
-        quality: 0.95,
-        pixelRatio: 1.5,
+        quality: 1.0,
+        pixelRatio: 2,
         backgroundColor: '#ffffff',
-        filter: (node) => node.tagName !== 'BUTTON'
+        filter: (node) => !(node instanceof HTMLElement && node.classList.contains('action-buttons'))
       });
       
-      // Restore buttons
-      buttons.forEach(btn => btn.style.display = '');
+      buttons.forEach(btn => (btn as HTMLElement).style.display = '');
       
       const pdf = new jsPDF({
         orientation: 'landscape',
@@ -123,27 +115,27 @@ const DiagramWrapper = ({ title, icon: Icon, children, id }: any) => {
          pdf.addImage(dataUrl, 'JPEG', x, y, finalWidth, finalHeight);
       }
       
-      pdf.save('root-cause-and-solutions-report.pdf');
+      pdf.save(`${title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.pdf`);
     } catch (e) {
       console.error('Failed to download image', e);
     }
   };
 
   return (
-    <div id={id} className={`bg-white p-6 rounded-lg border border-gray-200 shadow-sm overflow-hidden relative ${isFullScreen ? 'overflow-y-auto w-screen h-screen m-0 p-8 pt-16 flex flex-col' : ''}`}>
+    <div ref={containerRef} className={`bg-white p-6 rounded-lg border border-gray-200 shadow-sm overflow-hidden relative ${isFullScreen ? 'overflow-y-auto w-screen h-screen m-0 p-8 pt-16 flex flex-col' : ''}`}>
       <div className="flex justify-between items-center mb-6 border-b pb-2">
         <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
           <Icon className={`h-5 w-5 ${title.includes('1') ? 'text-indigo-600' : title.includes('2') ? 'text-emerald-500' : 'text-rose-500'}`} />
           {title}
         </h3>
-        <div className="flex bg-gray-50 rounded shadow-sm border p-1 space-x-1 shrink-0 z-50">
+        <div className="flex bg-gray-50 rounded shadow-sm border p-1 space-x-1 shrink-0 z-50 action-buttons">
           <button onClick={toggleFullScreen} className="p-1.5 hover:bg-gray-200 rounded text-gray-600 transition-colors" title="Toggle Fullscreen">
             {isFullScreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
           </button>
           <button onClick={handlePrint} className="p-1.5 hover:bg-gray-200 rounded text-gray-600 transition-colors" title="Print Diagram">
             <Printer className="h-4 w-4" />
           </button>
-          <button onClick={handleDownload} className="p-1.5 hover:bg-gray-200 rounded text-gray-600 transition-colors" title="Download PNG">
+          <button onClick={handleDownload} className="p-1.5 hover:bg-gray-200 rounded text-gray-600 transition-colors" title="Download PDF">
             <Download className="h-4 w-4" />
           </button>
         </div>
@@ -532,7 +524,7 @@ export default function RootCauseAnalysis({ scoreboards, processes = [] }: Props
         </div>
       </div>
 
-      <DiagramWrapper id="diagram-1" title="DIAGRAM 1: Capacity Loss Root Cause Analysis" icon={AlertTriangle}>
+      <DiagramWrapper title="DIAGRAM 1: Capacity Loss Root Cause Analysis" icon={AlertTriangle}>
         {renderFishbone('causes')}
         <AnimatePresence>
           {activeNode && activeNode.startsWith('causes') && (
@@ -543,7 +535,7 @@ export default function RootCauseAnalysis({ scoreboards, processes = [] }: Props
         </AnimatePresence>
       </DiagramWrapper>
 
-      <DiagramWrapper id="diagram-2" title="DIAGRAM 2: Actionable CAPA Solutions Matrix" icon={Lightbulb}>
+      <DiagramWrapper title="DIAGRAM 2: Actionable CAPA Solutions Matrix" icon={Lightbulb}>
         {renderFishbone('solutions')}
         <AnimatePresence>
           {activeNode && activeNode.startsWith('solutions') && (
@@ -554,7 +546,7 @@ export default function RootCauseAnalysis({ scoreboards, processes = [] }: Props
         </AnimatePresence>
       </DiagramWrapper>
 
-      <DiagramWrapper id="diagram-3" title="DIAGRAM 3: Bottleneck Diagnostics" icon={Activity}>
+      <DiagramWrapper title="DIAGRAM 3: Bottleneck Diagnostics" icon={Activity}>
         {minCapacityProcess ? (
            <>
              {renderFishbone('bottleneck')}
