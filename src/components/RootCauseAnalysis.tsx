@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ScoreboardRow, ProcessRow } from '../types';
 import { Share2, AlertTriangle, Lightbulb, Settings, Users, ArrowRightLeft, Activity, Info, Maximize, Printer, Download, Minimize } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import { toJpeg } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 import { useFullscreen } from '../hooks/useFullscreen';
 
@@ -10,99 +10,84 @@ const DiagramWrapper = ({ title, icon: Icon, children }: any) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { isFullscreen: isFullScreen, toggleFullscreen: toggleFullScreen } = useFullscreen(containerRef);
   
-  const handlePrint = async () => {
-    const elem = containerRef.current;
-    if (!elem) return;
-    
-    const buttons = elem.querySelectorAll('.action-buttons');
-    buttons.forEach(btn => (btn as HTMLElement).style.display = 'none');
+  const handlePrint = async (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!containerRef.current) return;
 
-    await new Promise(resolve => setTimeout(resolve, 250));
+    await new Promise((resolve) => setTimeout(resolve, 250));
 
-    const canvas = await html2canvas(elem, {
-      scale: 2,
-      useCORS: true,
-      logging: false
-    });
-    const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
-    
-    // Restore buttons
-    buttons.forEach(btn => (btn as HTMLElement).style.display = '');
+    try {
+      const actionsEl = containerRef.current.querySelector('.action-buttons') as HTMLElement;
+      if (actionsEl) actionsEl.style.visibility = 'hidden';
 
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
+      const chartImageDataUrl = await toJpeg(containerRef.current, {
+        pixelRatio: 2,
+        backgroundColor: '#ffffff',
+        fontEmbedCSS: ''
+      });
 
-    printWindow.document.write(`
-      <html>
-        <head>
-          <style>
-            @page { size: A4 landscape; margin: 0; }
-            body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #fff; }
-            img { width: 100%; height: auto; max-height: 100vh; object-fit: contain; }
-          </style>
-        </head>
-        <body>
-          <img src="${dataUrl}" onload="window.print(); window.close();" />
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
+      if (actionsEl) actionsEl.style.visibility = 'visible';
+
+      const printWindow = window.open('', '_blank');
+
+      if (printWindow) {
+        printWindow.document.write(`
+          <html>
+            <head>
+              <title>Print View - Root Cause & Solutions</title>
+              <style>
+                @page { size: A4 landscape; margin: 0; }
+                body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #fff; }
+                img { width: 100%; height: auto; max-height: 100vh; object-fit: contain; }
+              </style>
+            </head>
+            <body>
+              <img src="${chartImageDataUrl}" onload="window.print(); window.close();" />
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+      }
+    } catch (err) {
+      console.error('RCA Tab native printing execution failed:', err);
+    }
   };
 
-  const handleDownload = async () => {
-    const elem = containerRef.current;
-    if (!elem) return;
-    try {
-      const buttons = elem.querySelectorAll('.action-buttons');
-      buttons.forEach(btn => (btn as HTMLElement).style.display = 'none');
+  const handleDownload = async (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!containerRef.current) return;
 
-      await new Promise(resolve => setTimeout(resolve, 250));
-      
-      const canvas = await html2canvas(elem, {
-        scale: 2,
-        useCORS: true,
-        logging: false
+    // Fixed: Standard delay allows internal text vectors to stabilize before generation
+    await new Promise((resolve) => setTimeout(resolve, 250));
+
+    try {
+      const actionsEl = containerRef.current.querySelector('.action-buttons') as HTMLElement;
+      if (actionsEl) actionsEl.style.visibility = 'hidden';
+
+      const imgData = await toJpeg(containerRef.current, {
+        pixelRatio: 2,
+        backgroundColor: '#ffffff',
+        fontEmbedCSS: ''
       });
-      const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
-      
-      buttons.forEach(btn => (btn as HTMLElement).style.display = '');
-      
+
+      if (actionsEl) actionsEl.style.visibility = 'visible';
+
       const pdf = new jsPDF('l', 'mm', 'a4');
-      
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      
-      const margin = 5;
-      const availableWidth = pdfWidth - margin * 2;
-      const availableHeight = pdfHeight - margin * 2;
-      
-      const imgProps = pdf.getImageProperties(dataUrl);
-      const imgRatio = imgProps.width / imgProps.height;
-      
-      let finalHeight = availableHeight;
-      let finalWidth = finalHeight * imgRatio;
-      
-      if (finalWidth <= availableWidth) {
-         const x = margin + (availableWidth - finalWidth) / 2;
-         const y = margin + (availableHeight - finalHeight) / 2;
-         pdf.addImage(dataUrl, 'JPEG', x, y, finalWidth, finalHeight);
-      } else {
-         finalWidth = availableWidth;
-         finalHeight = finalWidth / imgRatio;
-         const x = margin;
-         const y = margin + (availableHeight - finalHeight) / 2;
-         pdf.addImage(dataUrl, 'JPEG', x, y, finalWidth, finalHeight);
-      }
-      
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight());
       pdf.save(`${title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.pdf`);
-    } catch (e) {
-      console.error('Failed to download image', e);
+    } catch (err) {
+      console.error('RCA Tab PDF output initialization failed:', err);
     }
   };
 
   return (
-    <div ref={containerRef} className={`bg-white p-6 rounded-lg border border-gray-200 shadow-sm overflow-hidden relative ${isFullScreen ? 'is-fullscreen overflow-y-auto m-0 p-8 pt-16 flex flex-col' : ''}`}>
-      <div className="flex justify-between items-center mb-6 border-b pb-2">
+    <div 
+      ref={containerRef} 
+      className={`chart-wrapper bg-white shadow-sm flex flex-col relative transition-all ${
+        isFullScreen ? 'is-fullscreen' : 'rounded-xl p-6 border border-gray-100'
+      }`}
+    >
+      <div className="flex justify-between items-center mb-6 border-b pb-2 chart-header">
         <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
           <Icon className={`h-5 w-5 ${title.includes('1') ? 'text-indigo-600' : title.includes('2') ? 'text-emerald-500' : 'text-rose-500'}`} />
           {title}
@@ -119,7 +104,7 @@ const DiagramWrapper = ({ title, icon: Icon, children }: any) => {
           </button>
         </div>
       </div>
-      <div className={isFullScreen ? 'flex-1 overflow-auto bg-white' : ''}>
+      <div className={`scrollable-chart-area w-full flex-1 ${isFullScreen ? 'bg-white' : ''}`}>
         {children}
       </div>
     </div>

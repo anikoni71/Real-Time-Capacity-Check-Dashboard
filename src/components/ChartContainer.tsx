@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Maximize2, Printer, Minimize2, Download, FileImage, FileSpreadsheet, FileText } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import { toJpeg } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 import { useFullscreen } from '../hooks/useFullscreen';
 
@@ -31,133 +31,69 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
   const handlePrint = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!containerRef.current) return;
-    
-    const elem = containerRef.current;
-    
-    // Hide buttons temporarily
-    const buttons = elem.querySelectorAll('.action-buttons');
-    buttons.forEach(btn => (btn as HTMLElement).style.display = 'none');
 
-    const header = elem.querySelector('.print-header') as HTMLElement;
-    if (header) {
-      header.classList.remove('hidden');
-      header.style.display = 'block';
+    try {
+      const actionsEl = containerRef.current.querySelector('.action-buttons') as HTMLElement;
+      if (actionsEl) actionsEl.style.visibility = 'hidden';
+
+      const chartImageDataUrl = await toJpeg(containerRef.current, {
+        pixelRatio: 2,
+        backgroundColor: '#ffffff',
+        fontEmbedCSS: ''
+      });
+
+      if (actionsEl) actionsEl.style.visibility = 'visible';
+
+      const printWindow = window.open('', '_blank');
+
+      if (printWindow) {
+        printWindow.document.write(`
+          <html>
+            <head>
+              <title>Print System - ${title}</title>
+              <style>
+                @page { size: A4 landscape; margin: 0; }
+                body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #fff; }
+                img { width: 100%; height: auto; max-height: 100vh; object-fit: contain; }
+              </style>
+            </head>
+            <body>
+              <img src="${chartImageDataUrl}" onload="window.print(); window.close();" />
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+      }
+    } catch (err) {
+      console.error('Print layout window generation failed:', err);
     }
-
-    const scrollInner = elem.querySelector('.scrollable-chart-inner') as HTMLElement;
-    let originalWidth = '';
-    if (scrollInner) {
-      originalWidth = scrollInner.style.width;
-      scrollInner.style.width = '100%';
-    }
-
-    await new Promise(resolve => setTimeout(resolve, 250));
-
-    const canvas = await html2canvas(elem, {
-      scale: 2,
-      useCORS: true,
-      logging: false
-    });
-    const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
-
-    // Restore buttons
-    buttons.forEach(btn => (btn as HTMLElement).style.display = '');
-
-    if (scrollInner) {
-      scrollInner.style.width = originalWidth;
-    }
-    
-    if (header) {
-      header.classList.add('hidden');
-      header.style.display = '';
-    }
-
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    printWindow.document.write(`
-      <html>
-        <head>
-          <style>
-            @page { size: A4 landscape; margin: 0; }
-            body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #fff; }
-            img { width: 100%; height: auto; max-height: 100vh; object-fit: contain; }
-          </style>
-        </head>
-        <body>
-          <img src="${dataUrl}" onload="window.print(); window.close();" />
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
   };
 
   const downloadPDF = async () => {
     if (!containerRef.current || isDownloading) return;
     setIsDownloading(true);
-    
-    const elem = containerRef.current;
+
     try {
-      const buttons = elem.querySelectorAll('.action-buttons');
-      buttons.forEach(btn => (btn as HTMLElement).style.display = 'none');
-      
-      const header = elem.querySelector('.print-header') as HTMLElement;
-      if (header) {
-        header.classList.remove('hidden');
-        header.style.display = 'block';
-      }
+      const actionsEl = containerRef.current.querySelector('.action-buttons') as HTMLElement;
+      if (actionsEl) actionsEl.style.visibility = 'hidden';
 
-      const scrollInner = elem.querySelector('.scrollable-chart-inner') as HTMLElement;
-      let originalWidth = '';
-      if (scrollInner) {
-        originalWidth = scrollInner.style.width;
-        scrollInner.style.width = '100%';
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 250));
-
-      const canvas = await html2canvas(elem, {
-        scale: 2,
-        useCORS: true,
-        logging: false
+      const imgData = await toJpeg(containerRef.current, {
+        pixelRatio: 2,
+        backgroundColor: '#ffffff',
+        fontEmbedCSS: ''
       });
-      const imgData = canvas.toDataURL('image/jpeg', 1.0);
-      
-      buttons.forEach(btn => (btn as HTMLElement).style.display = '');
-      if (scrollInner) {
-        scrollInner.style.width = originalWidth;
-      }
-      if (header) {
-        header.classList.add('hidden');
-        header.style.display = '';
-      }
-      
+
+      if (actionsEl) actionsEl.style.visibility = 'visible';
+
       const pdf = new jsPDF('l', 'mm', 'a4');
+      
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       
-      const imgProps = pdf.getImageProperties(imgData);
-      const imgRatio = imgProps.width / imgProps.height;
-      
-      const margin = 10;
-      const availableWidth = pdfWidth - margin * 2;
-      const availableHeight = pdfHeight - margin * 2;
-      
-      let finalHeight = availableHeight;
-      let finalWidth = finalHeight * imgRatio;
-      
-      if (finalWidth > availableWidth) {
-         finalWidth = availableWidth;
-         finalHeight = finalWidth / imgRatio;
-      }
-      
-      const x = margin + (availableWidth - finalWidth) / 2;
-      const y = margin + (availableHeight - finalHeight) / 2;
-      
-      pdf.addImage(imgData, 'JPEG', x, y, finalWidth, finalHeight);
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
       pdf.save(`${title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.pdf`);
     } catch (err) {
-      console.error('Error generating PDF:', err);
+      console.error('PDF Download processing broke:', err);
     } finally {
       setIsDownloading(false);
     }
@@ -179,14 +115,11 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
 
       await new Promise(resolve => setTimeout(resolve, 300));
 
-      const canvas = await html2canvas(containerRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
+      const imgData = await toJpeg(containerRef.current, {
+        pixelRatio: 2,
         backgroundColor: '#ffffff',
-        ignoreElements: (element) => element.classList?.contains('action-buttons')
+        fontEmbedCSS: ''
       });
-      const imgData = canvas.toDataURL('image/jpeg', 1.0);
       
       buttons.forEach(btn => (btn as HTMLElement).style.display = '');
       if (scrollInner) {
@@ -231,7 +164,9 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
   return (
     <div 
       ref={containerRef} 
-      className={`bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col h-full chart-wrapper relative transition-all ${isFullscreen ? 'is-fullscreen p-8 overflow-auto flex-1' : ''}`}
+      className={`chart-wrapper bg-white shadow-sm flex flex-col h-full relative transition-all ${
+        isFullscreen ? 'is-fullscreen' : 'rounded-xl p-4 border border-gray-100'
+      }`}
     >
       <div className="print-header hidden mb-6 text-center border-b pb-4 relative">
         <h1 className="text-2xl font-bold text-gray-900">Capacity Check Report - {title}</h1>
@@ -242,7 +177,7 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
         </div>
       </div>
 
-      <div className="flex items-center justify-between mb-4 header-controls print:hidden">
+      <div className="flex items-center justify-between mb-4 header-controls print:hidden chart-header">
         <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
           {icon}
           {title}
@@ -275,7 +210,7 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
       
       {/* Chart Content Area with Click-to-Fullscreen */}
       <div 
-        className="flex-1 w-full flex flex-col cursor-pointer" 
+        className="flex-1 scrollable-chart-area w-full flex flex-col cursor-pointer" 
         onClick={toggleFullscreen}
         title="Click to toggle fullscreen"
       >
