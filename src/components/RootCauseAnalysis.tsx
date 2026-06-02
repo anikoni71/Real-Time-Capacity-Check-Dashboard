@@ -4,29 +4,12 @@ import { ScoreboardRow, ProcessRow } from '../types';
 import { Share2, AlertTriangle, Lightbulb, Settings, Users, ArrowRightLeft, Activity, Info, Maximize, Printer, Download, Minimize } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { toJpeg } from 'html-to-image';
+import { useFullscreen } from '../hooks/useFullscreen';
 
 const DiagramWrapper = ({ title, icon: Icon, children }: any) => {
-  const [isFullScreen, setIsFullScreen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { isFullscreen: isFullScreen, toggleFullscreen: toggleFullScreen } = useFullscreen(containerRef);
   
-  const toggleFullScreen = () => {
-    const elem = containerRef.current;
-    if (!elem) return;
-    if (!document.fullscreenElement) {
-      elem.requestFullscreen().catch(err => console.error(err));
-    } else {
-      document.exitFullscreen();
-    }
-  };
-
-  useEffect(() => {
-    const handleFSChange = () => {
-      setIsFullScreen(document.fullscreenElement === containerRef.current);
-    };
-    document.addEventListener('fullscreenchange', handleFSChange);
-    return () => document.removeEventListener('fullscreenchange', handleFSChange);
-  }, []);
-
   const handlePrint = async () => {
     const elem = containerRef.current;
     if (!elem) return;
@@ -122,7 +105,7 @@ const DiagramWrapper = ({ title, icon: Icon, children }: any) => {
   };
 
   return (
-    <div ref={containerRef} className={`bg-white p-6 rounded-lg border border-gray-200 shadow-sm overflow-hidden relative ${isFullScreen ? 'overflow-y-auto w-screen h-screen m-0 p-8 pt-16 flex flex-col' : ''}`}>
+    <div ref={containerRef} className={`bg-white p-6 rounded-lg border border-gray-200 shadow-sm overflow-hidden relative ${isFullScreen ? 'is-fullscreen overflow-y-auto m-0 p-8 pt-16 flex flex-col' : ''}`}>
       <div className="flex justify-between items-center mb-6 border-b pb-2">
         <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
           <Icon className={`h-5 w-5 ${title.includes('1') ? 'text-indigo-600' : title.includes('2') ? 'text-emerald-500' : 'text-rose-500'}`} />

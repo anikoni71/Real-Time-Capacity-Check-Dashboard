@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Maximize2, Printer, Minimize2, Download, FileImage, FileSpreadsheet, FileText } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { toJpeg } from 'html-to-image';
+import { useFullscreen } from '../hooks/useFullscreen';
 
 interface ChartContainerProps {
   title: string;
@@ -13,19 +14,9 @@ interface ChartContainerProps {
 export default function ChartContainer({ title, icon, children, data }: ChartContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isPrintingRef = useRef(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const { isFullscreen, toggleFullscreen } = useFullscreen(containerRef);
   const [isDownloading, setIsDownloading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isFullscreen && !isPrintingRef.current) {
-        setIsFullscreen(false);
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isFullscreen]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -36,15 +27,6 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, [showDropdown]);
-
-  const toggleFullscreen = (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    setIsFullscreen(!isFullscreen);
-    // Dispatch resize event so chart resizes
-    setTimeout(() => {
-       window.dispatchEvent(new Event('resize'));
-    }, 50);
-  };
 
   const handlePrint = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -251,9 +233,8 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
   return (
     <div 
       ref={containerRef} 
-      className={`bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col h-full chart-wrapper relative transition-all ${isFullscreen ? 'fixed inset-4 z-50 overflow-auto' : ''}`}
+      className={`bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col h-full chart-wrapper relative transition-all ${isFullscreen ? 'is-fullscreen p-8 overflow-auto flex-1' : ''}`}
     >
-      {isFullscreen && <div className="fixed inset-0 bg-black/50 -z-10" onClick={(e) => toggleFullscreen(e)} />}
       <div className="print-header hidden mb-6 text-center border-b pb-4 relative">
         <h1 className="text-2xl font-bold text-gray-900">Capacity Check Report - {title}</h1>
         <p className="text-gray-500 mb-4">Generated on {new Date().toLocaleDateString()}</p>

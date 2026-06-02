@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* Fullscreen & Print Chart Styles */
-.chart-wrapper.css-fullscreen {
+.chart-wrapper.is-fullscreen {
   position: fixed;
   top: 0;
   left: 0;
@@ -18,20 +18,20 @@
   box-sizing: border-box;
 }
 
-.chart-wrapper.css-fullscreen .scrollable-chart-area {
+.chart-wrapper.is-fullscreen .scrollable-chart-area {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden !important;
 }
 
-.chart-wrapper.css-fullscreen .scrollable-chart-inner {
+.chart-wrapper.is-fullscreen .scrollable-chart-inner {
   width: 100% !important;
   height: 100% !important;
   min-height: unset;
 }
 
-.chart-wrapper.css-fullscreen .recharts-responsive-container {
+.chart-wrapper.is-fullscreen .recharts-responsive-container {
   width: 100% !important;
   height: 100% !important;
 }
