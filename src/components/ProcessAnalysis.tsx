@@ -96,7 +96,11 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
                  {target1 > 0 && capacityData.map((entry, idx) => {
                     const totalCap = capKeys.reduce((sum, key) => sum + (entry[key] || 0), 0);
                     if (totalCap > 0 && totalCap <= target1 * 0.9) {
-                       return <ReferenceArea key={`bg-cap-${idx}`} x1={entry.name} x2={entry.name} fill="#fee2e2" fillOpacity={0.5} />;
+                       return (
+                         <React.Fragment key={`bg-cap-${idx}`}>
+                           <ReferenceArea x1={entry.name} x2={entry.name} fill="#fee2e2" fillOpacity={0.5} />
+                         </React.Fragment>
+                       );
                     }
                     return null;
                  })}
@@ -132,7 +136,11 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
                  
                  {target1 > 0 && compareData.map((entry, idx) => {
                     if (entry.Capacity <= target1 * 0.9) {
-                       return <ReferenceArea key={`bg-comp-${idx}`} x1={entry.name} x2={entry.name} fill="#fee2e2" fillOpacity={0.5} />;
+                       return (
+                         <React.Fragment key={`bg-comp-${idx}`}>
+                           <ReferenceArea x1={entry.name} x2={entry.name} fill="#fee2e2" fillOpacity={0.5} />
+                         </React.Fragment>
+                       );
                     }
                     return null;
                  })}
@@ -169,7 +177,11 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
                  
                  {target1 > 0 && targetData.map((entry, idx) => {
                     if (entry.Capacity <= target1 * 0.9) {
-                       return <ReferenceArea key={`bg-tgt-${idx}`} x1={entry.name} x2={entry.name} fill="#fee2e2" fillOpacity={0.5} />;
+                       return (
+                         <React.Fragment key={`bg-tgt-${idx}`}>
+                           <ReferenceArea x1={entry.name} x2={entry.name} fill="#fee2e2" fillOpacity={0.5} />
+                         </React.Fragment>
+                       );
                     }
                     return null;
                  })}

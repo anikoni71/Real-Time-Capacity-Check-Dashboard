@@ -121,7 +121,11 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
               
               {target1 > 0 && chartData.map((entry, idx) => {
                 if (entry.Capacity <= target1 * 0.9) {
-                  return <ReferenceArea key={`bg-cap2-${idx}`} x1={entry.name} x2={entry.name} fill="#fee2e2" fillOpacity={0.5} />;
+                  return (
+                    <React.Fragment key={`bg-cap2-${idx}`}>
+                      <ReferenceArea x1={entry.name} x2={entry.name} fill="#fee2e2" fillOpacity={0.5} />
+                    </React.Fragment>
+                  );
                 }
                 return null;
               })}

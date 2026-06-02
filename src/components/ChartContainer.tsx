@@ -62,9 +62,9 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
 
     const dataUrl = await toJpeg(containerRef.current, {
       quality: 0.95,
-      backgroundColor: '#ffffff',
       pixelRatio: 1.5,
-      style: { fontFamily: 'sans-serif' }
+      backgroundColor: '#ffffff',
+      filter: (node) => node.tagName !== 'BUTTON'
     });
 
     // Restore buttons
@@ -133,9 +133,9 @@ export default function ChartContainer({ title, icon, children }: ChartContainer
 
       const imgData = await toJpeg(containerRef.current, {
         quality: 0.95,
-        backgroundColor: '#ffffff',
         pixelRatio: 1.5,
-        style: { fontFamily: 'sans-serif' }
+        backgroundColor: '#ffffff',
+        filter: (node) => node.tagName !== 'BUTTON'
       });
       
       // Restore buttons

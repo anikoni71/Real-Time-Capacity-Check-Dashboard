@@ -38,9 +38,9 @@ const DiagramWrapper = ({ title, icon: Icon, children, id }: any) => {
 
     const dataUrl = await toJpeg(elem, {
       quality: 0.95,
-      backgroundColor: '#ffffff',
       pixelRatio: 1.5,
-      style: { fontFamily: 'sans-serif' }
+      backgroundColor: '#ffffff',
+      filter: (node) => node.tagName !== 'BUTTON'
     });
     
     // Restore buttons
@@ -84,9 +84,9 @@ const DiagramWrapper = ({ title, icon: Icon, children, id }: any) => {
       
       const dataUrl = await toJpeg(elem, {
         quality: 0.95,
-        backgroundColor: '#ffffff',
         pixelRatio: 1.5,
-        style: { fontFamily: 'sans-serif' }
+        backgroundColor: '#ffffff',
+        filter: (node) => node.tagName !== 'BUTTON'
       });
       
       // Restore buttons
@@ -323,125 +323,130 @@ export default function RootCauseAnalysis({ scoreboards, processes = [] }: Props
     }
 
     return (
-      <div className="w-full overflow-x-auto pb-4">
-        <div style={{ minWidth: '1000px' }}>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 650" className="w-full h-auto drop-shadow-sm font-sans" style={{ minHeight: '550px' }}>
+      <div className="w-full overflow-x-auto pb-4 flex justify-center">
+        <div style={{ width: '1100px', height: '650px', position: 'relative' }} className="drop-shadow-sm font-sans shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 650" className="absolute top-0 left-0 w-full h-full">
             {/* Spine */}
             <line x1="50" y1="325" x2="940" y2="325" stroke="#9ca3af" strokeWidth="4" />
             <polygon points="920,315 940,325 920,335" fill="#9ca3af" />
             
-            {/* Head */}
-            <foreignObject x="940" y="265" width="155" height="120">
-              <div className={`h-full w-full ${headColor} text-white rounded-r-lg flex flex-col items-center justify-center p-3 text-center shadow-md border-l-4 border-white/20`} style={{wordBreak: "break-word"}}>
-                {type === 'bottleneck' ? (
-                  <Activity className="h-6 w-6 mb-2 opacity-80" />
-                ) : (
-                  <Share2 className="h-6 w-6 mb-2 opacity-80" />
-                )}
-                <span className="font-bold text-sm leading-snug">{headText}</span>
-              </div>
-            </foreignObject>
-
-            {/* BRANCH: MACHINE/TECHNICAL (Top-Left) */}
+            {/* BRANCH lines */}
             <line x1="230" y1="160" x2="430" y2="325" stroke={flags.machine ? (type === 'causes' || type === 'bottleneck' ? "#ef4444" : "#10b981") : "#d1d5db"} strokeWidth={flags.machine ? "4" : "2"} />
             <polygon points="418,321 430,325 423,314" fill={flags.machine ? (type === 'causes' || type === 'bottleneck' ? "#ef4444" : "#10b981") : "#d1d5db"} />
-            <foreignObject x="20" y="5" width="310" height="155">
-              <motion.div 
-                whileHover={{ scale: 1.05 }}
-                className={`h-full w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all ${flags.machine ? (type === 'causes' || type === 'bottleneck' ? 'border-red-400' : 'border-emerald-400') : 'border-gray-200'}`}
-                onClick={() => toggleNode(`${type}-machine`)}
-              >
-                <div className="flex items-center gap-2 mb-2 border-b pb-1">
-                  {React.createElement(labelTheme.machine.icon, { className: `h-4 w-4 ${flags.machine ? (type === 'causes' || type === 'bottleneck' ? 'text-red-500' : 'text-emerald-500') : 'text-gray-400'}` })}
-                  <h4 className={`font-bold text-sm ${flags.machine ? 'text-gray-900' : 'text-gray-500'}`}>{labelTheme.machine.label}</h4>
-                  {flags.machine && (type === 'causes' || type === 'bottleneck') && <AlertTriangle className="h-4 w-4 text-red-500 ml-auto" />}
-                </div>
-                <ul className="text-xs space-y-2 text-gray-600">
-                  {dataObj.machine.map((item, idx) => (
-                    <li key={idx} className="flex gap-1.5 leading-tight">
-                      <div className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${flags.machine ? (type === 'causes' || type === 'bottleneck' ? 'bg-red-400' : 'bg-emerald-400') : 'bg-gray-300'}`} />
-                      <span className="break-words w-full"><span className="font-semibold text-gray-700">{item.label}:</span> {item.desc}</span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            </foreignObject>
-
-            {/* BRANCH: METHOD/PROCESS (Top-Right) */}
+            
             <line x1="680" y1="160" x2="830" y2="325" stroke={flags.method ? (type === 'causes' || type === 'bottleneck' ? "#ef4444" : "#10b981") : "#d1d5db"} strokeWidth={flags.method ? "4" : "2"} />
             <polygon points="818,321 830,325 823,314" fill={flags.method ? (type === 'causes' || type === 'bottleneck' ? "#ef4444" : "#10b981") : "#d1d5db"} />
-            <foreignObject x="470" y="5" width="310" height="155">
-              <motion.div 
-                whileHover={{ scale: 1.05 }}
-                className={`h-full w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all ${flags.method ? (type === 'causes' || type === 'bottleneck' ? 'border-red-400' : 'border-emerald-400') : 'border-gray-200'}`}
-                onClick={() => toggleNode(`${type}-method`)}
-              >
-                <div className="flex items-center gap-2 mb-2 border-b pb-1">
-                  {React.createElement(labelTheme.method.icon, { className: `h-4 w-4 ${flags.method ? (type === 'causes' || type === 'bottleneck' ? 'text-red-500' : 'text-emerald-500') : 'text-gray-400'}` })}
-                  <h4 className={`font-bold text-sm ${flags.method ? 'text-gray-900' : 'text-gray-500'}`}>{labelTheme.method.label}</h4>
-                  {flags.method && (type === 'causes' || type === 'bottleneck') && <AlertTriangle className="h-4 w-4 text-red-500 ml-auto" />}
-                </div>
-                <ul className="text-xs space-y-2 text-gray-600">
-                  {dataObj.method.map((item, idx) => (
-                    <li key={idx} className="flex gap-1.5 leading-tight">
-                      <div className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${flags.method ? (type === 'causes' || type === 'bottleneck' ? 'bg-red-400' : 'bg-emerald-400') : 'bg-gray-300'}`} />
-                      <span className="break-words w-full"><span className="font-semibold text-gray-700">{item.label}:</span> {item.desc}</span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            </foreignObject>
-
-            {/* BRANCH: MANPOWER/OPERATOR (Bottom-Left) */}
+            
             <line x1="230" y1="490" x2="430" y2="325" stroke={flags.manpower ? (type === 'causes' || type === 'bottleneck' ? "#ef4444" : "#10b981") : "#d1d5db"} strokeWidth={flags.manpower ? "4" : "2"} />
             <polygon points="418,329 430,325 423,336" fill={flags.manpower ? (type === 'causes' || type === 'bottleneck' ? "#ef4444" : "#10b981") : "#d1d5db"} />
-            <foreignObject x="20" y="490" width="310" height="155">
-              <motion.div 
-                whileHover={{ scale: 1.05 }}
-                className={`h-full w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all ${flags.manpower ? (type === 'causes' || type === 'bottleneck' ? 'border-red-400' : 'border-emerald-400') : 'border-gray-200'}`}
-                onClick={() => toggleNode(`${type}-manpower`)}
-              >
-                <div className="flex items-center gap-2 mb-2 border-b pb-1">
-                  {React.createElement(labelTheme.manpower.icon, { className: `h-4 w-4 ${flags.manpower ? (type === 'causes' || type === 'bottleneck' ? 'text-red-500' : 'text-emerald-500') : 'text-gray-400'}` })}
-                  <h4 className={`font-bold text-sm ${flags.manpower ? 'text-gray-900' : 'text-gray-500'}`}>{labelTheme.manpower.label}</h4>
-                  {flags.manpower && (type === 'causes' || type === 'bottleneck') && <AlertTriangle className="h-4 w-4 text-red-500 ml-auto" />}
-                </div>
-                <ul className="text-xs space-y-2 text-gray-600">
-                  {dataObj.manpower.map((item, idx) => (
-                    <li key={idx} className="flex gap-1.5 leading-tight">
-                      <div className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${flags.manpower ? (type === 'causes' || type === 'bottleneck' ? 'bg-red-400' : 'bg-emerald-400') : 'bg-gray-300'}`} />
-                      <span className="break-words w-full"><span className="font-semibold text-gray-700">{item.label}:</span> {item.desc}</span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            </foreignObject>
-
-            {/* BRANCH: MATERIAL/QUALITY (Bottom-Right) */}
+            
             <line x1="680" y1="490" x2="830" y2="325" stroke={flags.material ? (type === 'causes' || type === 'bottleneck' ? "#ef4444" : "#10b981") : "#d1d5db"} strokeWidth={flags.material ? "4" : "2"} />
             <polygon points="818,329 830,325 823,336" fill={flags.material ? (type === 'causes' || type === 'bottleneck' ? "#ef4444" : "#10b981") : "#d1d5db"} />
-            <foreignObject x="470" y="490" width="310" height="155">
-              <motion.div 
-                whileHover={{ scale: 1.05 }}
-                className={`h-full w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all ${flags.material ? (type === 'causes' || type === 'bottleneck' ? 'border-red-400' : 'border-emerald-400') : 'border-gray-200'}`}
-                onClick={() => toggleNode(`${type}-material`)}
-              >
-                <div className="flex items-center gap-2 mb-2 border-b pb-1">
-                  {React.createElement(labelTheme.material.icon, { className: `h-4 w-4 ${flags.material ? (type === 'causes' || type === 'bottleneck' ? 'text-red-500' : 'text-emerald-500') : 'text-gray-400'}` })}
-                  <h4 className={`font-bold text-sm ${flags.material ? 'text-gray-900' : 'text-gray-500'}`}>{labelTheme.material.label}</h4>
-                  {flags.material && (type === 'causes' || type === 'bottleneck') && <AlertTriangle className="h-4 w-4 text-red-500 ml-auto" />}
-                </div>
-                <ul className="text-xs space-y-2 text-gray-600">
-                  {dataObj.material.map((item, idx) => (
-                    <li key={idx} className="flex gap-1.5 leading-tight">
-                      <div className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${flags.material ? (type === 'causes' || type === 'bottleneck' ? 'bg-red-400' : 'bg-emerald-400') : 'bg-gray-300'}`} />
-                      <span className="break-words w-full"><span className="font-semibold text-gray-700">{item.label}:</span> {item.desc}</span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            </foreignObject>
           </svg>
+
+          {/* Head */}
+          <div style={{ position: 'absolute', left: 940, top: 265, width: 155, height: 120 }}>
+            <div className={`h-full w-full ${headColor} text-white rounded-r-lg flex flex-col items-center justify-center p-3 text-center shadow-md border-l-4 border-white/20`} style={{wordBreak: "break-word"}}>
+              {type === 'bottleneck' ? (
+                <Activity className="h-6 w-6 mb-2 opacity-80" />
+              ) : (
+                <Share2 className="h-6 w-6 mb-2 opacity-80" />
+              )}
+              <span className="font-bold text-sm leading-snug">{headText}</span>
+            </div>
+          </div>
+
+          {/* BRANCH: MACHINE/TECHNICAL (Top-Left) */}
+          <div style={{ position: 'absolute', left: 20, top: 5, width: 310, height: 155 }}>
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              className={`h-full w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all ${flags.machine ? (type === 'causes' || type === 'bottleneck' ? 'border-red-400' : 'border-emerald-400') : 'border-gray-200'}`}
+              onClick={() => toggleNode(`${type}-machine`)}
+            >
+              <div className="flex items-center gap-2 mb-2 border-b pb-1">
+                {React.createElement(labelTheme.machine.icon, { className: `h-4 w-4 ${flags.machine ? (type === 'causes' || type === 'bottleneck' ? 'text-red-500' : 'text-emerald-500') : 'text-gray-400'}` })}
+                <h4 className={`font-bold text-sm ${flags.machine ? 'text-gray-900' : 'text-gray-500'}`}>{labelTheme.machine.label}</h4>
+                {flags.machine && (type === 'causes' || type === 'bottleneck') && <AlertTriangle className="h-4 w-4 text-red-500 ml-auto" />}
+              </div>
+              <ul className="text-xs space-y-2 text-gray-600">
+                {dataObj.machine.map((item, idx) => (
+                  <li key={idx} className="flex gap-1.5 leading-tight">
+                    <div className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${flags.machine ? (type === 'causes' || type === 'bottleneck' ? 'bg-red-400' : 'bg-emerald-400') : 'bg-gray-300'}`} />
+                    <span className="break-words w-full"><span className="font-semibold text-gray-700">{item.label}:</span> {item.desc}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          </div>
+
+          {/* BRANCH: METHOD/PROCESS (Top-Right) */}
+          <div style={{ position: 'absolute', left: 470, top: 5, width: 310, height: 155 }}>
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              className={`h-full w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all ${flags.method ? (type === 'causes' || type === 'bottleneck' ? 'border-red-400' : 'border-emerald-400') : 'border-gray-200'}`}
+              onClick={() => toggleNode(`${type}-method`)}
+            >
+              <div className="flex items-center gap-2 mb-2 border-b pb-1">
+                {React.createElement(labelTheme.method.icon, { className: `h-4 w-4 ${flags.method ? (type === 'causes' || type === 'bottleneck' ? 'text-red-500' : 'text-emerald-500') : 'text-gray-400'}` })}
+                <h4 className={`font-bold text-sm ${flags.method ? 'text-gray-900' : 'text-gray-500'}`}>{labelTheme.method.label}</h4>
+                {flags.method && (type === 'causes' || type === 'bottleneck') && <AlertTriangle className="h-4 w-4 text-red-500 ml-auto" />}
+              </div>
+              <ul className="text-xs space-y-2 text-gray-600">
+                {dataObj.method.map((item, idx) => (
+                  <li key={idx} className="flex gap-1.5 leading-tight">
+                    <div className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${flags.method ? (type === 'causes' || type === 'bottleneck' ? 'bg-red-400' : 'bg-emerald-400') : 'bg-gray-300'}`} />
+                    <span className="break-words w-full"><span className="font-semibold text-gray-700">{item.label}:</span> {item.desc}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          </div>
+
+          {/* BRANCH: MANPOWER/OPERATOR (Bottom-Left) */}
+          <div style={{ position: 'absolute', left: 20, top: 490, width: 310, height: 155 }}>
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              className={`h-full w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all ${flags.manpower ? (type === 'causes' || type === 'bottleneck' ? 'border-red-400' : 'border-emerald-400') : 'border-gray-200'}`}
+              onClick={() => toggleNode(`${type}-manpower`)}
+            >
+              <div className="flex items-center gap-2 mb-2 border-b pb-1">
+                {React.createElement(labelTheme.manpower.icon, { className: `h-4 w-4 ${flags.manpower ? (type === 'causes' || type === 'bottleneck' ? 'text-red-500' : 'text-emerald-500') : 'text-gray-400'}` })}
+                <h4 className={`font-bold text-sm ${flags.manpower ? 'text-gray-900' : 'text-gray-500'}`}>{labelTheme.manpower.label}</h4>
+                {flags.manpower && (type === 'causes' || type === 'bottleneck') && <AlertTriangle className="h-4 w-4 text-red-500 ml-auto" />}
+              </div>
+              <ul className="text-xs space-y-2 text-gray-600">
+                {dataObj.manpower.map((item, idx) => (
+                  <li key={idx} className="flex gap-1.5 leading-tight">
+                    <div className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${flags.manpower ? (type === 'causes' || type === 'bottleneck' ? 'bg-red-400' : 'bg-emerald-400') : 'bg-gray-300'}`} />
+                    <span className="break-words w-full"><span className="font-semibold text-gray-700">{item.label}:</span> {item.desc}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          </div>
+
+          {/* BRANCH: MATERIAL/QUALITY (Bottom-Right) */}
+          <div style={{ position: 'absolute', left: 470, top: 490, width: 310, height: 155 }}>
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              className={`h-full w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all ${flags.material ? (type === 'causes' || type === 'bottleneck' ? 'border-red-400' : 'border-emerald-400') : 'border-gray-200'}`}
+              onClick={() => toggleNode(`${type}-material`)}
+            >
+              <div className="flex items-center gap-2 mb-2 border-b pb-1">
+                {React.createElement(labelTheme.material.icon, { className: `h-4 w-4 ${flags.material ? (type === 'causes' || type === 'bottleneck' ? 'text-red-500' : 'text-emerald-500') : 'text-gray-400'}` })}
+                <h4 className={`font-bold text-sm ${flags.material ? 'text-gray-900' : 'text-gray-500'}`}>{labelTheme.material.label}</h4>
+                {flags.material && (type === 'causes' || type === 'bottleneck') && <AlertTriangle className="h-4 w-4 text-red-500 ml-auto" />}
+              </div>
+              <ul className="text-xs space-y-2 text-gray-600">
+                {dataObj.material.map((item, idx) => (
+                  <li key={idx} className="flex gap-1.5 leading-tight">
+                    <div className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${flags.material ? (type === 'causes' || type === 'bottleneck' ? 'bg-red-400' : 'bg-emerald-400') : 'bg-gray-300'}`} />
+                    <span className="break-words w-full"><span className="font-semibold text-gray-700">{item.label}:</span> {item.desc}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          </div>
         </div>
       </div>
     );
