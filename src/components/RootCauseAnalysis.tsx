@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ScoreboardRow, ProcessRow } from '../types';
 import { Share2, AlertTriangle, Lightbulb, Settings, Users, ArrowRightLeft, Activity, Info, Maximize, Printer, Download, Minimize } from 'lucide-react';
-import { toJpeg } from 'html-to-image';
+import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { useFullscreen } from '../hooks/useFullscreen';
 
@@ -10,35 +10,73 @@ const DiagramWrapper = ({ title, icon: Icon, children }: any) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { isFullscreen: isFullScreen, toggleFullscreen: toggleFullScreen } = useFullscreen(containerRef);
   
-  const handlePrint = async (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    if (!containerRef.current) return;
+  // Helper function to capture the absolute full dataset image cleanly
+  const captureFullChartImage = async (): Promise<string | null> => {
+    if (!containerRef.current) return null;
 
-    await new Promise((resolve) => setTimeout(resolve, 250));
+    // Find the horizontal scrolling data layer
+    const scrollArea = containerRef.current.querySelector('.scrollable-chart-area') as HTMLElement;
+    if (!scrollArea) return null;
+
+    // Create an invisible high-res container in the DOM to draw the un-clamped canvas
+    const printCanvas = document.createElement('div');
+    printCanvas.style.position = 'absolute';
+    printCanvas.style.top = '-9999px';
+    printCanvas.style.left = '-9999px';
+    // Match the full structural width of all data bars combined
+    printCanvas.style.width = `${scrollArea.scrollWidth}px`; 
+    printCanvas.style.height = `${scrollArea.clientHeight || 500}px`;
+    printCanvas.style.backgroundColor = '#ffffff';
+    printCanvas.className = 'print-capture-canvas';
+
+    // Clone the chart content inside our off-screen container
+    const clonedChart = scrollArea.cloneNode(true) as HTMLElement;
+    clonedChart.style.width = '100%';
+    clonedChart.style.minWidth = 'unset';
+    clonedChart.style.overflow = 'visible';
+    printCanvas.appendChild(clonedChart);
+    document.body.appendChild(printCanvas);
+
+    // Give charting engines a minor breath tick to evaluate structural paths
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     try {
-      const actionsEl = containerRef.current.querySelector('.action-buttons') as HTMLElement;
-      if (actionsEl) actionsEl.style.visibility = 'hidden';
-
-      const chartImageDataUrl = await toJpeg(containerRef.current, {
-        pixelRatio: 2,
+      const canvas = await html2canvas(printCanvas, {
+        scale: 2, // Retains premium crystal-clear resolution
+        useCORS: true,
+        logging: false,
         backgroundColor: '#ffffff',
-        fontEmbedCSS: ''
+        width: scrollArea.scrollWidth,
+        windowWidth: scrollArea.scrollWidth
       });
 
-      if (actionsEl) actionsEl.style.visibility = 'visible';
+      const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
+      document.body.removeChild(printCanvas); // Clean up the DOM node
+      return dataUrl;
+    } catch (err) {
+      console.error('Canvas trace capture aborted:', err);
+      if (document.body.contains(printCanvas)) document.body.removeChild(printCanvas);
+      return null;
+    }
+  };
 
+  const handlePrint = async (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    
+    const chartImageDataUrl = await captureFullChartImage();
+    if (!chartImageDataUrl) return;
+
+    try {
       const printWindow = window.open('', '_blank');
-
       if (printWindow) {
         printWindow.document.write(`
           <html>
             <head>
               <title>Print View - Root Cause & Solutions</title>
               <style>
-                @page { size: A4 landscape; margin: 0; }
-                body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #fff; }
-                img { width: 100%; height: auto; max-height: 100vh; object-fit: contain; }
+                @page { size: A4 landscape; margin: 10mm; }
+                body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #fff; }
+                img { width: 100%; height: auto; max-height: calc(100vh - 20mm); object-fit: contain; }
               </style>
             </head>
             <body>
@@ -55,25 +93,13 @@ const DiagramWrapper = ({ title, icon: Icon, children }: any) => {
 
   const handleDownload = async (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (!containerRef.current) return;
-
-    // Fixed: Standard delay allows internal text vectors to stabilize before generation
-    await new Promise((resolve) => setTimeout(resolve, 250));
+    
+    const chartImageDataUrl = await captureFullChartImage();
+    if (!chartImageDataUrl) return;
 
     try {
-      const actionsEl = containerRef.current.querySelector('.action-buttons') as HTMLElement;
-      if (actionsEl) actionsEl.style.visibility = 'hidden';
-
-      const imgData = await toJpeg(containerRef.current, {
-        pixelRatio: 2,
-        backgroundColor: '#ffffff',
-        fontEmbedCSS: ''
-      });
-
-      if (actionsEl) actionsEl.style.visibility = 'visible';
-
       const pdf = new jsPDF('l', 'mm', 'a4');
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight());
+      pdf.addImage(chartImageDataUrl, 'JPEG', 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight());
       pdf.save(`${title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.pdf`);
     } catch (err) {
       console.error('RCA Tab PDF output initialization failed:', err);

@@ -1,10 +1,12 @@
 @import "tailwindcss";
 
 /* ==========================================================================
-   GLOBAL FIX: Structural Overrides for All Graph Cards
+   GLOBAL GRAPH FIX: Perfect Fullscreen & Single-Page A4 Printing
    ========================================================================== */
 
-/* This targets the chart wrapper natively when the browser goes into fullscreen mode */
+/* --------------------------------------------------------------------------
+   1. SCREEN VIEW RULES: Handles Monitor Fullscreen Smoothly
+   -------------------------------------------------------------------------- */
 .chart-wrapper:fullscreen,
 .chart-wrapper.is-fullscreen {
   background-color: #ffffff !important;
@@ -13,10 +15,12 @@
   flex-direction: column !important;
   justify-content: flex-start !important;
   align-items: stretch !important;
-  overflow: hidden !important;
   width: 100vw !important;
   height: 100vh !important;
   box-sizing: border-box !important;
+  /* Allows the user to scroll horizontally through all bars on their screen */
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
   position: fixed;
   top: 0;
   left: 0;
@@ -25,9 +29,24 @@
   z-index: 9999;
 }
 
-/* Ensure the action header bar stays perfectly visible on top and doesn't get covered */
+/* Keeps your Title and Action Control Icons fixed to the left while scrolling bars */
 .chart-wrapper:fullscreen .chart-header,
-.chart-wrapper.is-fullscreen .chart-header,
+.chart-wrapper.is-fullscreen .chart-header {
+  position: sticky !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 100% !important;
+  max-width: calc(100vw - 48px) !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  z-index: 999999 !important;
+  margin-bottom: 20px !important;
+  flex-shrink: 0 !important;
+  background-color: #ffffff !important;
+}
+
+/* Ensure the action header bar stays perfectly visible on top and doesn't get covered */
 .chart-wrapper:fullscreen .action-buttons,
 .chart-wrapper.is-fullscreen .action-buttons,
 .chart-wrapper:fullscreen .header-controls,
@@ -40,67 +59,81 @@
   flex-shrink: 0 !important;
 }
 
-/* Force the actual chart display canvas area to take up the rest of the window screen space */
+/* Forces the inner canvas container to expand wide so no bars smash together */
 .chart-wrapper:fullscreen .scrollable-chart-area,
-.chart-wrapper.is-fullscreen .scrollable-chart-area,
-.chart-wrapper:fullscreen .recharts-responsive-container,
-.chart-wrapper.is-fullscreen .recharts-responsive-container,
-.chart-wrapper:fullscreen .apexcharts-canvas,
-.chart-wrapper.is-fullscreen .apexcharts-canvas {
-  flex-grow: 1 !important;
-  flex-shrink: 1 !important;
+.chart-wrapper.is-fullscreen .scrollable-chart-area {
+  display: block !important;
   width: 100% !important;
-  height: calc(100vh - 80px) !important; /* Forces the graph canvas to sit safely under the header controls */
-  min-height: unset !important;
+  min-width: 3200px !important; /* Spaciously expands all bars for easy reading */
+  height: calc(100vh - 120px) !important;
+  overflow: visible !important;
+  flex-grow: 1 !important;
 }
 
+/* Ensures Recharts / ApexCharts mapping systems adhere to the expanded screen size */
+.chart-wrapper:fullscreen .recharts-responsive-container,
+.chart-wrapper.is-fullscreen .recharts-responsive-container,
+.chart-wrapper:fullscreen .recharts-wrapper,
+.chart-wrapper.is-fullscreen .recharts-wrapper,
+.chart-wrapper:fullscreen .apexcharts-canvas,
+.chart-wrapper.is-fullscreen .apexcharts-canvas {
+  width: 100% !important;
+  min-width: 3200px !important;
+  height: 100% !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. NATIVE PRINT RULES: Forces the entire wide layout onto 1 single A4 Page
+   -------------------------------------------------------------------------- */
 @media print {
-  /* 1. Define A4 Portrait Page Size */
+  /* Set explicit A4 landscape configuration directly into the browser hardware engine */
   @page {
-    size: A4 portrait;
-    margin: 12mm;
+    size: A4 landscape !important;
+    margin: 6mm !important;
   }
 
-  /* 2. Reset Body & Global Layouts */
+  /* Reset the screen's layout parameters so the engine treats it as a static snapshot */
   body, html, #root, .dashboard-container {
     width: 100% !important;
-    max-width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
     margin: 0 !important;
     padding: 0 !important;
-    display: block !important;
-    background: white !important;
   }
 
-  /* 3. Force 2-Column Grids to Stack into 1-Column */
-  .grid-container, 
-  .charts-grid,
-  div[style*="grid-template-columns"] { 
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 20px !important;
-  }
-
-  /* 4. Force Every Chart Card to Scale Safely */
-  .chart-card, .card, .js-chart-container {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
-
-  /* 5. Force internal SVGs/Canvas elements to obey the parent width */
-  .chart-card svg, 
-  .chart-card canvas,
+  /* CRITICAL: Collapse the 3200px wide screen layout back down to 100% to prevent multi-page leaking */
+  .chart-wrapper, 
+  .chart-wrapper:fullscreen, 
+  .chart-wrapper.is-fullscreen,
+  .scrollable-chart-area,
+  .recharts-responsive-container,
+  .recharts-wrapper,
   .apexcharts-canvas {
     width: 100% !important;
     max-width: 100% !important;
+    min-width: unset !important; /* Kills the 3200px constraint instantly when printing */
+    height: auto !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+    display: block !important;
   }
 
-  /* 6. Keep Colors and Bar Fills Visible */
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
+  /* Completely hides the action buttons container from printing onto the actual A4 page layout */
+  .action-buttons,
+  .chart-header button,
+  .header-controls button {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Force print image views generated by html2canvas to adapt strictly to 1 landscape box */
+  img {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+    page-break-inside: avoid !important;
   }
 }
 

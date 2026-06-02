@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Maximize2, Printer, Minimize2, Download, FileImage, FileSpreadsheet, FileText } from 'lucide-react';
-import { toJpeg } from 'html-to-image';
+import { toJpeg, toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 import { useFullscreen } from '../hooks/useFullscreen';
 
@@ -28,44 +28,99 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
     return () => document.removeEventListener('click', handleClickOutside);
   }, [showDropdown]);
 
-  const handlePrint = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!containerRef.current) return;
+  // Helper function to capture the absolute full dataset image cleanly
+  const captureFullChartImage = async (): Promise<string | null> => {
+    if (!containerRef.current) return null;
+
+    // Find the horizontal scrolling data layer
+    const scrollArea = containerRef.current.querySelector('.scrollable-chart-area') as HTMLElement;
+    if (!scrollArea) return null;
+
+    // Create an invisible high-res container in the DOM to draw the un-clamped canvas
+    const printCanvas = document.createElement('div');
+    printCanvas.style.position = 'absolute';
+    printCanvas.style.top = '-9999px';
+    printCanvas.style.left = '-9999px';
+    // Match the full structural width of all data bars combined
+    printCanvas.style.width = `${scrollArea.scrollWidth}px`; 
+    printCanvas.style.height = `${scrollArea.clientHeight || 500}px`;
+    printCanvas.style.backgroundColor = '#ffffff';
+    printCanvas.className = 'print-capture-canvas';
+
+    // Clone the chart content inside our off-screen container
+    const clonedChart = scrollArea.cloneNode(true) as HTMLElement;
+    clonedChart.style.width = '100%';
+    clonedChart.style.minWidth = 'unset';
+    clonedChart.style.overflow = 'visible';
+    printCanvas.appendChild(clonedChart);
+    document.body.appendChild(printCanvas);
+
+    // Give charting engines a minor breath tick to evaluate structural paths
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     try {
-      const actionsEl = containerRef.current.querySelector('.action-buttons') as HTMLElement;
-      if (actionsEl) actionsEl.style.visibility = 'hidden';
-
-      const chartImageDataUrl = await toJpeg(containerRef.current, {
-        pixelRatio: 2,
+      const canvas = await html2canvas(printCanvas, {
+        scale: 2, // Retains premium crystal-clear resolution
+        useCORS: true,
+        logging: false,
         backgroundColor: '#ffffff',
-        fontEmbedCSS: ''
+        width: scrollArea.scrollWidth,
+        windowWidth: scrollArea.scrollWidth
       });
 
-      if (actionsEl) actionsEl.style.visibility = 'visible';
-
-      const printWindow = window.open('', '_blank');
-
-      if (printWindow) {
-        printWindow.document.write(`
-          <html>
-            <head>
-              <title>Print System - ${title}</title>
-              <style>
-                @page { size: A4 landscape; margin: 0; }
-                body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #fff; }
-                img { width: 100%; height: auto; max-height: 100vh; object-fit: contain; }
-              </style>
-            </head>
-            <body>
-              <img src="${chartImageDataUrl}" onload="window.print(); window.close();" />
-            </body>
-          </html>
-        `);
-        printWindow.document.close();
-      }
+      const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
+      document.body.removeChild(printCanvas); // Clean up the DOM node
+      return dataUrl;
     } catch (err) {
-      console.error('Print layout window generation failed:', err);
+      console.error('Canvas trace capture aborted:', err);
+      if (document.body.contains(printCanvas)) document.body.removeChild(printCanvas);
+      return null;
+    }
+  };
+
+  const handlePrint = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const chartImageDataUrl = await captureFullChartImage();
+    if (!chartImageDataUrl) return;
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Print System - ${title}</title>
+            <style>
+              @page { 
+                size: A4 landscape; 
+                margin: 5mm; 
+              }
+              body { 
+                margin: 0; 
+                padding: 0; 
+                display: flex; 
+                justify-content: center; 
+                align-items: center; 
+                min-height: 100vh; 
+                background: #fff; 
+                overflow: hidden; 
+              }
+              /* Clamps the entire horizontal graph into exactly one viewport boundary box */
+              img { 
+                width: 100vw !important; 
+                height: 100vh !important; 
+                max-width: 100% !important; 
+                max-height: 100% !important; 
+                object-fit: contain !important; 
+                page-break-inside: avoid !important;
+              }
+            </style>
+          </head>
+          <body>
+            <img src="${chartImageDataUrl}" onload="window.print(); window.close();" />
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
     }
   };
 
@@ -73,24 +128,19 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
     if (!containerRef.current || isDownloading) return;
     setIsDownloading(true);
 
+    const chartImageDataUrl = await captureFullChartImage();
+    if (!chartImageDataUrl) {
+      setIsDownloading(false);
+      return;
+    }
+
     try {
-      const actionsEl = containerRef.current.querySelector('.action-buttons') as HTMLElement;
-      if (actionsEl) actionsEl.style.visibility = 'hidden';
-
-      const imgData = await toJpeg(containerRef.current, {
-        pixelRatio: 2,
-        backgroundColor: '#ffffff',
-        fontEmbedCSS: ''
-      });
-
-      if (actionsEl) actionsEl.style.visibility = 'visible';
-
       const pdf = new jsPDF('l', 'mm', 'a4');
-      
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+      // Automatically stretches/shrinks the wide dataset snapshot to cleanly fit 1 A4 page
+      pdf.addImage(chartImageDataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight);
       pdf.save(`${title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.pdf`);
     } catch (err) {
       console.error('PDF Download processing broke:', err);
@@ -102,32 +152,16 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
   const downloadImage = async () => {
     if (!containerRef.current || isDownloading) return;
     setIsDownloading(true);
+
+    const chartImageDataUrl = await captureFullChartImage();
+    if (!chartImageDataUrl) {
+      setIsDownloading(false);
+      return;
+    }
+    
     try {
-      const buttons = containerRef.current.querySelectorAll('.action-buttons');
-      buttons.forEach(btn => (btn as HTMLElement).style.display = 'none');
-      
-      const scrollInner = containerRef.current.querySelector('.scrollable-chart-inner') as HTMLElement;
-      let originalWidth = '';
-      if (scrollInner) {
-        originalWidth = scrollInner.style.width;
-        scrollInner.style.width = '100%';
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      const imgData = await toJpeg(containerRef.current, {
-        pixelRatio: 2,
-        backgroundColor: '#ffffff',
-        fontEmbedCSS: ''
-      });
-      
-      buttons.forEach(btn => (btn as HTMLElement).style.display = '');
-      if (scrollInner) {
-        scrollInner.style.width = originalWidth;
-      }
-      
       const a = document.createElement('a');
-      a.href = imgData;
+      a.href = chartImageDataUrl;
       a.download = `${title.replace(/[^a-zA-Z0-9]/g, '_')}.jpeg`;
       document.body.appendChild(a);
       a.click();
