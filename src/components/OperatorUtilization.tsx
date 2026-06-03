@@ -1,10 +1,13 @@
 import React, { useMemo } from 'react';
 import { ProcessRow } from '../types';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList, ReferenceLine } from 'recharts';
+import { FullscreenResponsiveContainer as ResponsiveContainer } from './FullscreenResponsiveContainer';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LabelList, ReferenceLine } from 'recharts';
 import { Clock } from 'lucide-react';
 import ChartContainer from './ChartContainer';
+import { useFullscreenContext } from '../contexts/FullscreenContext';
 
 export default function OperatorUtilization({ processes }: { processes: ProcessRow[] }) {
+  const isFullscreen = useFullscreenContext();
   const chartData = useMemo(() => {
     // Unique Process + Operator combination
     const map = new Map();
@@ -54,9 +57,9 @@ export default function OperatorUtilization({ processes }: { processes: ProcessR
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                 <XAxis 
                   dataKey="name" 
-                  angle={-55} 
+                  angle={isFullscreen ? -60 : -45} 
                   textAnchor="end" 
-                  tick={{ fontSize: 11, fill: '#4B5563' }} 
+                  tick={{ fontSize: isFullscreen ? 8 : 12, fill: '#4B5563' }} 
                   interval={0}
                   height={150}
                 />

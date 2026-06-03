@@ -1,8 +1,10 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Maximize2, Printer, Minimize2, Download, FileImage, FileSpreadsheet, FileText } from 'lucide-react';
 import { toJpeg, toPng } from 'html-to-image';
+import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { useFullscreen } from '../hooks/useFullscreen';
+import { FullscreenContext } from '../contexts/FullscreenContext';
 
 interface ChartContainerProps {
   title: string;
@@ -247,8 +249,11 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
         className="flex-1 scrollable-chart-area w-full flex flex-col cursor-pointer" 
         onClick={toggleFullscreen}
         title="Click to toggle fullscreen"
+        key={isFullscreen ? 'fullscreen' : 'normal'}
       >
-        {children}
+        <FullscreenContext.Provider value={isFullscreen}>
+          {children}
+        </FullscreenContext.Provider>
       </div>
     </div>
   );

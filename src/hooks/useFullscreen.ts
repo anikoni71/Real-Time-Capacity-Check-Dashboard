@@ -30,10 +30,12 @@ export function useFullscreen(ref: RefObject<HTMLElement | null>) {
     
     setIsFullscreen(isCurrentlyFullscreen);
     
-    // Dispatch resize event so charts adapt
-    setTimeout(() => {
-       window.dispatchEvent(new Event('resize'));
-    }, 50);
+    // Dispatch resize event so charts adapt (multiple ticks to catch all layout reflow phases)
+    [50, 150, 300].forEach(delay => {
+      setTimeout(() => {
+         window.dispatchEvent(new Event('resize'));
+      }, delay);
+    });
   }, [ref]);
 
   useEffect(() => {

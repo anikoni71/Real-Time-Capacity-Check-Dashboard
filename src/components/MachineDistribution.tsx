@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { ProcessRow } from '../types';
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { FullscreenResponsiveContainer as ResponsiveContainer } from './FullscreenResponsiveContainer';
+import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import { Settings } from 'lucide-react';
 import ChartContainer from './ChartContainer';
 

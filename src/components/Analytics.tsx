@@ -1,10 +1,13 @@
 import React, { useMemo } from 'react';
 import { ProcessRow } from '../types';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList, ReferenceLine } from 'recharts';
+import { FullscreenResponsiveContainer as ResponsiveContainer } from './FullscreenResponsiveContainer';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LabelList, ReferenceLine } from 'recharts';
 import { PieChart, ArrowUpRight } from 'lucide-react';
 import ChartContainer from './ChartContainer';
+import { useFullscreenContext } from '../contexts/FullscreenContext';
 
 export default function Analytics({ processes }: { processes: ProcessRow[] }) {
+  const isFullscreen = useFullscreenContext();
   const { processStats, topProcesses, target1, target2 } = useMemo(() => {
     const processOps: string[] = [];
     processes.forEach(p => {
@@ -46,7 +49,7 @@ export default function Analytics({ processes }: { processes: ProcessRow[] }) {
              <ResponsiveContainer width="100%" height="100%">
                <BarChart data={processStats} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-55} textAnchor="end" height={150}/>
+                 <XAxis dataKey="name" tick={{ fontSize: isFullscreen ? 8 : 12, fill: '#4B5563' }} interval={0} angle={isFullscreen ? -60 : -45} textAnchor="end" height={150}/>
                  <YAxis domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} tick={{ fontSize: 11 }} />
                  <Tooltip isAnimationActive={false} />
                  <Legend verticalAlign="top" height={150} />
@@ -76,7 +79,7 @@ export default function Analytics({ processes }: { processes: ProcessRow[] }) {
              <ResponsiveContainer width="100%" height="100%">
                <LineChart data={topProcesses} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} interval={0} angle={-55} textAnchor="end" height={150}/>
+                 <XAxis dataKey="name" tick={{ fontSize: isFullscreen ? 8 : 12, fill: '#4B5563' }} interval={0} angle={isFullscreen ? -60 : -45} textAnchor="end" height={150}/>
                  <YAxis tick={{ fontSize: 11 }}  domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Number(m) * 1.2); }]} />
                  <Tooltip isAnimationActive={false} />
                  <Legend verticalAlign="top" height={150} />

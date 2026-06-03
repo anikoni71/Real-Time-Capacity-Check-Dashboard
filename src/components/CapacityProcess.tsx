@@ -1,8 +1,10 @@
 import React, { useMemo } from 'react';
 import { ProcessRow } from '../types';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList, Cell, ReferenceLine, ReferenceArea } from 'recharts';
+import { FullscreenResponsiveContainer as ResponsiveContainer } from './FullscreenResponsiveContainer';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LabelList, Cell, ReferenceLine, ReferenceArea } from 'recharts';
 import { BarChart2 } from 'lucide-react';
 import ChartContainer from './ChartContainer';
+import { useFullscreenContext } from '../contexts/FullscreenContext';
 
 // Define fixed colors for operators to keep them consistent
 const OPERATOR_COLORS = [
@@ -10,6 +12,7 @@ const OPERATOR_COLORS = [
 ];
 
 export default function CapacityProcess({ processes }: { processes: ProcessRow[] }) {
+  const isFullscreen = useFullscreenContext();
   const { chartData, ops, avgCapacity, target1, target2, calculatedMax } = useMemo(() => {
     // Process chart needs original sequence exactly. 
     // We can group by Process Name but maintain order of appearance.
@@ -90,9 +93,9 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
               <XAxis 
                 dataKey="name" 
-                tick={{ fontSize: 12, fill: '#4B5563' }} 
+                tick={{ fontSize: isFullscreen ? 8 : 12, fill: '#4B5563' }} 
                 interval={0} 
-                angle={-55} 
+                angle={isFullscreen ? -60 : -45} 
                 textAnchor="end"
                 height={150}
               />

@@ -5,6 +5,7 @@ import { Share2, AlertTriangle, Lightbulb, Settings, Users, ArrowRightLeft, Acti
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { useFullscreen } from '../hooks/useFullscreen';
+import { FullscreenContext } from '../contexts/FullscreenContext';
 
 const DiagramWrapper = ({ title, icon: Icon, children }: any) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -130,8 +131,13 @@ const DiagramWrapper = ({ title, icon: Icon, children }: any) => {
           </button>
         </div>
       </div>
-      <div className={`scrollable-chart-area w-full flex-1 ${isFullScreen ? 'bg-white' : ''}`}>
-        {children}
+      <div 
+        className={`scrollable-chart-area w-full flex-1 ${isFullScreen ? 'bg-white' : ''}`}
+        key={isFullScreen ? 'fullscreen' : 'normal'}
+      >
+        <FullscreenContext.Provider value={isFullScreen}>
+          {children}
+        </FullscreenContext.Provider>
       </div>
     </div>
   );

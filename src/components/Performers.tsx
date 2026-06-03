@@ -1,10 +1,13 @@
 import React, { useMemo } from 'react';
 import { ProcessRow } from '../types';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList, ReferenceLine } from 'recharts';
+import { FullscreenResponsiveContainer as ResponsiveContainer } from './FullscreenResponsiveContainer';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LabelList, ReferenceLine } from 'recharts';
 import { Sparkles, AlertCircle, ArrowUp, ArrowDown, Percent, Users, Activity, Target } from 'lucide-react';
 import ChartContainer from './ChartContainer';
+import { useFullscreenContext } from '../contexts/FullscreenContext';
 
 export default function Performers({ processes }: { processes: ProcessRow[] }) {
+  const isFullscreen = useFullscreenContext();
   const { 
     topProc, lowProc, topOp, lowOp, topEff, lowEff, target1, target2,
     totalActiveOperators, overallAverageEfficiency, linesBelowTarget
@@ -91,7 +94,7 @@ export default function Performers({ processes }: { processes: ProcessRow[] }) {
                 return Math.round(Math.max(max, target1, target2) * 1.2); 
               }]} 
             />
-            <YAxis dataKey="name" type="category" tick={{ fontSize: 11, fill: '#4B5563' }} width={140} />
+            <YAxis dataKey="name" type="category" tick={{ fontSize: isFullscreen ? 8 : 12, fill: '#4B5563' }} width={140} />
             <Tooltip isAnimationActive={false} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
             
             {hasTargets && target1 > 0 && (
