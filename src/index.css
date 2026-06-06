@@ -60,25 +60,29 @@
 }
 
 /* Forces the inner canvas container to expand wide so no bars smash together */
+.chart-wrapper:fullscreen svg,
+.chart-wrapper.is-fullscreen svg {
+  width: 100% !important;
+  height: 100% !important;
+  preserveAspectRatio: none !important; /* Forces the SVG to fit the exact screen width */
+}
+
 .chart-wrapper:fullscreen .scrollable-chart-area,
 .chart-wrapper.is-fullscreen .scrollable-chart-area {
-  width: 100vw !important;
+  width: 100% !important;
   height: calc(100vh - 60px) !important;
-  max-width: 100% !important;
-  max-height: 100% !important;
-  overflow: hidden !important; /* Block all scrolling entirely */
-  display: flex !important;
-  flex-direction: column !important;
-  padding: 10px !important;
+  overflow-x: hidden !important; /* Lock side scrolling */
+  overflow-y: auto !important;   /* Smooth vertical scrolling for large datasets */
+  padding: 20px !important;
   box-sizing: border-box !important;
+  background: #ffffff !important;
 }
 
 .chart-wrapper:fullscreen .scrollable-chart-inner,
 .chart-wrapper.is-fullscreen .scrollable-chart-inner {
   width: 100% !important;
   max-width: 100% !important;
-  height: 100% !important;
-  min-height: 0 !important;
+  height: 100%;
 }
 
 /* Ensures Recharts / ApexCharts mapping systems adhere to the expanded screen size */
@@ -89,7 +93,6 @@
 .chart-wrapper:fullscreen .apexcharts-canvas,
 .chart-wrapper.is-fullscreen .apexcharts-canvas {
   width: 100% !important;
-  height: 100% !important;
 }
 
 /* --------------------------------------------------------------------------

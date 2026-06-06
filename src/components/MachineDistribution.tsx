@@ -4,8 +4,10 @@ import { FullscreenResponsiveContainer as ResponsiveContainer } from './Fullscre
 import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import { Settings } from 'lucide-react';
 import ChartContainer from './ChartContainer';
+import { useFullscreenContext } from '../contexts/FullscreenContext';
 
 export default function MachineDistribution({ processes }: { processes: ProcessRow[] }) {
+  const isFullscreen = useFullscreenContext();
   const { data, COLORS } = useMemo(() => {
     const map = new Map<string, number>();
     processes.forEach(p => {
@@ -52,7 +54,7 @@ export default function MachineDistribution({ processes }: { processes: ProcessR
         icon={<Settings className="h-5 w-5 text-blue-600" />}
       >
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8 pb-4 scrollable-chart-area flex-1">
-          <div className="w-full lg:w-1/2 scrollable-chart-inner" style={{ height: '350px' }}>
+          <div className="w-full lg:w-1/2 scrollable-chart-inner" style={{ width: '100%', height: '100%', minHeight: '600px', flex: 1 }}>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie isAnimationActive={false}

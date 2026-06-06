@@ -57,40 +57,52 @@ export default function YamazumiChart({ processes }: { processes: ProcessRow[] }
           <p className="text-sm text-gray-500 mt-1">Shows Value-Added (VA), Non-Value-Added but Necessary (NVAN), and Waste (NVA) breakdown.</p>
         </div>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, chartData.length * 60)}px`, height: '600px' }}>
+          <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, chartData.length * 60)}px`, height: '100%', minHeight: '600px', flex: 1 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+              <BarChart layout={isFullscreen ? "vertical" : "horizontal"} data={chartData} margin={{ top: 30, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 220 }} barCategoryGap="1%">
+                <CartesianGrid strokeDasharray="3 3" vertical={!isFullscreen} horizontal={isFullscreen} stroke="#E5E7EB" />
+                {isFullscreen ? (
+                  <YAxis dataKey="name" type="category" width={150} tick={{ fontSize: 9, fill: '#4B5563' }} />
+                ) : (
+                  <XAxis 
+                    dataKey="name" 
+                    angle={-45} 
+                    textAnchor="end" 
+                    tick={{ fontSize: 12, fill: '#4B5563' }} 
+                    interval={0}
+                    height={150}
+                  />
+                )}
+              {isFullscreen ? (
                 <XAxis 
-                  dataKey="name" 
-                  angle={isFullscreen ? -60 : -45} 
-                  textAnchor="end" 
-                  tick={{ fontSize: isFullscreen ? 8 : 12, fill: '#4B5563' }} 
-                  interval={0}
-                  height={150}
+                  type="number"
+                  tick={{ fontSize: 11 }}
                 />
-              <YAxis 
-                tick={{ fontSize: 11 }}
-                label={{ value: 'Time (Sec/Min)', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#4B5563', fontSize: 12 } }} 
-              />
+              ) : (
+                <YAxis 
+                  type="number"
+                  tick={{ fontSize: 11 }}
+                  label={{ value: 'Time (Sec/Min)', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#4B5563', fontSize: 12 } }} 
+                />
+              )}
               <Tooltip isAnimationActive={false} 
                 cursor={{ fill: 'transparent' }}
                 contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
               />
-              <Legend verticalAlign="top" height={150} wrapperStyle={{ fontSize: '12px' }} />
+              <Legend verticalAlign="top" height={isFullscreen ? 50 : 150} wrapperStyle={{ fontSize: '12px' }} />
 
-              <Bar isAnimationActive={false} dataKey="va" stackId="a" fill="#10B981" name="Value-Added (VA)" maxBarSize={50} />
-              <Bar isAnimationActive={false} dataKey="nvan" stackId="a" fill="#F59E0B" name="Non-Value-Added Necessary (NVAN)" maxBarSize={50} />
-              <Bar isAnimationActive={false} dataKey="nva" stackId="a" fill="#EF4444" name="Waste (NVA)" maxBarSize={50}>
+              <Bar isAnimationActive={false} dataKey="va" stackId="a" fill="#10B981" name="Value-Added (VA)" minPointSize={2} />
+              <Bar isAnimationActive={false} dataKey="nvan" stackId="a" fill="#F59E0B" name="Non-Value-Added Necessary (NVAN)" minPointSize={2} />
+              <Bar isAnimationActive={false} dataKey="nva" stackId="a" fill="#EF4444" name="Waste (NVA)" minPointSize={2}>
                  <LabelList 
                    dataKey="total" 
-                   position="top" 
+                   position={isFullscreen ? "right" : "top"} 
                    fill="#111827" 
                    fontSize={11} 
                    fontWeight="bold" 
                    formatter={(v: number) => v > 0 ? String(Math.round(v)) : ''}
                    offset={10} 
-                   angle={-55}
+                   angle={isFullscreen ? 0 : -55}
                  />
               </Bar>
             </BarChart>

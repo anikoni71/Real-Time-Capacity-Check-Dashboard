@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ScoreboardRow, ProcessRow } from '../types';
 import { Share2, AlertTriangle, Lightbulb, Settings, Users, ArrowRightLeft, Activity, Info, Maximize, Printer, Download, Minimize } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import { toJpeg } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 import { useFullscreen } from '../hooks/useFullscreen';
 import { FullscreenContext } from '../contexts/FullscreenContext';
@@ -42,16 +42,14 @@ const DiagramWrapper = ({ title, icon: Icon, children }: any) => {
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     try {
-      const canvas = await html2canvas(printCanvas, {
-        scale: 2, // Retains premium crystal-clear resolution
-        useCORS: true,
-        logging: false,
+      const dataUrl = await toJpeg(printCanvas, {
+        quality: 1.0,
         backgroundColor: '#ffffff',
         width: scrollArea.scrollWidth,
-        windowWidth: scrollArea.scrollWidth
+        height: scrollArea.clientHeight || 500,
+        pixelRatio: 2
       });
 
-      const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
       document.body.removeChild(printCanvas); // Clean up the DOM node
       return dataUrl;
     } catch (err) {

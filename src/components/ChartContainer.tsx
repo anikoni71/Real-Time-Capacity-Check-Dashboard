@@ -1,7 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Maximize2, Printer, Minimize2, Download, FileImage, FileSpreadsheet, FileText } from 'lucide-react';
 import { toJpeg, toPng } from 'html-to-image';
-import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { useFullscreen } from '../hooks/useFullscreen';
 import { FullscreenContext } from '../contexts/FullscreenContext';
@@ -61,16 +60,14 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     try {
-      const canvas = await html2canvas(printCanvas, {
-        scale: 2, // Retains premium crystal-clear resolution
-        useCORS: true,
-        logging: false,
+      const dataUrl = await toJpeg(printCanvas, {
+        quality: 1.0,
         backgroundColor: '#ffffff',
         width: scrollArea.scrollWidth,
-        windowWidth: scrollArea.scrollWidth
+        height: scrollArea.clientHeight || 500,
+        pixelRatio: 2
       });
 
-      const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
       document.body.removeChild(printCanvas); // Clean up the DOM node
       return dataUrl;
     } catch (err) {
@@ -246,7 +243,7 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
       
       {/* Chart Content Area with Click-to-Fullscreen */}
       <div 
-        className="flex-1 scrollable-chart-area w-full flex flex-col cursor-pointer" 
+        className="flex-1 chart-content-wrapper w-full flex flex-col cursor-pointer" 
         onClick={toggleFullscreen}
         title="Click to toggle fullscreen"
         key={isFullscreen ? 'fullscreen' : 'normal'}

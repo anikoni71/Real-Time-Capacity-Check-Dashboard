@@ -35,19 +35,27 @@ export default function LineTargets({ processes }: { processes: ProcessRow[] }) 
     <div className="space-y-6">
       <ChartContainer title="Line 100% Target vs Capacity" icon={<Target className="h-5 w-5 text-indigo-600" />}>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-           <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, lineData.length * 60)}px`, height: '600px' }}>
+           <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, lineData.length * 60)}px`, height: '100%', minHeight: '600px', flex: 1 }}>
              <ResponsiveContainer width="100%" height="100%">
-               <LineChart data={lineData} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
-                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                 <XAxis dataKey="name" tick={{ fontSize: isFullscreen ? 8 : 12, fill: '#4B5563' }} interval={0} angle={isFullscreen ? -60 : -45} textAnchor="end" height={150}/>
-                 <YAxis domain={[0, (max: number | number[]) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(m * 1.2); }]} tick={{ fontSize: 11 }} />
+               <LineChart layout={isFullscreen ? "vertical" : "horizontal"} data={lineData} margin={{ top: 30, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 220 }}>
+                 <CartesianGrid strokeDasharray="3 3" vertical={!isFullscreen} horizontal={isFullscreen} stroke="#E5E7EB" />
+                 {isFullscreen ? (
+                   <YAxis dataKey="name" type="category" width={150} tick={{ fontSize: 9, fill: '#4B5563' }} />
+                 ) : (
+                   <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#4B5563' }} interval={0} angle={-45} textAnchor="end" height={150}/>
+                 )}
+                 {isFullscreen ? (
+                   <XAxis type="number" domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(m * 1.2); }]} tick={{ fontSize: 11 }} />
+                 ) : (
+                   <YAxis domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(m * 1.2); }]} tick={{ fontSize: 11 }} />
+                 )}
                  <Tooltip isAnimationActive={false} />
-                 <Legend verticalAlign="top" height={150} />
+                 <Legend verticalAlign="top" height={isFullscreen ? 50 : 150} />
                  <Line isAnimationActive={false} type="monotone" dataKey="Capacity" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }}>
-                   <LabelList dataKey="Capacity" position="bottom" fill="#3b82f6" fontSize={11} fontWeight="bold" angle={-55} offset={10} formatter={(v: number) => String(v)} />
+                   <LabelList dataKey="Capacity" position={isFullscreen ? "right" : "bottom"} fill="#3b82f6" fontSize={11} fontWeight="bold" angle={isFullscreen ? 0 : -55} offset={10} formatter={(v: number) => String(v)} />
                  </Line>
                  <Line isAnimationActive={false} type="monotone" dataKey="Line 100% Target" stroke="#ef4444" strokeWidth={3} dot={false} activeDot={false}>
-                   <LabelList dataKey="Line 100% Target" position="top" fill="#ef4444" fontSize={11} fontWeight="bold" angle={-55} offset={10} formatter={(v: number) => String(v)} />
+                   <LabelList dataKey="Line 100% Target" position={isFullscreen ? "right" : "top"} fill="#ef4444" fontSize={11} fontWeight="bold" angle={isFullscreen ? 0 : -55} offset={10} formatter={(v: number) => String(v)} />
                  </Line>
                </LineChart>
              </ResponsiveContainer>
@@ -57,19 +65,27 @@ export default function LineTargets({ processes }: { processes: ProcessRow[] }) 
 
       <ChartContainer title="Today Plan LC Target vs Capacity" icon={<Activity className="h-5 w-5 text-emerald-600" />}>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-           <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, lineData.length * 60)}px`, height: '600px' }}>
+           <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, lineData.length * 60)}px`, height: '100%', minHeight: '600px', flex: 1 }}>
              <ResponsiveContainer width="100%" height="100%">
-               <LineChart data={lineData} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
-                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                 <XAxis dataKey="name" tick={{ fontSize: isFullscreen ? 8 : 12, fill: '#4B5563' }} interval={0} angle={isFullscreen ? -60 : -45} textAnchor="end" height={150}/>
-                 <YAxis domain={[0, (max: number | number[]) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(m * 1.2); }]} tick={{ fontSize: 11 }} />
+               <LineChart layout={isFullscreen ? "vertical" : "horizontal"} data={lineData} margin={{ top: 30, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 220 }}>
+                 <CartesianGrid strokeDasharray="3 3" vertical={!isFullscreen} horizontal={isFullscreen} stroke="#E5E7EB" />
+                 {isFullscreen ? (
+                   <YAxis dataKey="name" type="category" width={150} tick={{ fontSize: 9, fill: '#4B5563' }} />
+                 ) : (
+                   <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#4B5563' }} interval={0} angle={-45} textAnchor="end" height={150}/>
+                 )}
+                 {isFullscreen ? (
+                   <XAxis type="number" domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(m * 1.2); }]} tick={{ fontSize: 11 }} />
+                 ) : (
+                   <YAxis domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(m * 1.2); }]} tick={{ fontSize: 11 }} />
+                 )}
                  <Tooltip isAnimationActive={false} />
-                 <Legend verticalAlign="top" height={150} />
+                 <Legend verticalAlign="top" height={isFullscreen ? 50 : 150} />
                  <Line isAnimationActive={false} type="monotone" dataKey="Capacity" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }}>
-                   <LabelList dataKey="Capacity" position="bottom" fill="#3b82f6" fontSize={11} fontWeight="bold" angle={-55} offset={10} formatter={(v: number) => String(v)} />
+                   <LabelList dataKey="Capacity" position={isFullscreen ? "right" : "bottom"} fill="#3b82f6" fontSize={11} fontWeight="bold" angle={isFullscreen ? 0 : -55} offset={10} formatter={(v: number) => String(v)} />
                  </Line>
                  <Line isAnimationActive={false} type="monotone" dataKey="Today Plan LC Target" stroke="#ef4444" strokeWidth={3} dot={false} activeDot={false}>
-                   <LabelList dataKey="Today Plan LC Target" position="top" fill="#ef4444" fontSize={11} fontWeight="bold" angle={-55} offset={10} formatter={(v: number) => String(v)} />
+                   <LabelList dataKey="Today Plan LC Target" position={isFullscreen ? "right" : "top"} fill="#ef4444" fontSize={11} fontWeight="bold" angle={isFullscreen ? 0 : -55} offset={10} formatter={(v: number) => String(v)} />
                  </Line>
                </LineChart>
              </ResponsiveContainer>

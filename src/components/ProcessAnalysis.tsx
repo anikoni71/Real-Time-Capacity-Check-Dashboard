@@ -87,37 +87,53 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
     <div className="space-y-6">
       <ChartContainer title="Capacity per Operator per Process" icon={<Cpu className="h-5 w-5 text-blue-600" />}>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-           <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, capacityData.length * 60)}px`, height: '600px' }}>
+           <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, capacityData.length * 60)}px`, height: '100%', minHeight: '600px', flex: 1 }}>
              <ResponsiveContainer width="100%" height="100%">
-               <BarChart data={capacityData} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
-                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                 <XAxis dataKey="name" tick={{ fontSize: isFullscreen ? 8 : 12, fill: '#4B5563' }} interval={0} angle={isFullscreen ? -60 : -45} textAnchor="end" height={150}/>
-                 <YAxis domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} tick={{ fontSize: 11 }} />
+               <BarChart layout={isFullscreen ? "vertical" : "horizontal"} data={capacityData} margin={{ top: 30, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 220 }} barCategoryGap="1%">
+                 <CartesianGrid strokeDasharray="3 3" vertical={!isFullscreen} horizontal={isFullscreen} stroke="#E5E7EB" />
+                 {isFullscreen ? (
+                   <YAxis dataKey="name" type="category" width={150} tick={{ fontSize: 9, fill: '#4B5563' }} />
+                 ) : (
+                   <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#4B5563' }} interval={0} angle={-45} textAnchor="end" height={150}/>
+                 )}
+                 {isFullscreen ? (
+                   <XAxis type="number" domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} tick={{ fontSize: 11 }} />
+                 ) : (
+                   <YAxis type="number" domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} tick={{ fontSize: 11 }} />
+                 )}
                  <Tooltip isAnimationActive={false} />
-                 <Legend verticalAlign="top" height={150} />
+                 <Legend verticalAlign="top" height={isFullscreen ? 50 : 150} />
                  
                  {target1 > 0 && capacityData.map((entry, idx) => {
                     const totalCap = capKeys.reduce((sum, key) => sum + (entry[key] || 0), 0);
                     if (totalCap > 0 && totalCap <= target1 * 0.9) {
                        return (
                          <React.Fragment key={`bg-cap-${idx}`}>
-                           <ReferenceArea {...{x1: entry.name, x2: entry.name, fill: "#fee2e2", fillOpacity: 0.5} as any} />
+                           {isFullscreen ? (
+                             <ReferenceArea {...{y1: entry.name, y2: entry.name, fill: "#fee2e2", fillOpacity: 0.5} as any} />
+                           ) : (
+                             <ReferenceArea {...{x1: entry.name, x2: entry.name, fill: "#fee2e2", fillOpacity: 0.5} as any} />
+                           )}
                          </React.Fragment>
                        );
                     }
                     return null;
                  })}
 
-                 {target1 > 0 && (
+                 {target1 > 0 && isFullscreen ? (
+                   <ReferenceLine x={target1} stroke="#ef4444" strokeDasharray="3 3" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'insideTopLeft', value: `LC Target: ${target1}`, fill: '#ef4444', fontSize: 11, fontWeight: 'bold' }} />
+                 ) : target1 > 0 ? (
                    <ReferenceLine y={target1} stroke="#ef4444" strokeDasharray="3 3" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'top', value: `LC Target: ${target1}`, fill: '#ef4444', fontSize: 11, fontWeight: 'bold' }} />
-                 )}
-                 {target2 > 0 && (
+                 ) : null}
+                 {target2 > 0 && isFullscreen ? (
+                   <ReferenceLine x={target2} stroke="#047857" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'insideTopRight', value: `100% Target: ${target2}`, fill: '#047857', fontSize: 11, fontWeight: 'bold' }} />
+                 ) : target2 > 0 ? (
                    <ReferenceLine y={target2} stroke="#047857" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'top', value: `100% Target: ${target2}`, fill: '#047857', fontSize: 11, fontWeight: 'bold' }} />
-                 )}
+                 ) : null}
 
                  {capKeys.map((k, i) => (
-                   <Bar isAnimationActive={false} key={k} dataKey={k} fill={['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][i % 5]} maxBarSize={50}>
-                     <LabelList dataKey={k} position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-55} offset={10} formatter={(val: number) => val > 0 ? String(Math.round(val)) : ''} />
+                   <Bar isAnimationActive={false} key={k} dataKey={k} fill={['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][i % 5]} minPointSize={2}>
+                     <LabelList dataKey={k} position={isFullscreen ? "right" : "top"} fill="#111827" fontSize={11} fontWeight="bold" angle={isFullscreen ? 0 : -55} offset={10} formatter={(val: number) => val > 0 ? String(Math.round(val)) : ''} />
                    </Bar>
                  ))}
                </BarChart>
@@ -128,38 +144,54 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
 
       <ChartContainer title="Capacity vs Actual Output (Process x Operator)" icon={<Activity className="h-5 w-5 text-indigo-600" />}>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-           <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, compareData.length * 60)}px`, height: '600px' }}>
+           <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, compareData.length * 60)}px`, height: '100%', minHeight: '600px', flex: 1 }}>
              <ResponsiveContainer width="100%" height="100%">
-               <BarChart data={compareData} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
-                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                 <XAxis dataKey="name" tick={{ fontSize: isFullscreen ? 8 : 12, fill: '#4B5563' }} interval={0} angle={isFullscreen ? -60 : -45} textAnchor="end" height={150}/>
-                 <YAxis domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} tick={{ fontSize: 11 }} />
+               <BarChart layout={isFullscreen ? "vertical" : "horizontal"} data={compareData} margin={{ top: 30, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 220 }} barCategoryGap="1%">
+                 <CartesianGrid strokeDasharray="3 3" vertical={!isFullscreen} horizontal={isFullscreen} stroke="#E5E7EB" />
+                 {isFullscreen ? (
+                   <YAxis dataKey="name" type="category" width={150} tick={{ fontSize: 9, fill: '#4B5563' }} />
+                 ) : (
+                   <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#4B5563' }} interval={0} angle={-45} textAnchor="end" height={150}/>
+                 )}
+                 {isFullscreen ? (
+                   <XAxis type="number" domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} tick={{ fontSize: 11 }} />
+                 ) : (
+                   <YAxis type="number" domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} tick={{ fontSize: 11 }} />
+                 )}
                  <Tooltip isAnimationActive={false} />
-                 <Legend verticalAlign="top" height={150} />
+                 <Legend verticalAlign="top" height={isFullscreen ? 50 : 150} />
                  
                  {target1 > 0 && compareData.map((entry, idx) => {
                     if (entry.Capacity <= target1 * 0.9) {
                        return (
                          <React.Fragment key={`bg-comp-${idx}`}>
-                           <ReferenceArea {...{x1: entry.name, x2: entry.name, fill: "#fee2e2", fillOpacity: 0.5} as any} />
+                           {isFullscreen ? (
+                             <ReferenceArea {...{y1: entry.name, y2: entry.name, fill: "#fee2e2", fillOpacity: 0.5} as any} />
+                           ) : (
+                             <ReferenceArea {...{x1: entry.name, x2: entry.name, fill: "#fee2e2", fillOpacity: 0.5} as any} />
+                           )}
                          </React.Fragment>
                        );
                     }
                     return null;
                  })}
 
-                 {target1 > 0 && (
+                 {target1 > 0 && isFullscreen ? (
+                   <ReferenceLine x={target1} stroke="#ef4444" strokeDasharray="3 3" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'insideTopLeft', value: `LC Target: ${target1}`, fill: '#ef4444', fontSize: 11, fontWeight: 'bold' }} />
+                 ) : target1 > 0 ? (
                    <ReferenceLine y={target1} stroke="#ef4444" strokeDasharray="3 3" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'top', value: `LC Target: ${target1}`, fill: '#ef4444', fontSize: 11, fontWeight: 'bold' }} />
-                 )}
-                 {target2 > 0 && (
+                 ) : null}
+                 {target2 > 0 && isFullscreen ? (
+                   <ReferenceLine x={target2} stroke="#047857" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'insideTopRight', value: `100% Target: ${target2}`, fill: '#047857', fontSize: 11, fontWeight: 'bold' }} />
+                 ) : target2 > 0 ? (
                    <ReferenceLine y={target2} stroke="#047857" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'top', value: `100% Target: ${target2}`, fill: '#047857', fontSize: 11, fontWeight: 'bold' }} />
-                 )}
+                 ) : null}
 
-                 <Bar isAnimationActive={false} dataKey="Capacity" fill="#8b5cf6" maxBarSize={40}>
-                   <LabelList dataKey="Capacity" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-55} offset={10} formatter={(v: number) => v > 0 ? String(v) : ''} />
+                 <Bar isAnimationActive={false} dataKey="Capacity" fill="#8b5cf6" minPointSize={2}>
+                   <LabelList dataKey="Capacity" position={isFullscreen ? "right" : "top"} fill="#111827" fontSize={11} fontWeight="bold" angle={isFullscreen ? 0 : -55} offset={10} formatter={(v: number) => v > 0 ? String(v) : ''} />
                  </Bar>
-                 <Bar isAnimationActive={false} dataKey="Output" fill="#ec4899" maxBarSize={40}>
-                   <LabelList dataKey="Output" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-55} offset={10} formatter={(v: number) => v > 0 ? String(v) : ''} />
+                 <Bar isAnimationActive={false} dataKey="Output" fill="#ec4899" minPointSize={2}>
+                   <LabelList dataKey="Output" position={isFullscreen ? "right" : "top"} fill="#111827" fontSize={11} fontWeight="bold" angle={isFullscreen ? 0 : -55} offset={10} formatter={(v: number) => v > 0 ? String(v) : ''} />
                  </Bar>
                </BarChart>
              </ResponsiveContainer>
@@ -169,38 +201,54 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
 
       <ChartContainer title="100% Process Target vs Capacity (Line Chart)" icon={<TrendingUp className="h-5 w-5 text-amber-500" />}>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-           <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, targetData.length * 60)}px`, height: '600px' }}>
+           <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, targetData.length * 60)}px`, height: '100%', minHeight: '600px', flex: 1 }}>
              <ResponsiveContainer width="100%" height="100%">
-               <LineChart data={targetData} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
-                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                 <XAxis dataKey="name" tick={{ fontSize: isFullscreen ? 8 : 12, fill: '#4B5563' }} interval={0} angle={isFullscreen ? -60 : -45} textAnchor="end" height={150}/>
-                 <YAxis domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} tick={{ fontSize: 11 }} />
+               <LineChart layout={isFullscreen ? "vertical" : "horizontal"} data={targetData} margin={{ top: 30, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 220 }}>
+                 <CartesianGrid strokeDasharray="3 3" vertical={!isFullscreen} horizontal={isFullscreen} stroke="#E5E7EB" />
+                 {isFullscreen ? (
+                   <YAxis dataKey="name" type="category" width={150} tick={{ fontSize: 9, fill: '#4B5563' }} />
+                 ) : (
+                   <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#4B5563' }} interval={0} angle={-45} textAnchor="end" height={150}/>
+                 )}
+                 {isFullscreen ? (
+                   <XAxis type="number" domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} tick={{ fontSize: 11 }} />
+                 ) : (
+                   <YAxis type="number" domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(Math.max(m, target1, target2) * 1.2); }]} tick={{ fontSize: 11 }} />
+                 )}
                  <Tooltip isAnimationActive={false} />
-                 <Legend verticalAlign="top" height={150} />
+                 <Legend verticalAlign="top" height={isFullscreen ? 50 : 150} />
                  
                  {target1 > 0 && targetData.map((entry, idx) => {
                     if (entry.Capacity <= target1 * 0.9) {
                        return (
                          <React.Fragment key={`bg-tgt-${idx}`}>
-                           <ReferenceArea {...{x1: entry.name, x2: entry.name, fill: "#fee2e2", fillOpacity: 0.5} as any} />
+                           {isFullscreen ? (
+                             <ReferenceArea {...{y1: entry.name, y2: entry.name, fill: "#fee2e2", fillOpacity: 0.5} as any} />
+                           ) : (
+                             <ReferenceArea {...{x1: entry.name, x2: entry.name, fill: "#fee2e2", fillOpacity: 0.5} as any} />
+                           )}
                          </React.Fragment>
                        );
                     }
                     return null;
                  })}
                  
-                 {target1 > 0 && (
+                 {target1 > 0 && isFullscreen ? (
+                   <ReferenceLine x={target1} stroke="#ef4444" strokeDasharray="3 3" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'insideTopLeft', value: `LC Target: ${target1}`, fill: '#ef4444', fontSize: 11, fontWeight: 'bold' }} />
+                 ) : target1 > 0 ? (
                    <ReferenceLine y={target1} stroke="#ef4444" strokeDasharray="3 3" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'top', value: `LC Target: ${target1}`, fill: '#ef4444', fontSize: 11, fontWeight: 'bold' }} />
-                 )}
-                 {target2 > 0 && (
+                 ) : null}
+                 {target2 > 0 && isFullscreen ? (
+                   <ReferenceLine x={target2} stroke="#047857" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'insideTopRight', value: `100% Target: ${target2}`, fill: '#047857', fontSize: 11, fontWeight: 'bold' }} />
+                 ) : target2 > 0 ? (
                    <ReferenceLine y={target2} stroke="#047857" strokeWidth={2} ifOverflow="extendDomain" label={{ position: 'top', value: `100% Target: ${target2}`, fill: '#047857', fontSize: 11, fontWeight: 'bold' }} />
-                 )}
+                 ) : null}
 
                  <Line isAnimationActive={false} type="monotone" dataKey="Target" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }}>
-                   <LabelList dataKey="Target" position="top" fill="#f59e0b" fontSize={11} fontWeight="bold" angle={-55} offset={10} />
+                   <LabelList dataKey="Target" position={isFullscreen ? "right" : "top"} fill="#f59e0b" fontSize={11} fontWeight="bold" angle={isFullscreen ? 0 : -55} offset={10} />
                  </Line>
                  <Line isAnimationActive={false} type="monotone" dataKey="Capacity" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }}>
-                   <LabelList dataKey="Capacity" position="bottom" fill="#3b82f6" fontSize={11} fontWeight="bold" angle={-55} offset={10} />
+                   <LabelList dataKey="Capacity" position={isFullscreen ? "right" : "bottom"} fill="#3b82f6" fontSize={11} fontWeight="bold" angle={isFullscreen ? 0 : -55} offset={10} />
                  </Line>
                </LineChart>
              </ResponsiveContainer>

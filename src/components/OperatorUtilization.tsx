@@ -51,22 +51,34 @@ export default function OperatorUtilization({ processes }: { processes: ProcessR
           <p className="text-sm text-gray-500 mt-1">Yellow bar represents 60 minutes total time. Green represents utilized minutes.</p>
         </div>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <div className="scrollable-chart-inner" style={{ width: `${Math.max(1200, stackedData.length * 60)}px`, height: '600px' }}>
+          <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, stackedData.length * 60)}px`, height: '100%', minHeight: '600px', flex: 1 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stackedData} margin={{ top: 30, right: 30, left: 20, bottom: 220 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+              <BarChart layout={isFullscreen ? "vertical" : "horizontal"} data={stackedData} margin={{ top: 30, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 220 }} barCategoryGap="1%">
+                <CartesianGrid strokeDasharray="3 3" vertical={!isFullscreen} horizontal={isFullscreen} stroke="#E5E7EB" />
+                {isFullscreen ? (
+                  <YAxis dataKey="name" type="category" width={150} tick={{ fontSize: 9, fill: '#4B5563' }} />
+                ) : (
+                  <XAxis 
+                    dataKey="name" 
+                    angle={-45} 
+                    textAnchor="end" 
+                    tick={{ fontSize: 12, fill: '#4B5563' }} 
+                    interval={0}
+                    height={150}
+                  />
+                )}
+              {isFullscreen ? (
                 <XAxis 
-                  dataKey="name" 
-                  angle={isFullscreen ? -60 : -45} 
-                  textAnchor="end" 
-                  tick={{ fontSize: isFullscreen ? 8 : 12, fill: '#4B5563' }} 
-                  interval={0}
-                  height={150}
+                  type="number"
+                  tick={{ fontSize: 11 }}
                 />
-              <YAxis 
-                tick={{ fontSize: 11 }}
-                label={{ value: 'Minutes', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#4B5563', fontSize: 12 } }} 
-              />
+              ) : (
+                <YAxis 
+                  type="number"
+                  tick={{ fontSize: 11 }}
+                  label={{ value: 'Minutes', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#4B5563', fontSize: 12 } }} 
+                />
+              )}
               <Tooltip isAnimationActive={false} 
                 cursor={{ fill: 'transparent' }}
                 contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
@@ -76,15 +88,19 @@ export default function OperatorUtilization({ processes }: { processes: ProcessR
                   return [value, name];
                 }}
               />
-              <Legend verticalAlign="top" height={150} wrapperStyle={{ fontSize: '12px' }} />
+              <Legend verticalAlign="top" height={isFullscreen ? 50 : 150} wrapperStyle={{ fontSize: '12px' }} />
               
-              <ReferenceLine y={60} stroke="#EF4444" strokeDasharray="3 3" label={{ position: 'top', value: '60 Min Capacity', fill: '#EF4444', fontSize: 12, fontWeight: 'bold' }} />
+              {isFullscreen ? (
+                <ReferenceLine x={60} stroke="#EF4444" strokeDasharray="3 3" label={{ position: 'insideTopLeft', value: '60 Min Capacity', fill: '#EF4444', fontSize: 12, fontWeight: 'bold' }} />
+              ) : (
+                <ReferenceLine y={60} stroke="#EF4444" strokeDasharray="3 3" label={{ position: 'top', value: '60 Min Capacity', fill: '#EF4444', fontSize: 12, fontWeight: 'bold' }} />
+              )}
 
-              <Bar isAnimationActive={false} dataKey="Utilized" stackId="a" fill="#10B981" name="Utilized Minute" maxBarSize={50}>
-                <LabelList dataKey="Utilized" position="insideTop" fill="#ffffff" fontSize={11} fontWeight="bold" angle={-55} offset={10} formatter={(v: number) => String(v)} />
+              <Bar isAnimationActive={false} dataKey="Utilized" stackId="a" fill="#10B981" name="Utilized Minute" minPointSize={2}>
+                <LabelList dataKey="Utilized" position="insideTop" fill="#ffffff" fontSize={11} fontWeight="bold" angle={isFullscreen ? 0 : -55} offset={10} formatter={(v: number) => String(v)} />
               </Bar>
-              <Bar isAnimationActive={false} dataKey="Unutilized" stackId="a" fill="#FBBF24" name="Unutilized Minute" maxBarSize={50}>
-                <LabelList dataKey="Percentage" position="top" fill="#111827" fontSize={11} fontWeight="bold" angle={-55} offset={10} formatter={(v: string) => String(v)} />
+              <Bar isAnimationActive={false} dataKey="Unutilized" stackId="a" fill="#FBBF24" name="Unutilized Minute" minPointSize={2}>
+                <LabelList dataKey="Percentage" position={isFullscreen ? "right" : "top"} fill="#111827" fontSize={11} fontWeight="bold" angle={isFullscreen ? 0 : -55} offset={10} formatter={(v: string) => String(v)} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
