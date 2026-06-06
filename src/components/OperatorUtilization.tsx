@@ -51,8 +51,8 @@ export default function OperatorUtilization({ processes }: { processes: ProcessR
           <p className="text-sm text-gray-500 mt-1">Yellow bar represents 60 minutes total time. Green represents utilized minutes.</p>
         </div>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, stackedData.length * 60)}px`, height: '100%', minHeight: '600px', flex: 1 }}>
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, stackedData.length * 60)}px`, height: isFullscreen ? 'auto' : '600px', minHeight: isFullscreen ? `${Math.max(stackedData.length * 30, 800)}px` : undefined }}>
+            <ResponsiveContainer width="100%" height={isFullscreen ? Math.max(stackedData.length * 30, 800) : "100%"} minHeight={isFullscreen ? Math.max(stackedData.length * 30, 800) : 600} key={isFullscreen ? 'fs-scroll-engine' : 'normal-view'}>
               <BarChart layout={isFullscreen ? "vertical" : "horizontal"} data={stackedData} margin={{ top: 30, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 220 }} barCategoryGap="1%">
                 <CartesianGrid strokeDasharray="3 3" vertical={!isFullscreen} horizontal={isFullscreen} stroke="#E5E7EB" />
                 {isFullscreen ? (

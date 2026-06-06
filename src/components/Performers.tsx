@@ -82,8 +82,8 @@ export default function Performers({ processes }: { processes: ProcessRow[] }) {
 
   const renderHorizontalChart = (data: any[], title: string, color: string, IconComponent: any, dataKey: string = "Capacity", hasTargets: boolean = true) => (
     <ChartContainer title={title} icon={IconComponent} data={data}>
-      <div className="flex-1 w-full scrollable-chart-area" style={{ height: '100%', minHeight: '600px', overflowY: isFullscreen ? 'auto' : 'visible', flex: 1 }}>
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="flex-1 w-full scrollable-chart-area" style={{ height: isFullscreen ? 'auto' : '300px', overflowY: isFullscreen ? 'auto' : 'visible', minHeight: isFullscreen ? `${Math.max(data.length * 30, 400)}px` : undefined }}>
+        <ResponsiveContainer width="100%" height={isFullscreen ? Math.max(data.length * 30, 400) : 300} minHeight={isFullscreen ? Math.max(data.length * 30, 400) : 300} key={isFullscreen ? 'fs-scroll-engine' : 'normal-view'}>
           <BarChart data={data} layout="vertical" margin={{ top: 20, right: 30, left: 150, bottom: 5 }} barCategoryGap={isFullscreen ? "2%" : "10%"} barGap={0}>
             <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
             <XAxis 

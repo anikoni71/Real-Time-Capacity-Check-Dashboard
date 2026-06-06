@@ -57,8 +57,8 @@ export default function YamazumiChart({ processes }: { processes: ProcessRow[] }
           <p className="text-sm text-gray-500 mt-1">Shows Value-Added (VA), Non-Value-Added but Necessary (NVAN), and Waste (NVA) breakdown.</p>
         </div>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, chartData.length * 60)}px`, height: '100%', minHeight: '600px', flex: 1 }}>
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, chartData.length * 60)}px`, height: isFullscreen ? 'auto' : '600px', minHeight: isFullscreen ? `${Math.max(chartData.length * 30, 800)}px` : undefined }}>
+            <ResponsiveContainer width="100%" height={isFullscreen ? Math.max(chartData.length * 30, 800) : "100%"} minHeight={isFullscreen ? Math.max(chartData.length * 30, 800) : 600} key={isFullscreen ? 'fs-scroll-engine' : 'normal-view'}>
               <BarChart layout={isFullscreen ? "vertical" : "horizontal"} data={chartData} margin={{ top: 30, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 220 }} barCategoryGap="1%">
                 <CartesianGrid strokeDasharray="3 3" vertical={!isFullscreen} horizontal={isFullscreen} stroke="#E5E7EB" />
                 {isFullscreen ? (

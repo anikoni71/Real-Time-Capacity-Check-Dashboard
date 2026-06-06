@@ -54,8 +54,8 @@ export default function MachineDistribution({ processes }: { processes: ProcessR
         icon={<Settings className="h-5 w-5 text-blue-600" />}
       >
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8 pb-4 scrollable-chart-area flex-1">
-          <div className="w-full lg:w-1/2 scrollable-chart-inner" style={{ width: '100%', height: '100%', minHeight: '600px', flex: 1 }}>
-          <ResponsiveContainer width="100%" height="100%">
+          <div className="w-full lg:w-1/2 scrollable-chart-inner" style={{ height: isFullscreen ? 'min(80vh, 800px)' : '350px', minHeight: isFullscreen ? '400px' : undefined }}>
+          <ResponsiveContainer width="100%" height="100%" minHeight={isFullscreen ? 400 : 350}>
             <PieChart>
               <Pie isAnimationActive={false}
                 data={data}

@@ -87,8 +87,8 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
     <div className="space-y-6">
       <ChartContainer title="Capacity per Operator per Process" icon={<Cpu className="h-5 w-5 text-blue-600" />}>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-           <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, capacityData.length * 60)}px`, height: '100%', minHeight: '600px', flex: 1 }}>
-             <ResponsiveContainer width="100%" height="100%">
+           <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, capacityData.length * 60)}px`, height: isFullscreen ? 'auto' : '600px', minHeight: isFullscreen ? `${Math.max(capacityData.length * 30, 800)}px` : undefined }}>
+             <ResponsiveContainer width="100%" height={isFullscreen ? Math.max(capacityData.length * 30, 800) : "100%"} minHeight={isFullscreen ? Math.max(capacityData.length * 30, 800) : 600} key={isFullscreen ? 'fs-scroll-engine' : 'normal-view'}>
                <BarChart layout={isFullscreen ? "vertical" : "horizontal"} data={capacityData} margin={{ top: 30, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 220 }} barCategoryGap="1%">
                  <CartesianGrid strokeDasharray="3 3" vertical={!isFullscreen} horizontal={isFullscreen} stroke="#E5E7EB" />
                  {isFullscreen ? (
@@ -144,8 +144,8 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
 
       <ChartContainer title="Capacity vs Actual Output (Process x Operator)" icon={<Activity className="h-5 w-5 text-indigo-600" />}>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-           <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, compareData.length * 60)}px`, height: '100%', minHeight: '600px', flex: 1 }}>
-             <ResponsiveContainer width="100%" height="100%">
+           <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, compareData.length * 60)}px`, height: isFullscreen ? 'auto' : '600px', minHeight: isFullscreen ? `${Math.max(compareData.length * 30, 800)}px` : undefined }}>
+             <ResponsiveContainer width="100%" height={isFullscreen ? Math.max(compareData.length * 30, 800) : "100%"} minHeight={isFullscreen ? Math.max(compareData.length * 30, 800) : 600} key={isFullscreen ? 'fs-scroll-engine' : 'normal-view'}>
                <BarChart layout={isFullscreen ? "vertical" : "horizontal"} data={compareData} margin={{ top: 30, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 220 }} barCategoryGap="1%">
                  <CartesianGrid strokeDasharray="3 3" vertical={!isFullscreen} horizontal={isFullscreen} stroke="#E5E7EB" />
                  {isFullscreen ? (
@@ -201,8 +201,8 @@ export default function ProcessAnalysis({ processes }: { processes: ProcessRow[]
 
       <ChartContainer title="100% Process Target vs Capacity (Line Chart)" icon={<TrendingUp className="h-5 w-5 text-amber-500" />}>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-           <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, targetData.length * 60)}px`, height: '100%', minHeight: '600px', flex: 1 }}>
-             <ResponsiveContainer width="100%" height="100%">
+           <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, targetData.length * 60)}px`, height: isFullscreen ? 'auto' : '600px', minHeight: isFullscreen ? `${Math.max(targetData.length * 30, 800)}px` : undefined }}>
+             <ResponsiveContainer width="100%" height={isFullscreen ? Math.max(targetData.length * 30, 800) : "100%"} minHeight={isFullscreen ? Math.max(targetData.length * 30, 800) : 600} key={isFullscreen ? 'fs-scroll-engine' : 'normal-view'}>
                <LineChart layout={isFullscreen ? "vertical" : "horizontal"} data={targetData} margin={{ top: 30, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 220 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={!isFullscreen} horizontal={isFullscreen} stroke="#E5E7EB" />
                  {isFullscreen ? (

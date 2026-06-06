@@ -35,8 +35,8 @@ export default function LineTargets({ processes }: { processes: ProcessRow[] }) 
     <div className="space-y-6">
       <ChartContainer title="Line 100% Target vs Capacity" icon={<Target className="h-5 w-5 text-indigo-600" />}>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-           <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, lineData.length * 60)}px`, height: '100%', minHeight: '600px', flex: 1 }}>
-             <ResponsiveContainer width="100%" height="100%">
+           <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, lineData.length * 60)}px`, height: isFullscreen ? 'auto' : '600px', minHeight: isFullscreen ? '800px' : '600px' }}>
+             <ResponsiveContainer width="100%" height={isFullscreen ? 800 : "100%"} minHeight={800}>
                <LineChart layout={isFullscreen ? "vertical" : "horizontal"} data={lineData} margin={{ top: 30, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 220 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={!isFullscreen} horizontal={isFullscreen} stroke="#E5E7EB" />
                  {isFullscreen ? (
@@ -65,8 +65,8 @@ export default function LineTargets({ processes }: { processes: ProcessRow[] }) 
 
       <ChartContainer title="Today Plan LC Target vs Capacity" icon={<Activity className="h-5 w-5 text-emerald-600" />}>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-           <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, lineData.length * 60)}px`, height: '100%', minHeight: '600px', flex: 1 }}>
-             <ResponsiveContainer width="100%" height="100%">
+           <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, lineData.length * 60)}px`, height: isFullscreen ? 'auto' : '600px', minHeight: isFullscreen ? '800px' : '600px' }}>
+             <ResponsiveContainer width="100%" height={isFullscreen ? 800 : "100%"} minHeight={800}>
                <LineChart layout={isFullscreen ? "vertical" : "horizontal"} data={lineData} margin={{ top: 30, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 220 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={!isFullscreen} horizontal={isFullscreen} stroke="#E5E7EB" />
                  {isFullscreen ? (
