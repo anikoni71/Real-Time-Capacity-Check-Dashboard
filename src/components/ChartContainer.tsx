@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Maximize2, Printer, Minimize2, Download, FileImage, FileSpreadsheet, FileText } from 'lucide-react';
-import { toJpeg, toPng } from 'html-to-image';
+import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { useFullscreen } from '../hooks/useFullscreen';
 import { FullscreenContext } from '../contexts/FullscreenContext';
@@ -33,43 +33,84 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
   const captureFullChartImage = async (): Promise<string | null> => {
     if (!containerRef.current) return null;
 
-    // Find the horizontal scrolling data layer
-    const scrollArea = containerRef.current.querySelector('.scrollable-chart-area') as HTMLElement;
-    if (!scrollArea) return null;
+    const A4_WIDTH = 1123; // A4 Landscape width in px at 96 DPI
+    const A4_HEIGHT = 794; // A4 Landscape height in px
 
-    // Create an invisible high-res container in the DOM to draw the un-clamped canvas
+    // Create an invisible high-res container in the DOM
     const printCanvas = document.createElement('div');
     printCanvas.style.position = 'absolute';
     printCanvas.style.top = '-9999px';
     printCanvas.style.left = '-9999px';
-    // Match the full structural width of all data bars combined
-    printCanvas.style.width = `${scrollArea.scrollWidth}px`; 
-    printCanvas.style.height = `${scrollArea.clientHeight || 500}px`;
+    printCanvas.style.width = `${A4_WIDTH}px`;
+    printCanvas.style.minHeight = `${A4_HEIGHT}px`;
     printCanvas.style.backgroundColor = '#ffffff';
+    printCanvas.style.padding = '20px';
+    printCanvas.style.boxSizing = 'border-box';
     printCanvas.className = 'print-capture-canvas';
 
-    // Clone the chart content inside our off-screen container
-    const clonedChart = scrollArea.cloneNode(true) as HTMLElement;
+    // Clone the whole container to capture title/legend
+    const clonedChart = containerRef.current.cloneNode(true) as HTMLElement;
+    
+    // Clean styling on clone
     clonedChart.style.width = '100%';
-    clonedChart.style.minWidth = 'unset';
-    clonedChart.style.overflow = 'visible';
+    clonedChart.style.height = '100%';
+    clonedChart.style.margin = '0';
+    clonedChart.style.border = 'none';
+    clonedChart.style.boxShadow = 'none';
+
+    // Hide action buttons in the clone
+    const actions = clonedChart.querySelector('.action-buttons');
+    if (actions) {
+      (actions as HTMLElement).style.display = 'none';
+    }
+
+    // Strip scrollbars and allow scaling
+    const scrollAreas = clonedChart.querySelectorAll('.scrollable-chart-area, .scrollable-chart-inner');
+    scrollAreas.forEach(area => {
+      const el = area as HTMLElement;
+      el.style.width = '100%';
+      el.style.height = '100%';
+      el.style.overflow = 'hidden'; 
+      el.style.maxWidth = '100%';
+    });
+
+    // Make SVGs responsive by adding viewBox and 100% width/height
+    const svgs = clonedChart.querySelectorAll('svg');
+    svgs.forEach(svg => {
+        const width = svg.getAttribute('width');
+        const height = svg.getAttribute('height');
+        if (width && height && !svg.getAttribute('viewBox')) {
+            svg.setAttribute('viewBox', `0 0 ${parseInt(width)} ${parseInt(height)}`);
+        }
+        svg.style.width = '100%';
+        svg.style.height = 'auto'; // Proportional scaling
+    });
+    
+    // Force Recharts containers to take 100% width
+    const rechartsContainers = clonedChart.querySelectorAll('.recharts-responsive-container, .recharts-wrapper, .chart-content-wrapper');
+    rechartsContainers.forEach(container => {
+        const el = container as HTMLElement;
+        el.style.width = '100%';
+        el.style.height = '100%';
+    });
+
     printCanvas.appendChild(clonedChart);
     document.body.appendChild(printCanvas);
 
-    // Give charting engines a minor breath tick to evaluate structural paths
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // Give charting engines a generous breathing window for animations/painting
+    await new Promise((resolve) => setTimeout(resolve, 800));
 
     try {
-      const dataUrl = await toJpeg(printCanvas, {
-        quality: 1.0,
+      const canvas = await html2canvas(printCanvas, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
         backgroundColor: '#ffffff',
-        width: scrollArea.scrollWidth,
-        height: scrollArea.clientHeight || 500,
-        pixelRatio: 2
+        logging: false,
       });
 
-      document.body.removeChild(printCanvas); // Clean up the DOM node
-      return dataUrl;
+      document.body.removeChild(printCanvas); 
+      return canvas.toDataURL('image/jpeg', 1.0);
     } catch (err) {
       console.error('Canvas trace capture aborted:', err);
       if (document.body.contains(printCanvas)) document.body.removeChild(printCanvas);
