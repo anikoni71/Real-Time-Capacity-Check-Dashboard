@@ -9,24 +9,19 @@
    -------------------------------------------------------------------------- */
 .chart-wrapper:fullscreen,
 .chart-wrapper.is-fullscreen {
+  position: fixed !important;
+  inset: 0 !important;
   background-color: #ffffff !important;
-  padding: 24px !important;
+  z-index: 9999 !important;
   display: flex !important;
   flex-direction: column !important;
-  justify-content: flex-start !important;
-  align-items: stretch !important;
+  align-items: center !important;
+  justify-content: center !important;
   width: 100vw !important;
   height: 100vh !important;
+  padding: 20px !important;
   box-sizing: border-box !important;
-  /* Allows the user to scroll horizontally through all bars on their screen */
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 9999;
+  overflow: hidden !important;
 }
 
 /* Keeps your Title and Action Control Icons fixed to the left while scrolling bars */
@@ -82,7 +77,8 @@
 .chart-wrapper.is-fullscreen .scrollable-chart-inner {
   width: 100% !important;
   max-width: 100% !important;
-  height: 100%;
+  height: auto !important;
+  min-height: 100% !important;
 }
 
 /* Ensures Recharts / ApexCharts mapping systems adhere to the expanded screen size */
@@ -207,7 +203,6 @@
 
   body.print-single-chart .printable-area .recharts-responsive-container {
     width: 100% !important;
-    height: 100% !important;
   }
 
   /* Ensure our header displays on print */
