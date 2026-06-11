@@ -5,6 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LabelList,
 import { BarChart2 } from 'lucide-react';
 import ChartContainer from './ChartContainer';
 import { useFullscreenContext } from '../contexts/FullscreenContext';
+import { CustomizedAxisTick } from './CustomizedAxisTick';
 
 // Define fixed colors for operators to keep them consistent
 const OPERATOR_COLORS = [
@@ -87,9 +88,9 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
         </div>
         
         <div className="overflow-x-auto w-full border border-gray-100 rounded-md pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-           <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${expectedWidth}px`, height: isFullscreen ? 'auto' : '600px', minHeight: isFullscreen ? `${Math.max(chartData.length * 30, 800)}px` : undefined }}>
-             <ResponsiveContainer width="100%" height={isFullscreen ? Math.max(chartData.length * 30, 800) : "100%"} minHeight={isFullscreen ? Math.max(chartData.length * 30, 800) : 600} key={isFullscreen ? 'fs-scroll-engine' : 'normal-view'}>
-              <BarChart layout={isFullscreen ? "vertical" : "horizontal"} data={chartData} margin={{ top: 30, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 220 }} barCategoryGap="1%">
+           <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${expectedWidth}px`, height: isFullscreen ? 'auto' : '650px', minHeight: isFullscreen ? `${Math.max(chartData.length * 30, 800)}px` : undefined, overflow: 'visible' }}>
+             <ResponsiveContainer width="100%" height={isFullscreen ? Math.max(chartData.length * 30, 800) : "100%"} minHeight={isFullscreen ? Math.max(chartData.length * 30, 800) : 650} key={isFullscreen ? 'fs-scroll-engine' : 'normal-view'}>
+              <BarChart layout={isFullscreen ? "vertical" : "horizontal"} data={chartData} margin={{ top: 20, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 250 }} barCategoryGap="1%">
               <CartesianGrid strokeDasharray="3 3" vertical={!isFullscreen} horizontal={isFullscreen} stroke="#E5E7EB" />
               {isFullscreen ? (
                 <YAxis dataKey="name" type="category" width={150} tick={{ fontSize: 9, fill: '#4B5563' }} />
@@ -97,11 +98,9 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
                 <XAxis 
                   dataKey="name" 
                   type="category"
-                  tick={{ fontSize: 12, fill: '#4B5563' }} 
+                  tick={<CustomizedAxisTick />} 
                   interval={0} 
-                  angle={-45} 
-                  textAnchor="end"
-                  height={150}
+                  height={250}
                 />
               )}
               {isFullscreen ? (

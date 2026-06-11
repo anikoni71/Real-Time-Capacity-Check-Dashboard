@@ -5,6 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LabelList,
 import { Clock } from 'lucide-react';
 import ChartContainer from './ChartContainer';
 import { useFullscreenContext } from '../contexts/FullscreenContext';
+import { CustomizedAxisTick } from './CustomizedAxisTick';
 
 export default function OperatorUtilization({ processes }: { processes: ProcessRow[] }) {
   const isFullscreen = useFullscreenContext();
@@ -51,20 +52,18 @@ export default function OperatorUtilization({ processes }: { processes: ProcessR
           <p className="text-sm text-gray-500 mt-1">Yellow bar represents 60 minutes total time. Green represents utilized minutes.</p>
         </div>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, stackedData.length * 60)}px`, height: isFullscreen ? 'auto' : '600px', minHeight: isFullscreen ? `${Math.max(stackedData.length * 30, 800)}px` : undefined }}>
-            <ResponsiveContainer width="100%" height={isFullscreen ? Math.max(stackedData.length * 30, 800) : "100%"} minHeight={isFullscreen ? Math.max(stackedData.length * 30, 800) : 600} key={isFullscreen ? 'fs-scroll-engine' : 'normal-view'}>
-              <BarChart layout={isFullscreen ? "vertical" : "horizontal"} data={stackedData} margin={{ top: 30, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 220 }} barCategoryGap="1%">
+          <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, stackedData.length * 60)}px`, height: isFullscreen ? 'auto' : '650px', minHeight: isFullscreen ? `${Math.max(stackedData.length * 30, 800)}px` : undefined, overflow: 'visible' }}>
+            <ResponsiveContainer width="100%" height={isFullscreen ? Math.max(stackedData.length * 30, 800) : "100%"} minHeight={isFullscreen ? Math.max(stackedData.length * 30, 800) : 650} key={isFullscreen ? 'fs-scroll-engine' : 'normal-view'}>
+              <BarChart layout={isFullscreen ? "vertical" : "horizontal"} data={stackedData} margin={{ top: 20, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 250 }} barCategoryGap="1%">
                 <CartesianGrid strokeDasharray="3 3" vertical={!isFullscreen} horizontal={isFullscreen} stroke="#E5E7EB" />
                 {isFullscreen ? (
                   <YAxis dataKey="name" type="category" width={150} tick={{ fontSize: 9, fill: '#4B5563' }} />
                 ) : (
                   <XAxis 
                     dataKey="name" 
-                    angle={-45} 
-                    textAnchor="end" 
-                    tick={{ fontSize: 12, fill: '#4B5563' }} 
+                    tick={<CustomizedAxisTick />} 
                     interval={0}
-                    height={150}
+                    height={250}
                   />
                 )}
               {isFullscreen ? (

@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Maximize2, Printer, Minimize2, Download, FileImage, FileSpreadsheet, FileText } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import { toJpeg } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 import { useFullscreen } from '../hooks/useFullscreen';
 import { FullscreenContext } from '../contexts/FullscreenContext';
@@ -33,88 +33,58 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
   const captureFullChartImage = async (): Promise<string | null> => {
     if (!containerRef.current) return null;
 
-    const A4_WIDTH = 1123; // A4 Landscape width in px at 96 DPI
-    const A4_HEIGHT = 794; // A4 Landscape height in px
-
-    // Create an invisible high-res container in the DOM
-    const printCanvas = document.createElement('div');
-    printCanvas.style.position = 'absolute';
-    printCanvas.style.top = '-9999px';
-    printCanvas.style.left = '-9999px';
-    printCanvas.style.width = `${A4_WIDTH}px`;
-    printCanvas.style.minHeight = `${A4_HEIGHT}px`;
-    printCanvas.style.backgroundColor = '#ffffff';
-    printCanvas.style.padding = '20px';
-    printCanvas.style.boxSizing = 'border-box';
-    printCanvas.className = 'print-capture-canvas';
-
-    // Clone the whole container to capture title/legend
-    const clonedChart = containerRef.current.cloneNode(true) as HTMLElement;
+    const targetElement = (containerRef.current.querySelector('.scrollable-chart-inner') || 
+                           containerRef.current.querySelector('.scrollable-chart-area') || 
+                           containerRef.current) as HTMLElement;
     
-    // Clean styling on clone
-    clonedChart.style.width = '100%';
-    clonedChart.style.height = '100%';
-    clonedChart.style.margin = '0';
-    clonedChart.style.border = 'none';
-    clonedChart.style.boxShadow = 'none';
+    // Save original styles
+    const originalWidth = targetElement.style.width;
+    const originalMaxWidth = targetElement.style.maxWidth;
+    const originalPosition = targetElement.style.position;
+    const originalZIndex = targetElement.style.zIndex;
+    const originalBackgroundColor = targetElement.style.backgroundColor;
+    const originalOverflow = targetElement.style.overflow;
 
-    // Hide action buttons in the clone
-    const actions = clonedChart.querySelector('.action-buttons');
-    if (actions) {
-      (actions as HTMLElement).style.display = 'none';
-    }
+    // Physical DOM Expansion
+    targetElement.style.width = targetElement.scrollWidth + 'px';
+    targetElement.style.maxWidth = 'none';
+    targetElement.style.position = 'absolute';
+    targetElement.style.zIndex = '9999';
+    targetElement.style.backgroundColor = '#ffffff';
+    targetElement.style.overflow = 'visible';
 
-    // Strip scrollbars and allow scaling
-    const scrollAreas = clonedChart.querySelectorAll('.scrollable-chart-area, .scrollable-chart-inner');
-    scrollAreas.forEach(area => {
-      const el = area as HTMLElement;
-      el.style.width = '100%';
-      el.style.height = '100%';
-      el.style.overflow = 'hidden'; 
-      el.style.maxWidth = '100%';
-    });
+    // Trigger Recharts Re-render (Crucial)
+    window.dispatchEvent(new Event('resize'));
 
-    // Make SVGs responsive by adding viewBox and 100% width/height
-    const svgs = clonedChart.querySelectorAll('svg');
-    svgs.forEach(svg => {
-        const width = svg.getAttribute('width');
-        const height = svg.getAttribute('height');
-        if (width && height && !svg.getAttribute('viewBox')) {
-            svg.setAttribute('viewBox', `0 0 ${parseInt(width)} ${parseInt(height)}`);
-        }
-        svg.style.width = '100%';
-        svg.style.height = 'auto'; // Proportional scaling
-    });
-    
-    // Force Recharts containers to take 100% width
-    const rechartsContainers = clonedChart.querySelectorAll('.recharts-responsive-container, .recharts-wrapper, .chart-content-wrapper');
-    rechartsContainers.forEach(container => {
-        const el = container as HTMLElement;
-        el.style.width = '100%';
-        el.style.height = '100%';
-    });
-
-    printCanvas.appendChild(clonedChart);
-    document.body.appendChild(printCanvas);
-
-    // Give charting engines a generous breathing window for animations/painting
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    // Wait for Paint
+    await new Promise(resolve => setTimeout(resolve, 800));
 
     try {
-      const canvas = await html2canvas(printCanvas, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
+      // Capture with html-to-image
+      const dataUrl = await toJpeg(targetElement, { 
+        pixelRatio: 2,
         backgroundColor: '#ffffff',
-        logging: false,
+        style: {
+          padding: '20px',
+          overflow: 'hidden'
+        }
       });
 
-      document.body.removeChild(printCanvas); 
-      return canvas.toDataURL('image/jpeg', 1.0);
+      return dataUrl;
     } catch (err) {
-      console.error('Canvas trace capture aborted:', err);
-      if (document.body.contains(printCanvas)) document.body.removeChild(printCanvas);
+      console.error('Canvas capture aborted:', err);
       return null;
+    } finally {
+      // Revert Styles immediately
+      targetElement.style.width = originalWidth;
+      targetElement.style.maxWidth = originalMaxWidth;
+      targetElement.style.position = originalPosition;
+      targetElement.style.zIndex = originalZIndex;
+      targetElement.style.backgroundColor = originalBackgroundColor;
+      targetElement.style.overflow = originalOverflow;
+      
+      // Trigger Recharts Re-render again to shrink back
+      window.dispatchEvent(new Event('resize'));
     }
   };
 
@@ -175,16 +145,65 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
     }
 
     try {
-      const pdf = new jsPDF('l', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      
-      // Automatically stretches/shrinks the wide dataset snapshot to cleanly fit 1 A4 page
-      pdf.addImage(chartImageDataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`${title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.pdf`);
+      const img = new Image();
+      img.onload = () => {
+        const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+        
+        const a4Width = 297;
+        const a4Height = 210;
+        const usableWidth = a4Width - 30; // 15mm margins on sides
+        const usableHeight = a4Height - 50; // Leave 50mm at top for headers
+        
+        const scaledImgWidth = (img.width * usableHeight) / img.height;
+        const totalPages = Math.ceil(scaledImgWidth / usableWidth);
+        
+        for (let i = 0; i < totalPages; i++) {
+          if (i > 0) pdf.addPage();
+
+          // Flood the background white
+          pdf.setFillColor(255, 255, 255);
+          pdf.rect(0, 0, a4Width, a4Height, 'F');
+
+          // Render headers on EVERY page
+          pdf.setFont("helvetica", "bold");
+          pdf.setFontSize(18);
+          // Set text color separately to ensure it applies Correctly across multiple jsPDF addPage calls
+          pdf.setTextColor(33, 37, 41);
+          pdf.text("Real Time Capacity Check", a4Width / 2, 15, { align: 'center' });
+
+          pdf.setFontSize(10);
+          pdf.setFont("helvetica", "italic");
+          pdf.setTextColor(100, 116, 139);
+          pdf.text("App Develop By Anik_Oni", a4Width - 15, 15, { align: 'right' });
+
+          // Add dynamic chart title
+          pdf.setFont("helvetica", "bold");
+          pdf.setFontSize(16);
+          pdf.setTextColor(33, 37, 41);
+          pdf.text(title, a4Width / 2, 28, { align: 'center' });
+
+          // Shift the image to the left for each subsequent page slice
+          const xOffset = 15 - (i * usableWidth);
+
+          // Stamp the image (PDF natively crops whatever falls outside the page bounds)
+          pdf.addImage(chartImageDataUrl, 'JPEG', xOffset, 40, scaledImgWidth, usableHeight);
+
+          // Add page numbers
+          pdf.setFontSize(9);
+          pdf.setTextColor(100, 116, 139);
+          pdf.text(`Page ${i + 1} of ${totalPages}`, a4Width / 2, a4Height - 10, { align: 'center' });
+        }
+        
+        pdf.save(`${title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.pdf`);
+        setIsDownloading(false);
+      };
+      img.onerror = () => {
+        console.error('Failed to load image for PDF generation');
+        setIsDownloading(false);
+      };
+      img.src = chartImageDataUrl;
     } catch (err) {
       console.error('PDF Download processing broke:', err);
-    } finally {
       setIsDownloading(false);
     }
   };

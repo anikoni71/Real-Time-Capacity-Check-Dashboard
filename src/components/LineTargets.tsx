@@ -5,6 +5,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LabelLis
 import { Activity, Target } from 'lucide-react';
 import ChartContainer from './ChartContainer';
 import { useFullscreenContext } from '../contexts/FullscreenContext';
+import { CustomizedAxisTick } from './CustomizedAxisTick';
 
 export default function LineTargets({ processes }: { processes: ProcessRow[] }) {
   const isFullscreen = useFullscreenContext();
@@ -35,14 +36,14 @@ export default function LineTargets({ processes }: { processes: ProcessRow[] }) 
     <div className="space-y-6">
       <ChartContainer title="Line 100% Target vs Capacity" icon={<Target className="h-5 w-5 text-indigo-600" />}>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-           <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, lineData.length * 60)}px`, height: isFullscreen ? 'auto' : '600px', minHeight: isFullscreen ? '800px' : '600px' }}>
+           <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, lineData.length * 60)}px`, height: isFullscreen ? 'auto' : '650px', minHeight: isFullscreen ? '800px' : '650px', overflow: 'visible' }}>
              <ResponsiveContainer width="100%" height={isFullscreen ? 800 : "100%"} minHeight={800}>
-               <LineChart layout={isFullscreen ? "vertical" : "horizontal"} data={lineData} margin={{ top: 30, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 220 }}>
+               <LineChart layout={isFullscreen ? "vertical" : "horizontal"} data={lineData} margin={{ top: 20, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 250 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={!isFullscreen} horizontal={isFullscreen} stroke="#E5E7EB" />
                  {isFullscreen ? (
                    <YAxis dataKey="name" type="category" width={150} tick={{ fontSize: 9, fill: '#4B5563' }} />
                  ) : (
-                   <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#4B5563' }} interval={0} angle={-45} textAnchor="end" height={150}/>
+                   <XAxis dataKey="name" tick={<CustomizedAxisTick />} interval={0} height={250}/>
                  )}
                  {isFullscreen ? (
                    <XAxis type="number" domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(m * 1.2); }]} tick={{ fontSize: 11 }} />
@@ -65,14 +66,14 @@ export default function LineTargets({ processes }: { processes: ProcessRow[] }) 
 
       <ChartContainer title="Today Plan LC Target vs Capacity" icon={<Activity className="h-5 w-5 text-emerald-600" />}>
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-           <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, lineData.length * 60)}px`, height: isFullscreen ? 'auto' : '600px', minHeight: isFullscreen ? '800px' : '600px' }}>
+           <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, lineData.length * 60)}px`, height: isFullscreen ? 'auto' : '650px', minHeight: isFullscreen ? '800px' : '650px', overflow: 'visible' }}>
              <ResponsiveContainer width="100%" height={isFullscreen ? 800 : "100%"} minHeight={800}>
-               <LineChart layout={isFullscreen ? "vertical" : "horizontal"} data={lineData} margin={{ top: 30, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 220 }}>
+               <LineChart layout={isFullscreen ? "vertical" : "horizontal"} data={lineData} margin={{ top: 20, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 250 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={!isFullscreen} horizontal={isFullscreen} stroke="#E5E7EB" />
                  {isFullscreen ? (
                    <YAxis dataKey="name" type="category" width={150} tick={{ fontSize: 9, fill: '#4B5563' }} />
                  ) : (
-                   <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#4B5563' }} interval={0} angle={-45} textAnchor="end" height={150}/>
+                   <XAxis dataKey="name" tick={<CustomizedAxisTick />} interval={0} height={250}/>
                  )}
                  {isFullscreen ? (
                    <XAxis type="number" domain={[0, (max) => { const m = Array.isArray(max) ? max[1] : max; return Math.round(m * 1.2); }]} tick={{ fontSize: 11 }} />
