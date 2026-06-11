@@ -110,53 +110,37 @@ const DiagramWrapper = ({ title, icon: Icon, children }: any) => {
     try {
       const img = new Image();
       img.onload = () => {
-        const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+        const pdf = new jsPDF('l', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeightObj = pdf.internal.pageSize.getHeight();
         
-        const a4Width = 297;
-        const a4Height = 210;
-        const usableWidth = a4Width - 30; // 15mm margins on sides
-        const usableHeight = a4Height - 50; // Leave 50mm at top for headers
+        pdf.setFillColor(255, 255, 255);
+        pdf.rect(0, 0, pdfWidth, pdfHeightObj, 'F');
         
-        const scaledImgWidth = (img.width * usableHeight) / img.height;
-        const totalPages = Math.ceil(scaledImgWidth / usableWidth);
+        // Render Main Centered Title
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(18);
+        pdf.setTextColor(33, 37, 41);
+        pdf.text("Real Time Capacity Check", pdfWidth / 2, 15, { align: 'center' });
+
+        // Render Right-Aligned Attribution
+        pdf.setFont("helvetica", "italic");
+        pdf.setFontSize(10);
+        pdf.setTextColor(100, 116, 139);
+        pdf.text("App Develop By Anik_Oni", pdfWidth - 15, 15, { align: 'right' });
+
+        // Render Native PDF Text for Header Title
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(16);
+        pdf.setTextColor(33, 37, 41); // Dark charcoal text
+        pdf.text(title, 15, 28); // Positioned slightly below the main header row
         
-        for (let i = 0; i < totalPages; i++) {
-          if (i > 0) pdf.addPage();
-
-          // Flood the background white
-          pdf.setFillColor(255, 255, 255);
-          pdf.rect(0, 0, a4Width, a4Height, 'F');
-
-          // Render headers on EVERY page
-          pdf.setFont("helvetica", "bold");
-          pdf.setFontSize(18);
-          // Set text color separately to ensure it applies Correctly across multiple jsPDF addPage calls
-          pdf.setTextColor(33, 37, 41);
-          pdf.text("Real Time Capacity Check", a4Width / 2, 15, { align: 'center' });
-
-          pdf.setFontSize(10);
-          pdf.setFont("helvetica", "italic");
-          pdf.setTextColor(100, 116, 139);
-          pdf.text("App Develop By Anik_Oni", a4Width - 15, 15, { align: 'right' });
-
-          // Add dynamic chart title
-          pdf.setFont("helvetica", "bold");
-          pdf.setFontSize(16);
-          pdf.setTextColor(33, 37, 41);
-          pdf.text(title, a4Width / 2, 28, { align: 'center' });
-
-          // Shift the image to the left for each subsequent page slice
-          const xOffset = 15 - (i * usableWidth);
-
-          // Stamp the image (PDF natively crops whatever falls outside the page bounds)
-          pdf.addImage(chartImageDataUrl, 'JPEG', xOffset, 40, scaledImgWidth, usableHeight);
-
-          // Add page numbers
-          pdf.setFontSize(9);
-          pdf.setTextColor(100, 116, 139);
-          pdf.text(`Page ${i + 1} of ${totalPages}`, a4Width / 2, a4Height - 10, { align: 'center' });
-        }
+        // Automatically stretches/shrinks the wide dataset snapshot to cleanly fit 1 A4 page
+        // Maintain aspect ratio
+        const imgWidth = pdfWidth - 30; // Clean 15px side margins
+        const imgHeight = (img.height * imgWidth) / img.width;
         
+        pdf.addImage(chartImageDataUrl, 'JPEG', 15, 40, imgWidth, imgHeight);
         pdf.save(`${title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.pdf`);
       };
       img.onerror = () => {
