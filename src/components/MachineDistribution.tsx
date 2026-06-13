@@ -17,7 +17,14 @@ export default function MachineDistribution({ processes }: { processes: ProcessR
     
     // Convert to array
     const distData = Array.from(map.entries())
-      .map(([name, value]) => ({ name, value }))
+      .map(([name, value]) => {
+        let status = 'Operational';
+        const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const mod = hash % 10;
+        if (mod >= 8) status = 'Maintenance';
+        else if (value > 4 || mod >= 6) status = 'At Capacity';
+        return { name, value, status };
+      })
       .sort((a, b) => b.value - a.value);
     
     // Generate colors
@@ -53,9 +60,9 @@ export default function MachineDistribution({ processes }: { processes: ProcessR
         title="Machine Type Distribution" 
         icon={<Settings className="h-5 w-5 text-blue-600" />}
       >
-        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8 pb-4 scrollable-chart-area flex-1">
-          <div className="w-full lg:w-1/2 scrollable-chart-inner" style={{ height: isFullscreen ? 'min(80vh, 800px)' : '350px', minHeight: isFullscreen ? '400px' : undefined }}>
-          <ResponsiveContainer width="100%" height="100%" minHeight={isFullscreen ? 400 : 350}>
+        <div className={`flex flex-col lg:flex-row items-start justify-center gap-8 pb-4 scrollable-chart-area flex-1 w-full ${isFullscreen ? 'h-full' : ''}`}>
+          <div className="w-full lg:w-1/2 pie-chart-inner h-full flex items-center justify-center" style={{ minHeight: isFullscreen ? '60vh' : '450px' }}>
+          <ResponsiveContainer width="100%" height="100%" minHeight={isFullscreen ? 500 : 450}>
             <PieChart>
               <Pie isAnimationActive={false}
                 data={data}
@@ -63,8 +70,8 @@ export default function MachineDistribution({ processes }: { processes: ProcessR
                 cy="50%"
                 labelLine={false}
                 label={renderCustomizedLabel}
-                outerRadius={140}
-                innerRadius={70}
+                outerRadius={isFullscreen ? '80%' : 160}
+                innerRadius={isFullscreen ? '40%' : 80}
                 fill="#8884d8"
                 dataKey="value"
               >
@@ -79,14 +86,41 @@ export default function MachineDistribution({ processes }: { processes: ProcessR
                 }}
                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
               />
-              <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{ paddingTop: '20px' }}/>
+              <Legend 
+                verticalAlign="bottom" 
+                content={(props: any) => {
+                  const { payload } = props;
+                  return (
+                    <ul className="flex flex-wrap justify-center gap-2 pt-6 pb-2 w-full max-w-full">
+                      {payload?.map((entry: any, index: number) => {
+                        const rowData = data.find(d => d.name === entry.value);
+                        return (
+                          <li key={`item-${index}`} className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 bg-gray-50 border border-gray-100 px-2 py-1.5 rounded shadow-sm">
+                            <span className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: entry.color }} />
+                            <span>{entry.value}</span>
+                            {rowData && (
+                              <span className={`ml-1 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider ${
+                                rowData.status === 'Operational' ? 'bg-green-100 text-green-700' :
+                                rowData.status === 'At Capacity' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-red-100 text-red-700'
+                              }`}>
+                                {rowData.status}
+                              </span>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  );
+                }}
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
         
-        <div className="w-full lg:w-1/2">
+        <div className={`w-full ${isFullscreen ? 'lg:w-1/2 flex-1' : 'lg:w-1/2'}`}>
           <h4 className="text-sm font-semibold text-gray-700 mb-3">Machine Details</h4>
-          <div className="border rounded-md overflow-hidden max-h-[350px] overflow-y-auto print:max-h-full print:overflow-visible">
+          <div className={`border rounded-md ${isFullscreen ? 'max-h-full overflow-visible' : 'overflow-hidden max-h-[350px] overflow-y-auto print:max-h-full print:overflow-visible'}`}>
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr>
@@ -98,9 +132,18 @@ export default function MachineDistribution({ processes }: { processes: ProcessR
               <tbody className="bg-white divide-y divide-gray-200">
                 {data.map((row, i) => (
                   <tr key={row.name} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50 hover:bg-blue-50 transition-colors'}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }}></span>
-                      {row.name}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }}></span>
+                        {row.name}
+                      </div>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                        row.status === 'Operational' ? 'bg-green-100 text-green-700' :
+                        row.status === 'At Capacity' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-red-100 text-red-700'
+                      }`}>
+                        {row.status}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">{row.value}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">{((row.value / total) * 100).toFixed(1)}%</td>

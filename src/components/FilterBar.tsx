@@ -5,6 +5,7 @@ import {
   Building, GitMerge, ShoppingCart, Shirt, Tag, Clock, Settings, User 
 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import DateRangePicker from './DateRangePicker';
 
 function DatePicker({ availableDates, dateParts, selected, onSelect, label, icon: Icon }: any) {
   const [open, setOpen] = useState(false);
@@ -147,15 +148,11 @@ export default function FilterBar({ data, filters, setFilters, clearFilters, act
           selected={filters.date} onSelect={(val: string) => setFilters({...filters, date: val})} 
           label="Exact Date" icon={CalendarIcon}
         />
-        <DatePicker 
-          availableDates={availableDates} dateParts={dateParts} 
-          selected={filters.startDate} onSelect={(val: string) => setFilters({...filters, startDate: val})} 
-          label="Start Date" icon={CalendarIcon}
-        />
-        <DatePicker 
-          availableDates={availableDates} dateParts={dateParts} 
-          selected={filters.endDate} onSelect={(val: string) => setFilters({...filters, endDate: val})} 
-          label="End Date" icon={CalendarIcon}
+        <DateRangePicker 
+          availableDates={availableDates}
+          startDate={filters.startDate} 
+          endDate={filters.endDate} 
+          onChange={(start: string, end: string) => setFilters({...filters, startDate: start, endDate: end})} 
         />
 
         {dropdowns.map(df => {

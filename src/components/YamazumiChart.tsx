@@ -59,7 +59,7 @@ export default function YamazumiChart({ processes }: { processes: ProcessRow[] }
         <div className="overflow-x-auto w-full pb-4 scrollable-chart-area flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
           <div className="scrollable-chart-inner" style={{ width: isFullscreen ? '100%' : `${Math.max(1200, chartData.length * 60)}px`, height: isFullscreen ? 'auto' : '650px', minHeight: isFullscreen ? `${Math.max(chartData.length * 30, 800)}px` : undefined }}>
             <ResponsiveContainer width="100%" height={isFullscreen ? Math.max(chartData.length * 30, 800) : "100%"} minHeight={isFullscreen ? Math.max(chartData.length * 30, 800) : 650} key={isFullscreen ? 'fs-scroll-engine' : 'normal-view'}>
-              <BarChart layout={isFullscreen ? "vertical" : "horizontal"} data={chartData} margin={{ top: 20, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 180 }} barCategoryGap="1%">
+              <BarChart layout={isFullscreen ? "vertical" : "horizontal"} data={chartData} margin={{ top: 60, right: 30, left: isFullscreen ? 150 : 20, bottom: isFullscreen ? 20 : 180 }} barCategoryGap="1%">
                 <CartesianGrid strokeDasharray="3 3" vertical={!isFullscreen} horizontal={isFullscreen} stroke="#E5E7EB" />
                 {isFullscreen ? (
                   <YAxis dataKey="name" type="category" width={150} tick={{ fontSize: 9, fill: '#4B5563' }} />
@@ -87,11 +87,20 @@ export default function YamazumiChart({ processes }: { processes: ProcessRow[] }
                 cursor={{ fill: 'transparent' }}
                 contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
               />
-              <Legend verticalAlign="top" height={isFullscreen ? 50 : 150} wrapperStyle={{ fontSize: '12px' }} />
+              <Legend 
+                verticalAlign="top" 
+                layout="horizontal"
+                align="center"
+                wrapperStyle={{ 
+                  fontSize: '12px',
+                  paddingBottom: '20px'
+                }} 
+                iconType="circle"
+              />
 
               <Bar isAnimationActive={false} dataKey="va" stackId="a" fill="#10B981" name="Value-Added (VA)" minPointSize={2} />
-              <Bar isAnimationActive={false} dataKey="nvan" stackId="a" fill="#F59E0B" name="Non-Value-Added Necessary (NVAN)" minPointSize={2} />
-              <Bar isAnimationActive={false} dataKey="nva" stackId="a" fill="#EF4444" name="Waste (NVA)" minPointSize={2}>
+              <Bar isAnimationActive={false} dataKey="nvan" stackId="a" fill="#F59E0B" name="NVAN" minPointSize={2} />
+              <Bar isAnimationActive={false} dataKey="nva" stackId="a" fill="#EF4444" name="NVA" minPointSize={2}>
                  <LabelList 
                    dataKey="total" 
                    position={isFullscreen ? "right" : "top"} 

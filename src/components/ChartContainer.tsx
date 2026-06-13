@@ -29,31 +29,49 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
     return () => document.removeEventListener('click', handleClickOutside);
   }, [showDropdown]);
 
-  // Helper function to capture the absolute full dataset image cleanly
   const captureFullChartImage = async (): Promise<string | null> => {
     if (!containerRef.current) return null;
 
-    const targetElement = (containerRef.current.querySelector('.scrollable-chart-inner') || 
-                           containerRef.current.querySelector('.scrollable-chart-area') || 
-                           containerRef.current) as HTMLElement;
+    const container = containerRef.current;
     
-    // Save original styles
-    const originalWidth = targetElement.style.width;
-    const originalMaxWidth = targetElement.style.maxWidth;
-    const originalPosition = targetElement.style.position;
-    const originalZIndex = targetElement.style.zIndex;
-    const originalBackgroundColor = targetElement.style.backgroundColor;
-    const originalOverflow = targetElement.style.overflow;
+    // Find if there's a scrollable inner element that needs expansion
+    const scrollableInner = container.querySelector('.scrollable-chart-inner') as HTMLElement;
+    
+    // Evaluate required expanded width for container
+    let requiredWidth: number | null = null;
+    let originalInnerWidth = '';
+    let originalInnerOverflow = '';
 
-    // Physical DOM Expansion
-    targetElement.style.width = targetElement.scrollWidth + 'px';
-    targetElement.style.maxWidth = 'none';
-    targetElement.style.position = 'absolute';
-    targetElement.style.zIndex = '9999';
-    targetElement.style.backgroundColor = '#ffffff';
-    targetElement.style.overflow = 'visible';
+    if (scrollableInner && scrollableInner.scrollWidth > scrollableInner.clientWidth + 10) {
+      requiredWidth = Math.max(container.offsetWidth, scrollableInner.scrollWidth + 40);
+      originalInnerWidth = scrollableInner.style.width;
+      originalInnerOverflow = scrollableInner.style.overflow;
+      scrollableInner.style.width = scrollableInner.scrollWidth + 'px';
+      scrollableInner.style.overflow = 'visible';
+    }
+    
+    // Save original styles of container
+    const originalWidth = container.style.width;
+    const originalMaxWidth = container.style.maxWidth;
+    const originalPosition = container.style.position;
+    const originalZIndex = container.style.zIndex;
+    const originalBackgroundColor = container.style.backgroundColor;
+    const originalOverflow = container.style.overflow;
+    
+    // Physical DOM Expansion (Width only) to fit contents if needed
+    if (requiredWidth !== null) {
+        container.style.width = requiredWidth + 'px';
+    }
+    container.style.maxWidth = 'none';
+    container.style.position = 'absolute';
+    container.style.zIndex = '9999';
+    container.style.backgroundColor = '#ffffff';
+    container.style.overflow = 'visible';
 
-    // Trigger Recharts Re-render (Crucial)
+    // Add exporting-chart class to disable transforms during capture
+    document.body.classList.add('exporting-chart');
+
+    // Trigger Recharts Re-render
     window.dispatchEvent(new Event('resize'));
 
     // Wait for Paint
@@ -61,12 +79,17 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
 
     try {
       // Capture with html-to-image
-      const dataUrl = await toJpeg(targetElement, { 
+      const dataUrl = await toJpeg(container, { 
         pixelRatio: 2,
         backgroundColor: '#ffffff',
         style: {
-          padding: '20px',
           overflow: 'hidden'
+        },
+        filter: (node) => {
+          if (node instanceof Element) {
+             return !node.classList.contains('action-buttons');
+          }
+          return true;
         }
       });
 
@@ -75,14 +98,20 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
       console.error('Canvas capture aborted:', err);
       return null;
     } finally {
+      document.body.classList.remove('exporting-chart');
       // Revert Styles immediately
-      targetElement.style.width = originalWidth;
-      targetElement.style.maxWidth = originalMaxWidth;
-      targetElement.style.position = originalPosition;
-      targetElement.style.zIndex = originalZIndex;
-      targetElement.style.backgroundColor = originalBackgroundColor;
-      targetElement.style.overflow = originalOverflow;
+      container.style.width = originalWidth;
+      container.style.maxWidth = originalMaxWidth;
+      container.style.position = originalPosition;
+      container.style.zIndex = originalZIndex;
+      container.style.backgroundColor = originalBackgroundColor;
+      container.style.overflow = originalOverflow;
       
+      if (scrollableInner && requiredWidth !== null) {
+          scrollableInner.style.width = originalInnerWidth;
+          scrollableInner.style.overflow = originalInnerOverflow;
+      }
+
       // Trigger Recharts Re-render again to shrink back
       window.dispatchEvent(new Event('resize'));
     }
@@ -147,37 +176,56 @@ export default function ChartContainer({ title, icon, children, data }: ChartCon
     try {
       const img = new Image();
       img.onload = () => {
-        const pdf = new jsPDF('l', 'mm', 'a4');
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeightObj = pdf.internal.pageSize.getHeight();
-        
+        const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+        const a4Width = 297;
+        const a4Height = 210;
+        const margin = 15;
+        const topMargin = 40; // Leave space for the professional headers
+
+        // Define the maximum physical box the image is allowed to fill
+        const maxImgWidth = a4Width - (margin * 2);
+        const maxImgHeight = a4Height - topMargin - margin;
+
+        const imgProps = pdf.getImageProperties(img.src);
+        const imgRatio = imgProps.width / imgProps.height;
+        const pageBoxRatio = maxImgWidth / maxImgHeight;
+
+        let finalWidth, finalHeight;
+
+        // Determine whether the width or the height hits the page boundary first
+        if (imgRatio > pageBoxRatio) {
+            // Chart is naturally very wide: lock to max width, calculate proportional height
+            finalWidth = maxImgWidth;
+            finalHeight = maxImgWidth / imgRatio;
+        } else {
+            // Chart is naturally tall: lock to max height, calculate proportional width
+            finalHeight = maxImgHeight;
+            finalWidth = maxImgHeight * imgRatio;
+        }
+
+        // Center the chart perfectly within that available space
+        const xOffset = margin + (maxImgWidth - finalWidth) / 2;
+        const yOffset = topMargin + (maxImgHeight - finalHeight) / 2;
+
+        // Flood white background, add professional headers, and stamp the perfectly scaled image
         pdf.setFillColor(255, 255, 255);
-        pdf.rect(0, 0, pdfWidth, pdfHeightObj, 'F');
-        
+        pdf.rect(0, 0, a4Width, a4Height, 'F');
+
         // Render Main Centered Title
         pdf.setFont("helvetica", "bold");
         pdf.setFontSize(18);
         pdf.setTextColor(33, 37, 41);
-        pdf.text("Real Time Capacity Check", pdfWidth / 2, 15, { align: 'center' });
+        pdf.text("Real Time Capacity Check", a4Width / 2, 15, { align: 'center' });
 
         // Render Right-Aligned Attribution
         pdf.setFont("helvetica", "italic");
         pdf.setFontSize(10);
         pdf.setTextColor(100, 116, 139);
-        pdf.text("App Develop By Anik_Oni", pdfWidth - 15, 15, { align: 'right' });
+        pdf.text("App Develop By Anik_Oni", a4Width - 15, 15, { align: 'right' });
 
-        // Render Native PDF Text for Header Title
-        pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(16);
-        pdf.setTextColor(33, 37, 41); // Dark charcoal text
-        pdf.text(title, 15, 28); // Positioned slightly below the main header row
+        // Render Native PDF Text for Header Title (Removed native rendering to use captured image header instead)
         
-        // Automatically stretches/shrinks the wide dataset snapshot to cleanly fit 1 A4 page
-        // Maintain aspect ratio
-        const imgWidth = pdfWidth - 30; // Clean 15px side margins
-        const imgHeight = (img.height * imgWidth) / img.width;
-        
-        pdf.addImage(chartImageDataUrl, 'JPEG', 15, 40, imgWidth, imgHeight);
+        pdf.addImage(img.src, 'JPEG', xOffset, yOffset, finalWidth, finalHeight);
         pdf.save(`${title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.pdf`);
         setIsDownloading(false);
       };
