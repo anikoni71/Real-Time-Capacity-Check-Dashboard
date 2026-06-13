@@ -774,7 +774,7 @@ export default function RootCauseAnalysis({
             >
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                className={`h-full w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all flex flex-col ${flags.machine ? (type === "causes" || type === "bottleneck" ? "border-red-400" : "border-emerald-400") : "border-gray-200"}`}
+                className={`w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all flex flex-col ${flags.machine ? (type === "causes" || type === "bottleneck" ? "border-red-400" : "border-emerald-400") : "border-gray-200"}`}
                 onClick={() => toggleNode(`${type}-machine`)}
               >
                 <div className="flex items-center gap-2 mb-2 border-b pb-1 shrink-0">
@@ -822,7 +822,7 @@ export default function RootCauseAnalysis({
             >
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                className={`h-full w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all flex flex-col ${flags.method ? (type === "causes" || type === "bottleneck" ? "border-red-400" : "border-emerald-400") : "border-gray-200"}`}
+                className={`w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all flex flex-col ${flags.method ? (type === "causes" || type === "bottleneck" ? "border-red-400" : "border-emerald-400") : "border-gray-200"}`}
                 onClick={() => toggleNode(`${type}-method`)}
               >
                 <div className="flex items-center gap-2 mb-2 border-b pb-1 shrink-0">
@@ -870,7 +870,7 @@ export default function RootCauseAnalysis({
             >
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                className={`h-full w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all flex flex-col ${flags.manpower ? (type === "causes" || type === "bottleneck" ? "border-red-400" : "border-emerald-400") : "border-gray-200"}`}
+                className={`w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all flex flex-col ${flags.manpower ? (type === "causes" || type === "bottleneck" ? "border-red-400" : "border-emerald-400") : "border-gray-200"}`}
                 onClick={() => toggleNode(`${type}-manpower`)}
               >
                 <div className="flex items-center gap-2 mb-2 border-b pb-1 shrink-0">
@@ -918,7 +918,7 @@ export default function RootCauseAnalysis({
             >
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                className={`h-full w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all flex flex-col ${flags.material ? (type === "causes" || type === "bottleneck" ? "border-red-400" : "border-emerald-400") : "border-gray-200"}`}
+                className={`w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all flex flex-col ${flags.material ? (type === "causes" || type === "bottleneck" ? "border-red-400" : "border-emerald-400") : "border-gray-200"}`}
                 onClick={() => toggleNode(`${type}-material`)}
               >
                 <div className="flex items-center gap-2 mb-2 border-b pb-1 shrink-0">

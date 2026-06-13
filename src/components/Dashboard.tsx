@@ -1,20 +1,33 @@
 // src/components/Dashboard.tsx
-import React, { useState, useEffect, useMemo } from 'react';
-import { DashboardData, ProcessRow, ScoreboardRow } from '../types';
-import { fetchDashboardData } from '../services/dataService';
-import FilterBar from './FilterBar';
-import Scoreboard from './Scoreboard';
-import CapacityProcess from './CapacityProcess';
-import ProcessAnalysis from './ProcessAnalysis';
-import LineTargets from './LineTargets';
-import Analytics from './Analytics';
-import Performers from './Performers';
-import Database from './Database';
-import OperatorUtilization from './OperatorUtilization';
-import MachineDistribution from './MachineDistribution';
-import YamazumiChart from './YamazumiChart';
-import RootCauseAnalysis from './RootCauseAnalysis';
-import { RefreshCcw, Loader2, Factory, LineChart, BarChart2, Trophy, Database as DbIcon, Activity, Layers, ActivitySquare, GitBranch } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from "react";
+import { DashboardData, ProcessRow, ScoreboardRow } from "../types";
+import { fetchDashboardData } from "../services/dataService";
+import FilterBar from "./FilterBar";
+import Scoreboard from "./Scoreboard";
+import CapacityProcess from "./CapacityProcess";
+import ProcessAnalysis from "./ProcessAnalysis";
+import LineTargets from "./LineTargets";
+import Analytics from "./Analytics";
+import Performers from "./Performers";
+import Database from "./Database";
+import OperatorUtilization from "./OperatorUtilization";
+import MachineDistribution from "./MachineDistribution";
+import YamazumiChart from "./YamazumiChart";
+import RootCauseAnalysis from "./RootCauseAnalysis";
+import {
+  RefreshCcw,
+  Loader2,
+  Factory,
+  LineChart,
+  BarChart2,
+  Trophy,
+  Database as DbIcon,
+  Activity,
+  Layers,
+  ActivitySquare,
+  GitBranch,
+  Printer,
+} from "lucide-react";
 
 export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -22,17 +35,17 @@ export default function Dashboard() {
   const [countdown, setCountdown] = useState(30);
 
   const [filters, setFilters] = useState({
-    date: '',
-    startDate: '',
-    endDate: '',
-    unit: '',
-    line: '',
-    buyer: '',
-    style: '',
-    item: '',
-    runday: '',
-    processName: '',
-    operatorName: ''
+    date: "",
+    startDate: "",
+    endDate: "",
+    unit: "",
+    line: "",
+    buyer: "",
+    style: "",
+    item: "",
+    runday: "",
+    processName: "",
+    operatorName: "",
   });
 
   const fetchData = async () => {
@@ -63,25 +76,36 @@ export default function Dashboard() {
 
   const clearFilters = () => {
     setFilters({
-      date: '', startDate: '', endDate: '', unit: '', line: '', buyer: '', style: '',
-      item: '', runday: '', processName: '', operatorName: ''
+      date: "",
+      startDate: "",
+      endDate: "",
+      unit: "",
+      line: "",
+      buyer: "",
+      style: "",
+      item: "",
+      runday: "",
+      processName: "",
+      operatorName: "",
     });
   };
 
   const parseDate = (dStr: string) => {
-    const [m, d, y] = dStr.split('/');
+    const [m, d, y] = dStr.split("/");
     return new Date(parseInt(y), parseInt(m) - 1, parseInt(d)).getTime();
   };
 
   const filteredProcesses = useMemo(() => {
     if (!data) return [];
-    return data.processes.filter(p => {
+    return data.processes.filter((p) => {
       let dateValid = true;
       if (filters.date && p.date !== filters.date) dateValid = false;
       if (filters.startDate || filters.endDate) {
         const pTime = parseDate(p.date);
-        if (filters.startDate && pTime < parseDate(filters.startDate)) dateValid = false;
-        if (filters.endDate && pTime > parseDate(filters.endDate)) dateValid = false;
+        if (filters.startDate && pTime < parseDate(filters.startDate))
+          dateValid = false;
+        if (filters.endDate && pTime > parseDate(filters.endDate))
+          dateValid = false;
       }
 
       return (
@@ -100,13 +124,15 @@ export default function Dashboard() {
 
   const filteredScoreboards = useMemo(() => {
     if (!data) return [];
-    return data.scoreboards.filter(s => {
+    return data.scoreboards.filter((s) => {
       let dateValid = true;
       if (filters.date && s.date !== filters.date) dateValid = false;
       if (filters.startDate || filters.endDate) {
         const sTime = parseDate(s.date);
-        if (filters.startDate && sTime < parseDate(filters.startDate)) dateValid = false;
-        if (filters.endDate && sTime > parseDate(filters.endDate)) dateValid = false;
+        if (filters.startDate && sTime < parseDate(filters.startDate))
+          dateValid = false;
+        if (filters.endDate && sTime > parseDate(filters.endDate))
+          dateValid = false;
       }
 
       return (
@@ -122,18 +148,18 @@ export default function Dashboard() {
   }, [data, filters]);
 
   const tabs = [
-    { id: 'Capacity by Process', icon: Factory },
-    { id: 'Utilization & Machines', icon: Layers },
-    { id: 'Process Analysis', icon: LineChart },
-    { id: 'Line Targets', icon: Activity },
-    { id: 'Analytics', icon: BarChart2 },
-    { id: 'Root Cause & Solutions', icon: GitBranch },
-    { id: 'Yamazumi Chart', icon: ActivitySquare },
-    { id: 'Operator\'s Performers & Efficiency Analysis', icon: Trophy },
-    { id: 'Database', icon: DbIcon }
+    { id: "Capacity by Process", icon: Factory },
+    { id: "Utilization & Machines", icon: Layers },
+    { id: "Process Analysis", icon: LineChart },
+    { id: "Line Targets", icon: Activity },
+    { id: "Analytics", icon: BarChart2 },
+    { id: "Root Cause & Solutions", icon: GitBranch },
+    { id: "Yamazumi Chart", icon: ActivitySquare },
+    { id: "Operator's Performers & Efficiency Analysis", icon: Trophy },
+    { id: "Database", icon: DbIcon },
   ];
 
-  const [activeTab, setActiveTab] = useState('Capacity by Process');
+  const [activeTab, setActiveTab] = useState("Capacity by Process");
 
   if (loading && !data) {
     return (
@@ -151,17 +177,31 @@ export default function Dashboard() {
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
             <Activity className="h-6 w-6 text-blue-600" />
-            <h1 className="text-xl font-bold text-gray-900">Real Time Capacity Check Dashboard</h1>
+            <h1 className="text-xl font-bold text-gray-900">
+              Real Time Capacity Check Dashboard
+            </h1>
           </div>
-          <span className="text-xs text-green-600 font-medium tracking-wide mt-1">Live Connection</span>
+          <span className="text-xs text-green-600 font-medium tracking-wide mt-1">
+            Live Connection
+          </span>
         </div>
         <div className="flex items-center space-x-4">
-          <div className="text-sm text-gray-500">
-            Next refresh in <span className="font-mono font-medium text-gray-900">{countdown}s</span>
+          <div className="text-sm text-gray-500 print:hidden">
+            Next refresh in{" "}
+            <span className="font-mono font-medium text-gray-900">
+              {countdown}s
+            </span>
           </div>
-          <button 
+          <button
+            onClick={() => window.print()}
+            className="flex items-center space-x-2 px-3 py-1.5 bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200 rounded-md transition-colors text-sm font-medium print:hidden"
+          >
+            <Printer className="h-4 w-4" />
+            <span>Export to PDF</span>
+          </button>
+          <button
             onClick={fetchData}
-            className="flex items-center space-x-2 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-md transition-colors text-sm font-medium"
+            className="flex items-center space-x-2 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-md transition-colors text-sm font-medium print:hidden"
           >
             <RefreshCcw className="h-4 w-4" />
             <span>Refresh Now</span>
@@ -170,18 +210,21 @@ export default function Dashboard() {
       </header>
 
       <div className="p-6 flex-1 max-w-7xl mx-auto w-full flex flex-col space-y-6">
-        <FilterBar 
-          data={data!} 
-          filters={filters} 
-          setFilters={setFilters} 
+        <FilterBar
+          data={data!}
+          filters={filters}
+          setFilters={setFilters}
           clearFilters={clearFilters}
           activeCount={activeFiltersCount}
         />
 
-        <Scoreboard scoreboards={filteredScoreboards} activeCount={activeFiltersCount} />
+        <Scoreboard
+          scoreboards={filteredScoreboards}
+          activeCount={activeFiltersCount}
+        />
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="flex border-b overflow-x-auto">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden print:border-none print:shadow-none">
+          <div className="flex border-b overflow-x-auto print:hidden">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
@@ -189,9 +232,9 @@ export default function Dashboard() {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-2 ${
-                    activeTab === tab.id 
-                      ? 'border-b-2 border-blue-600 text-blue-600 bg-blue-50/50' 
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    activeTab === tab.id
+                      ? "border-b-2 border-blue-600 text-blue-600 bg-blue-50/50"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -200,22 +243,41 @@ export default function Dashboard() {
               );
             })}
           </div>
-          
+
           <div className="p-4 bg-gray-50">
-            {activeTab === 'Capacity by Process' && <CapacityProcess processes={filteredProcesses} />}
-            {activeTab === 'Utilization & Machines' && (
+            {activeTab === "Capacity by Process" && (
+              <CapacityProcess processes={filteredProcesses} />
+            )}
+            {activeTab === "Utilization & Machines" && (
               <div className="space-y-6">
                 <OperatorUtilization processes={filteredProcesses} />
                 <MachineDistribution processes={filteredProcesses} />
               </div>
             )}
-            {activeTab === 'Process Analysis' && <ProcessAnalysis processes={filteredProcesses} />}
-            {activeTab === 'Line Targets' && <LineTargets processes={filteredProcesses} />}
-            {activeTab === 'Analytics' && <Analytics processes={filteredProcesses} />}
-            {activeTab === 'Root Cause & Solutions' && <RootCauseAnalysis scoreboards={filteredScoreboards} processes={filteredProcesses} />}
-            { activeTab === 'Yamazumi Chart' && <YamazumiChart processes={filteredProcesses} /> }
-            { activeTab === 'Operator\'s Performers & Efficiency Analysis' && <Performers processes={filteredProcesses} /> }
-            { activeTab === 'Database' && <Database processes={filteredProcesses} /> }
+            {activeTab === "Process Analysis" && (
+              <ProcessAnalysis processes={filteredProcesses} />
+            )}
+            {activeTab === "Line Targets" && (
+              <LineTargets processes={filteredProcesses} />
+            )}
+            {activeTab === "Analytics" && (
+              <Analytics processes={filteredProcesses} />
+            )}
+            {activeTab === "Root Cause & Solutions" && (
+              <RootCauseAnalysis
+                scoreboards={filteredScoreboards}
+                processes={filteredProcesses}
+              />
+            )}
+            {activeTab === "Yamazumi Chart" && (
+              <YamazumiChart processes={filteredProcesses} />
+            )}
+            {activeTab === "Operator's Performers & Efficiency Analysis" && (
+              <Performers processes={filteredProcesses} />
+            )}
+            {activeTab === "Database" && (
+              <Database processes={filteredProcesses} />
+            )}
           </div>
         </div>
       </div>
