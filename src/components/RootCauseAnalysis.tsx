@@ -576,7 +576,12 @@ export default function RootCauseAnalysis({
     material: { label: "QUALITY", icon: Activity },
   };
 
-  const renderFishbone = (type: "causes" | "solutions" | "bottleneck") => {
+  const FishboneDiagram = ({
+    type,
+  }: {
+    type: "causes" | "solutions" | "bottleneck";
+  }) => {
+    const isFullScreenWrapper = useFullscreenContext();
     let headText = "CAPACITY LOSS";
     let headColor = "bg-indigo-600";
     let dataObj = lossCauses;
@@ -595,7 +600,7 @@ export default function RootCauseAnalysis({
 
     return (
       <div
-        className={`w-full flex justify-center items-center ${isFullScreen ? "h-[calc(100vh-80px)] overflow-hidden bg-gray-50 rounded-md" : "overflow-x-auto pb-10 min-h-[680px]"}`}
+        className={`w-full flex justify-center items-center ${isFullScreenWrapper ? "h-[85vh] min-h-[600px] overflow-hidden bg-gray-50 rounded-md block w-full" : "overflow-x-auto pb-10 min-h-[680px]"}`}
       >
         <style>{`
           .exporting-chart .fishbone-scale-wrapper {
@@ -603,18 +608,22 @@ export default function RootCauseAnalysis({
           }
         `}</style>
         <div
-          className={isFullScreen ? "fishbone-scale-wrapper" : ""}
+          className={
+            isFullScreenWrapper
+              ? "fishbone-scale-wrapper w-full h-full flex items-center justify-center"
+              : "block"
+          }
           style={
-            isFullScreen
+            isFullScreenWrapper
               ? {
-                  transform: `scale(min(calc((100vw - 80px) / 1100), calc((100vh - 120px) / 650)))`,
+                  transform: `scale(min(calc((100vw - 80px) / 1100), calc((85vh - 120px) / 650)))`,
                   transformOrigin: "center center",
                 }
               : {}
           }
         >
           <div
-            className="scrollable-chart-inner drop-shadow-sm font-sans text-left bg-white relative mx-auto"
+            className="scrollable-chart-inner drop-shadow-sm font-sans text-left bg-white relative mx-auto overflow-hidden"
             style={{ width: "1100px", height: "650px", flexShrink: 0 }}
           >
             <svg
@@ -751,9 +760,19 @@ export default function RootCauseAnalysis({
                 style={{ wordBreak: "break-word" }}
               >
                 {type === "bottleneck" ? (
-                  <Activity className="h-6 w-6 mb-2 opacity-80" />
+                  <Activity
+                    width={48}
+                    height={48}
+                    className="mb-2 opacity-80"
+                    style={{ flexShrink: 0 }}
+                  />
                 ) : (
-                  <Share2 className="h-6 w-6 mb-2 opacity-80" />
+                  <Share2
+                    width={48}
+                    height={48}
+                    className="mb-2 opacity-80"
+                    style={{ flexShrink: 0 }}
+                  />
                 )}
                 <span className="font-bold text-sm leading-snug">
                   {headText}
@@ -777,9 +796,15 @@ export default function RootCauseAnalysis({
                 className={`w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all flex flex-col ${flags.machine ? (type === "causes" || type === "bottleneck" ? "border-red-400" : "border-emerald-400") : "border-gray-200"}`}
                 onClick={() => toggleNode(`${type}-machine`)}
               >
-                <div className="flex items-center gap-2 mb-2 border-b pb-1 shrink-0">
+                <div
+                  className="flex items-center gap-2 mb-2 border-b pb-1 shrink-0"
+                  style={{ flexShrink: 0 }}
+                >
                   {React.createElement(labelTheme.machine.icon, {
-                    className: `h-4 w-4 shrink-0 ${flags.machine ? (type === "causes" || type === "bottleneck" ? "text-red-500" : "text-emerald-500") : "text-gray-400"}`,
+                    className: `shrink-0 ${flags.machine ? (type === "causes" || type === "bottleneck" ? "text-red-500" : "text-emerald-500") : "text-gray-400"}`,
+                    width: 48,
+                    height: 48,
+                    style: { flexShrink: 0 },
                   })}
                   <h4
                     className={`font-bold text-sm truncate ${flags.machine ? "text-gray-900" : "text-gray-500"}`}
@@ -788,7 +813,12 @@ export default function RootCauseAnalysis({
                   </h4>
                   {flags.machine &&
                     (type === "causes" || type === "bottleneck") && (
-                      <AlertTriangle className="h-4 w-4 text-red-500 ml-auto shrink-0" />
+                      <AlertTriangle
+                        width={48}
+                        height={48}
+                        className="text-red-500 ml-auto shrink-0"
+                        style={{ flexShrink: 0 }}
+                      />
                     )}
                 </div>
                 <ul className="text-xs space-y-1.5 text-gray-600 flex-1 overflow-visible">
@@ -825,9 +855,15 @@ export default function RootCauseAnalysis({
                 className={`w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all flex flex-col ${flags.method ? (type === "causes" || type === "bottleneck" ? "border-red-400" : "border-emerald-400") : "border-gray-200"}`}
                 onClick={() => toggleNode(`${type}-method`)}
               >
-                <div className="flex items-center gap-2 mb-2 border-b pb-1 shrink-0">
+                <div
+                  className="flex items-center gap-2 mb-2 border-b pb-1 shrink-0"
+                  style={{ flexShrink: 0 }}
+                >
                   {React.createElement(labelTheme.method.icon, {
-                    className: `h-4 w-4 shrink-0 ${flags.method ? (type === "causes" || type === "bottleneck" ? "text-red-500" : "text-emerald-500") : "text-gray-400"}`,
+                    className: `shrink-0 ${flags.method ? (type === "causes" || type === "bottleneck" ? "text-red-500" : "text-emerald-500") : "text-gray-400"}`,
+                    width: 48,
+                    height: 48,
+                    style: { flexShrink: 0 },
                   })}
                   <h4
                     className={`font-bold text-sm truncate ${flags.method ? "text-gray-900" : "text-gray-500"}`}
@@ -836,7 +872,12 @@ export default function RootCauseAnalysis({
                   </h4>
                   {flags.method &&
                     (type === "causes" || type === "bottleneck") && (
-                      <AlertTriangle className="h-4 w-4 text-red-500 ml-auto shrink-0" />
+                      <AlertTriangle
+                        width={48}
+                        height={48}
+                        className="text-red-500 ml-auto shrink-0"
+                        style={{ flexShrink: 0 }}
+                      />
                     )}
                 </div>
                 <ul className="text-xs space-y-1.5 text-gray-600 flex-1 overflow-visible">
@@ -873,9 +914,15 @@ export default function RootCauseAnalysis({
                 className={`w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all flex flex-col ${flags.manpower ? (type === "causes" || type === "bottleneck" ? "border-red-400" : "border-emerald-400") : "border-gray-200"}`}
                 onClick={() => toggleNode(`${type}-manpower`)}
               >
-                <div className="flex items-center gap-2 mb-2 border-b pb-1 shrink-0">
+                <div
+                  className="flex items-center gap-2 mb-2 border-b pb-1 shrink-0"
+                  style={{ flexShrink: 0 }}
+                >
                   {React.createElement(labelTheme.manpower.icon, {
-                    className: `h-4 w-4 shrink-0 ${flags.manpower ? (type === "causes" || type === "bottleneck" ? "text-red-500" : "text-emerald-500") : "text-gray-400"}`,
+                    className: `shrink-0 ${flags.manpower ? (type === "causes" || type === "bottleneck" ? "text-red-500" : "text-emerald-500") : "text-gray-400"}`,
+                    width: 48,
+                    height: 48,
+                    style: { flexShrink: 0 },
                   })}
                   <h4
                     className={`font-bold text-sm truncate ${flags.manpower ? "text-gray-900" : "text-gray-500"}`}
@@ -884,7 +931,12 @@ export default function RootCauseAnalysis({
                   </h4>
                   {flags.manpower &&
                     (type === "causes" || type === "bottleneck") && (
-                      <AlertTriangle className="h-4 w-4 text-red-500 ml-auto shrink-0" />
+                      <AlertTriangle
+                        width={48}
+                        height={48}
+                        className="text-red-500 ml-auto shrink-0"
+                        style={{ flexShrink: 0 }}
+                      />
                     )}
                 </div>
                 <ul className="text-xs space-y-1.5 text-gray-600 flex-1 overflow-visible">
@@ -921,9 +973,15 @@ export default function RootCauseAnalysis({
                 className={`w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all flex flex-col ${flags.material ? (type === "causes" || type === "bottleneck" ? "border-red-400" : "border-emerald-400") : "border-gray-200"}`}
                 onClick={() => toggleNode(`${type}-material`)}
               >
-                <div className="flex items-center gap-2 mb-2 border-b pb-1 shrink-0">
+                <div
+                  className="flex items-center gap-2 mb-2 border-b pb-1 shrink-0"
+                  style={{ flexShrink: 0 }}
+                >
                   {React.createElement(labelTheme.material.icon, {
-                    className: `h-4 w-4 shrink-0 ${flags.material ? (type === "causes" || type === "bottleneck" ? "text-red-500" : "text-emerald-500") : "text-gray-400"}`,
+                    className: `shrink-0 ${flags.material ? (type === "causes" || type === "bottleneck" ? "text-red-500" : "text-emerald-500") : "text-gray-400"}`,
+                    width: 48,
+                    height: 48,
+                    style: { flexShrink: 0 },
                   })}
                   <h4
                     className={`font-bold text-sm truncate ${flags.material ? "text-gray-900" : "text-gray-500"}`}
@@ -932,7 +990,12 @@ export default function RootCauseAnalysis({
                   </h4>
                   {flags.material &&
                     (type === "causes" || type === "bottleneck") && (
-                      <AlertTriangle className="h-4 w-4 text-red-500 ml-auto shrink-0" />
+                      <AlertTriangle
+                        width={48}
+                        height={48}
+                        className="text-red-500 ml-auto shrink-0"
+                        style={{ flexShrink: 0 }}
+                      />
                     )}
                 </div>
                 <ul className="text-xs space-y-1.5 text-gray-600 flex-1 overflow-visible">
@@ -1106,7 +1169,7 @@ export default function RootCauseAnalysis({
         title="DIAGRAM 1: Capacity Loss Root Cause Analysis"
         icon={AlertTriangle}
       >
-        {renderFishbone("causes")}
+        <FishboneDiagram type="causes" />
         <AnimatePresence>
           {activeNode && activeNode.startsWith("causes") && (
             <motion.div
@@ -1124,7 +1187,7 @@ export default function RootCauseAnalysis({
         title="DIAGRAM 2: Actionable CAPA Solutions Matrix"
         icon={Lightbulb}
       >
-        {renderFishbone("solutions")}
+        <FishboneDiagram type="solutions" />
         <AnimatePresence>
           {activeNode && activeNode.startsWith("solutions") && (
             <motion.div
@@ -1141,7 +1204,7 @@ export default function RootCauseAnalysis({
       <DiagramWrapper title="DIAGRAM 3: Bottleneck Diagnostics" icon={Activity}>
         {minCapacityProcess ? (
           <>
-            {renderFishbone("bottleneck")}
+            <FishboneDiagram type="bottleneck" />
             <AnimatePresence>
               {activeNode && activeNode.startsWith("bottleneck") && (
                 <motion.div

@@ -27,6 +27,8 @@ import {
   ActivitySquare,
   GitBranch,
   Printer,
+  Settings,
+  AlertTriangle,
 } from "lucide-react";
 
 export default function Dashboard() {
