@@ -29,11 +29,13 @@ import {
   Printer,
   Settings,
   AlertTriangle,
+  RefreshCw,
 } from "lucide-react";
 
 export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [countdown, setCountdown] = useState(30);
 
   const [filters, setFilters] = useState({
@@ -52,12 +54,15 @@ export default function Dashboard() {
 
   const fetchData = async () => {
     try {
+      setLoading(true);
+      setError(null);
       const result = await fetchDashboardData();
       setData(result);
       setLoading(false);
       setCountdown(30);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      setError(e.message || "Failed to load dashboard data. Please try again.");
       setLoading(false);
     }
   };
@@ -167,6 +172,28 @@ export default function Dashboard() {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-gray-50">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-gray-50 p-4">
+        <div className="bg-white p-6 rounded-lg max-w-md w-full shadow-lg border border-red-200">
+          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mb-4 mx-auto">
+            <AlertTriangle className="h-6 w-6 text-red-600" />
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2 text-center">
+            Data Loading Error
+          </h2>
+          <p className="text-gray-600 mb-6 text-center text-sm">{error}</p>
+          <button
+            onClick={fetchData}
+            className="w-full flex justify-center items-center gap-2 bg-blue-600 text-white rounded-md px-4 py-2 hover:bg-blue-700 transition"
+          >
+            <RefreshCw className="h-4 w-4" /> Try Again
+          </button>
+        </div>
       </div>
     );
   }

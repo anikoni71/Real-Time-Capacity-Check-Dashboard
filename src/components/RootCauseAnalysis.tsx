@@ -72,8 +72,14 @@ const DiagramWrapper = ({ title, icon: Icon, children }: any) => {
       });
 
       return dataUrl;
-    } catch (err) {
-      console.error("Canvas capture aborted:", err);
+    } catch (err: any) {
+      if (err instanceof ProgressEvent || (err && err.type === "error")) {
+        console.error(
+          "Canvas capture aborted: Network or CORS error fetching fonts/SVGs.",
+        );
+      } else {
+        console.error("Canvas capture aborted:", err);
+      }
       return null;
     } finally {
       // Revert Styles immediately
@@ -215,7 +221,9 @@ const DiagramWrapper = ({ title, icon: Icon, children }: any) => {
       <div className="flex justify-between items-center mb-6 border-b pb-2 chart-header">
         <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
           <Icon
-            className={`h-5 w-5 ${title.includes("1") ? "text-indigo-600" : title.includes("2") ? "text-emerald-500" : "text-rose-500"}`}
+            size={20}
+            className={`h-5 w-5 shrink-0 ${title.includes("1") ? "text-indigo-600" : title.includes("2") ? "text-emerald-500" : "text-rose-500"}`}
+            style={{ flexShrink: 0, minWidth: 20, minHeight: 20 }}
           />
           {title}
         </h3>
@@ -600,26 +608,13 @@ export default function RootCauseAnalysis({
 
     return (
       <div
-        className={`w-full flex justify-center items-center ${isFullScreenWrapper ? "h-[85vh] min-h-[600px] overflow-hidden bg-gray-50 rounded-md block w-full" : "overflow-x-auto pb-10 min-h-[680px]"}`}
+        className={`w-full flex justify-center items-center ${isFullScreenWrapper ? "h-[85vh] min-h-[650px] overflow-auto bg-gray-50 rounded-md" : "overflow-x-auto pb-10 min-h-[680px]"}`}
       >
-        <style>{`
-          .exporting-chart .fishbone-scale-wrapper {
-             transform: none !important;
-          }
-        `}</style>
         <div
           className={
             isFullScreenWrapper
-              ? "fishbone-scale-wrapper w-full h-full flex items-center justify-center"
-              : "block"
-          }
-          style={
-            isFullScreenWrapper
-              ? {
-                  transform: `scale(min(calc((100vw - 80px) / 1100), calc((85vh - 120px) / 650)))`,
-                  transformOrigin: "center center",
-                }
-              : {}
+              ? "w-[1200px] h-[600px] mx-auto flex items-center justify-center bg-white p-6"
+              : "w-full"
           }
         >
           <div
@@ -761,17 +756,19 @@ export default function RootCauseAnalysis({
               >
                 {type === "bottleneck" ? (
                   <Activity
+                    size={48}
                     width={48}
                     height={48}
                     className="mb-2 opacity-80"
-                    style={{ flexShrink: 0 }}
+                    style={{ width: '48px', height: '48px', flexShrink: 0 }}
                   />
                 ) : (
                   <Share2
+                    size={48}
                     width={48}
                     height={48}
                     className="mb-2 opacity-80"
-                    style={{ flexShrink: 0 }}
+                    style={{ width: '48px', height: '48px', flexShrink: 0 }}
                   />
                 )}
                 <span className="font-bold text-sm leading-snug">
@@ -802,9 +799,10 @@ export default function RootCauseAnalysis({
                 >
                   {React.createElement(labelTheme.machine.icon, {
                     className: `shrink-0 ${flags.machine ? (type === "causes" || type === "bottleneck" ? "text-red-500" : "text-emerald-500") : "text-gray-400"}`,
+                    size: 48,
                     width: 48,
                     height: 48,
-                    style: { flexShrink: 0 },
+                    style: { width: '48px', height: '48px', flexShrink: 0 },
                   })}
                   <h4
                     className={`font-bold text-sm truncate ${flags.machine ? "text-gray-900" : "text-gray-500"}`}
@@ -817,7 +815,7 @@ export default function RootCauseAnalysis({
                         width={48}
                         height={48}
                         className="text-red-500 ml-auto shrink-0"
-                        style={{ flexShrink: 0 }}
+                        style={{ width: '48px', height: '48px', flexShrink: 0 }}
                       />
                     )}
                 </div>
@@ -861,9 +859,10 @@ export default function RootCauseAnalysis({
                 >
                   {React.createElement(labelTheme.method.icon, {
                     className: `shrink-0 ${flags.method ? (type === "causes" || type === "bottleneck" ? "text-red-500" : "text-emerald-500") : "text-gray-400"}`,
+                    size: 48,
                     width: 48,
                     height: 48,
-                    style: { flexShrink: 0 },
+                    style: { width: '48px', height: '48px', flexShrink: 0 },
                   })}
                   <h4
                     className={`font-bold text-sm truncate ${flags.method ? "text-gray-900" : "text-gray-500"}`}
@@ -876,7 +875,7 @@ export default function RootCauseAnalysis({
                         width={48}
                         height={48}
                         className="text-red-500 ml-auto shrink-0"
-                        style={{ flexShrink: 0 }}
+                        style={{ width: '48px', height: '48px', flexShrink: 0 }}
                       />
                     )}
                 </div>
@@ -920,9 +919,10 @@ export default function RootCauseAnalysis({
                 >
                   {React.createElement(labelTheme.manpower.icon, {
                     className: `shrink-0 ${flags.manpower ? (type === "causes" || type === "bottleneck" ? "text-red-500" : "text-emerald-500") : "text-gray-400"}`,
+                    size: 48,
                     width: 48,
                     height: 48,
-                    style: { flexShrink: 0 },
+                    style: { width: '48px', height: '48px', flexShrink: 0 },
                   })}
                   <h4
                     className={`font-bold text-sm truncate ${flags.manpower ? "text-gray-900" : "text-gray-500"}`}
@@ -935,7 +935,7 @@ export default function RootCauseAnalysis({
                         width={48}
                         height={48}
                         className="text-red-500 ml-auto shrink-0"
-                        style={{ flexShrink: 0 }}
+                        style={{ width: '48px', height: '48px', flexShrink: 0 }}
                       />
                     )}
                 </div>
@@ -979,9 +979,10 @@ export default function RootCauseAnalysis({
                 >
                   {React.createElement(labelTheme.material.icon, {
                     className: `shrink-0 ${flags.material ? (type === "causes" || type === "bottleneck" ? "text-red-500" : "text-emerald-500") : "text-gray-400"}`,
+                    size: 48,
                     width: 48,
                     height: 48,
-                    style: { flexShrink: 0 },
+                    style: { width: '48px', height: '48px', flexShrink: 0 },
                   })}
                   <h4
                     className={`font-bold text-sm truncate ${flags.material ? "text-gray-900" : "text-gray-500"}`}
@@ -994,7 +995,7 @@ export default function RootCauseAnalysis({
                         width={48}
                         height={48}
                         className="text-red-500 ml-auto shrink-0"
-                        style={{ flexShrink: 0 }}
+                        style={{ width: '48px', height: '48px', flexShrink: 0 }}
                       />
                     )}
                 </div>
@@ -1056,7 +1057,9 @@ export default function RootCauseAnalysis({
               className="bg-white p-3 rounded shadow-sm border border-gray-100 flex items-start gap-3"
             >
               <SectionIcon
+                size={20}
                 className={`h-5 w-5 shrink-0 mt-0.5 ${isFlagged ? (isCauses ? "text-red-400" : "text-emerald-400") : "text-gray-400"}`}
+                style={{ flexShrink: 0, minWidth: 20, minHeight: 20 }}
               />
               <div>
                 <div className="font-bold text-gray-800 text-sm mb-1">
