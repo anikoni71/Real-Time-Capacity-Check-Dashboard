@@ -98,32 +98,23 @@ const DiagramWrapper = ({ title, icon: Icon, children }: any) => {
   const handlePrint = async (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
 
-    const chartImageDataUrl = await captureFullChartImage();
-    if (!chartImageDataUrl) return;
+    if (!containerRef.current) return;
 
-    try {
-      const printWindow = window.open("", "_blank");
-      if (printWindow) {
-        printWindow.document.write(`
-          <html>
-            <head>
-              <title>Print View - Root Cause & Solutions</title>
-              <style>
-                @page { size: A4 landscape; margin: 10mm; }
-                body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #fff; }
-                img { width: 100%; height: auto; max-height: calc(100vh - 20mm); object-fit: contain; }
-              </style>
-            </head>
-            <body>
-              <img src="${chartImageDataUrl}" onload="window.print(); window.close();" />
-            </body>
-          </html>
-        `);
-        printWindow.document.close();
+    document.body.classList.add("print-single-chart");
+    containerRef.current.classList.add("printable-area");
+
+    window.dispatchEvent(new Event("resize"));
+
+    setTimeout(() => {
+      window.print();
+
+      document.body.classList.remove("print-single-chart");
+      if (containerRef.current) {
+        containerRef.current.classList.remove("printable-area");
       }
-    } catch (err) {
-      console.error("RCA Tab native printing execution failed:", err);
-    }
+
+      window.dispatchEvent(new Event("resize"));
+    }, 500);
   };
 
   const handleDownload = async (e?: React.MouseEvent) => {
@@ -608,414 +599,133 @@ export default function RootCauseAnalysis({
 
     return (
       <div
-        className={`w-full flex justify-center items-center ${isFullScreenWrapper ? "h-[85vh] min-h-[650px] overflow-auto bg-gray-50 rounded-md" : "overflow-x-auto pb-10 min-h-[680px]"}`}
+        className={
+          isFullScreenWrapper
+            ? "w-[1123px] h-[794px] mx-auto my-4 bg-white p-8 shadow-2xl overflow-hidden flex flex-col justify-between"
+            : "w-full p-4 block bg-white"
+        }
       >
-        <div
-          className={
-            isFullScreenWrapper
-              ? "w-[1200px] h-[600px] mx-auto flex items-center justify-center bg-white p-6"
-              : "w-full"
-          }
-        >
+        <div className={`w-full ${headColor} text-white rounded-lg flex items-center justify-center p-4 text-center shadow border border-white/20 mb-6 shrink-0`}>
+          {type === "bottleneck" ? (
+            <Activity className="w-6 h-6 flex-shrink-0 mr-3" />
+          ) : (
+            <Share2 className="w-6 h-6 flex-shrink-0 mr-3" />
+          )}
+          <span className="font-bold text-lg leading-snug tracking-wide uppercase">
+            {headText}
+          </span>
+        </div>
+        <div className="grid grid-cols-2 gap-6 w-full h-full flex-1 min-h-0">
+          {/* MACHINE */}
           <div
-            className="scrollable-chart-inner drop-shadow-sm font-sans text-left bg-white relative mx-auto overflow-hidden"
-            style={{ width: "1100px", height: "650px", flexShrink: 0 }}
+            className={`cursor-pointer rounded-lg border-2 flex flex-col p-4 shadow-sm hover:shadow-md transition-shadow ${flags.machine ? (type === "causes" || type === "bottleneck" ? "border-red-400 bg-red-50" : "border-emerald-400 bg-emerald-50") : "border-gray-200 bg-gray-50 hover:border-gray-300"}`}
+            onClick={() => toggleNode(`${type}-machine`)}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="1100"
-              height="650"
-              className="absolute top-0 left-0 w-full h-full pointer-events-none"
-            >
-              {/* Spine */}
-              <line
-                x1="50"
-                y1="325"
-                x2="940"
-                y2="325"
-                stroke="#9ca3af"
-                strokeWidth="4"
-              />
-              <polygon points="920,315 940,325 920,335" fill="#9ca3af" />
-
-              {/* BRANCH lines */}
-              <line
-                x1="230"
-                y1="160"
-                x2="430"
-                y2="325"
-                stroke={
-                  flags.machine
-                    ? type === "causes" || type === "bottleneck"
-                      ? "#ef4444"
-                      : "#10b981"
-                    : "#d1d5db"
-                }
-                strokeWidth={flags.machine ? "4" : "2"}
-              />
-              <polygon
-                points="423,313 430,325 418,321"
-                fill={
-                  flags.machine
-                    ? type === "causes" || type === "bottleneck"
-                      ? "#ef4444"
-                      : "#10b981"
-                    : "#d1d5db"
-                }
-              />
-
-              <line
-                x1="680"
-                y1="160"
-                x2="830"
-                y2="325"
-                stroke={
-                  flags.method
-                    ? type === "causes" || type === "bottleneck"
-                      ? "#ef4444"
-                      : "#10b981"
-                    : "#d1d5db"
-                }
-                strokeWidth={flags.method ? "4" : "2"}
-              />
-              <polygon
-                points="823,313 830,325 818,321"
-                fill={
-                  flags.method
-                    ? type === "causes" || type === "bottleneck"
-                      ? "#ef4444"
-                      : "#10b981"
-                    : "#d1d5db"
-                }
-              />
-
-              <line
-                x1="230"
-                y1="490"
-                x2="430"
-                y2="325"
-                stroke={
-                  flags.manpower
-                    ? type === "causes" || type === "bottleneck"
-                      ? "#ef4444"
-                      : "#10b981"
-                    : "#d1d5db"
-                }
-                strokeWidth={flags.manpower ? "4" : "2"}
-              />
-              <polygon
-                points="418,329 430,325 423,336"
-                fill={
-                  flags.manpower
-                    ? type === "causes" || type === "bottleneck"
-                      ? "#ef4444"
-                      : "#10b981"
-                    : "#d1d5db"
-                }
-              />
-
-              <line
-                x1="680"
-                y1="490"
-                x2="830"
-                y2="325"
-                stroke={
-                  flags.material
-                    ? type === "causes" || type === "bottleneck"
-                      ? "#ef4444"
-                      : "#10b981"
-                    : "#d1d5db"
-                }
-                strokeWidth={flags.material ? "4" : "2"}
-              />
-              <polygon
-                points="818,329 830,325 823,336"
-                fill={
-                  flags.material
-                    ? type === "causes" || type === "bottleneck"
-                      ? "#ef4444"
-                      : "#10b981"
-                    : "#d1d5db"
-                }
-              />
-            </svg>
-
-            {/* Head */}
-            <div
-              style={{
-                position: "absolute",
-                left: 940,
-                top: 265,
-                width: 155,
-                height: 120,
-              }}
-            >
-              <div
-                className={`h-full w-full ${headColor} text-white rounded-r-lg flex flex-col items-center justify-center p-3 text-center shadow-md border-l-4 border-white/20`}
-                style={{ wordBreak: "break-word" }}
-              >
-                {type === "bottleneck" ? (
-                  <Activity
-                    size={48}
-                    width={48}
-                    height={48}
-                    className="mb-2 opacity-80"
-                    style={{ width: '48px', height: '48px', flexShrink: 0 }}
-                  />
-                ) : (
-                  <Share2
-                    size={48}
-                    width={48}
-                    height={48}
-                    className="mb-2 opacity-80"
-                    style={{ width: '48px', height: '48px', flexShrink: 0 }}
-                  />
-                )}
-                <span className="font-bold text-sm leading-snug">
-                  {headText}
-                </span>
-              </div>
+            <div className="flex items-center gap-2 mb-3 border-b pb-2 shrink-0 border-black/10">
+              {React.createElement(labelTheme.machine.icon, {
+                className: `w-6 h-6 flex-shrink-0 ${flags.machine ? (type === "causes" || type === "bottleneck" ? "text-red-600" : "text-emerald-600") : "text-gray-500"}`,
+              })}
+              <h4 className={`font-bold text-base uppercase tracking-wide truncate ${flags.machine ? "text-gray-900" : "text-gray-600"}`}>
+                {labelTheme.machine.label}
+              </h4>
+              {flags.machine && (
+                <AlertTriangle className="w-6 h-6 text-red-500 ml-auto flex-shrink-0" />
+              )}
             </div>
+            <ul className="text-sm space-y-2 text-gray-700 flex-1 overflow-y-auto min-h-0 pr-1 break-words">
+              {dataObj.machine.map((item: any, idx: number) => (
+                <li key={idx} className="flex gap-2">
+                  <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${flags.machine ? (type === "causes" || type === "bottleneck" ? "bg-red-500" : "bg-emerald-500") : "bg-gray-400"}`} />
+                  <span className="break-words w-full leading-tight">
+                    <span className="font-semibold text-gray-900">{item.label}:</span> {item.desc}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            {/* BRANCH: MACHINE/EQUIPMENT (Top-Left) */}
-            <div
-              style={{
-                position: "absolute",
-                left: 20,
-                top: 5,
-                width: 340,
-                minHeight: 155,
-                zIndex: 10,
-              }}
-            >
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                className={`w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all flex flex-col ${flags.machine ? (type === "causes" || type === "bottleneck" ? "border-red-400" : "border-emerald-400") : "border-gray-200"}`}
-                onClick={() => toggleNode(`${type}-machine`)}
-              >
-                <div
-                  className="flex items-center gap-2 mb-2 border-b pb-1 shrink-0"
-                  style={{ flexShrink: 0 }}
-                >
-                  {React.createElement(labelTheme.machine.icon, {
-                    className: `shrink-0 ${flags.machine ? (type === "causes" || type === "bottleneck" ? "text-red-500" : "text-emerald-500") : "text-gray-400"}`,
-                    size: 48,
-                    width: 48,
-                    height: 48,
-                    style: { width: '48px', height: '48px', flexShrink: 0 },
-                  })}
-                  <h4
-                    className={`font-bold text-sm truncate ${flags.machine ? "text-gray-900" : "text-gray-500"}`}
-                  >
-                    {labelTheme.machine.label}
-                  </h4>
-                  {flags.machine &&
-                    (type === "causes" || type === "bottleneck") && (
-                      <AlertTriangle
-                        width={48}
-                        height={48}
-                        className="text-red-500 ml-auto shrink-0"
-                        style={{ width: '48px', height: '48px', flexShrink: 0 }}
-                      />
-                    )}
-                </div>
-                <ul className="text-xs space-y-1.5 text-gray-600 flex-1 overflow-visible">
-                  {dataObj.machine.map((item: any, idx: number) => (
-                    <li key={idx} className="flex gap-1.5 leading-tight">
-                      <div
-                        className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${flags.machine ? (type === "causes" || type === "bottleneck" ? "bg-red-400" : "bg-emerald-400") : "bg-gray-300"}`}
-                      />
-                      <span className="break-words w-full">
-                        <span className="font-semibold text-gray-700">
-                          {item.label}:
-                        </span>{" "}
-                        {item.desc}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
+          {/* METHOD */}
+          <div
+            className={`cursor-pointer rounded-lg border-2 flex flex-col p-4 shadow-sm hover:shadow-md transition-shadow ${flags.method ? (type === "causes" || type === "bottleneck" ? "border-red-400 bg-red-50" : "border-emerald-400 bg-emerald-50") : "border-gray-200 bg-gray-50 hover:border-gray-300"}`}
+            onClick={() => toggleNode(`${type}-method`)}
+          >
+            <div className="flex items-center gap-2 mb-3 border-b pb-2 shrink-0 border-black/10">
+              {React.createElement(labelTheme.method.icon, {
+                className: `w-6 h-6 flex-shrink-0 ${flags.method ? (type === "causes" || type === "bottleneck" ? "text-red-600" : "text-emerald-600") : "text-gray-500"}`,
+              })}
+              <h4 className={`font-bold text-base uppercase tracking-wide truncate ${flags.method ? "text-gray-900" : "text-gray-600"}`}>
+                {labelTheme.method.label}
+              </h4>
+              {flags.method && (
+                <AlertTriangle className="w-6 h-6 text-red-500 ml-auto flex-shrink-0" />
+              )}
             </div>
+            <ul className="text-sm space-y-2 text-gray-700 flex-1 overflow-y-auto min-h-0 pr-1 break-words">
+              {dataObj.method.map((item: any, idx: number) => (
+                <li key={idx} className="flex gap-2">
+                  <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${flags.method ? (type === "causes" || type === "bottleneck" ? "bg-red-500" : "bg-emerald-500") : "bg-gray-400"}`} />
+                  <span className="break-words w-full leading-tight">
+                    <span className="font-semibold text-gray-900">{item.label}:</span> {item.desc}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            {/* BRANCH: METHOD/PROCESS (Top-Right) */}
-            <div
-              style={{
-                position: "absolute",
-                left: 470,
-                top: 5,
-                width: 340,
-                minHeight: 155,
-                zIndex: 10,
-              }}
-            >
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                className={`w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all flex flex-col ${flags.method ? (type === "causes" || type === "bottleneck" ? "border-red-400" : "border-emerald-400") : "border-gray-200"}`}
-                onClick={() => toggleNode(`${type}-method`)}
-              >
-                <div
-                  className="flex items-center gap-2 mb-2 border-b pb-1 shrink-0"
-                  style={{ flexShrink: 0 }}
-                >
-                  {React.createElement(labelTheme.method.icon, {
-                    className: `shrink-0 ${flags.method ? (type === "causes" || type === "bottleneck" ? "text-red-500" : "text-emerald-500") : "text-gray-400"}`,
-                    size: 48,
-                    width: 48,
-                    height: 48,
-                    style: { width: '48px', height: '48px', flexShrink: 0 },
-                  })}
-                  <h4
-                    className={`font-bold text-sm truncate ${flags.method ? "text-gray-900" : "text-gray-500"}`}
-                  >
-                    {labelTheme.method.label}
-                  </h4>
-                  {flags.method &&
-                    (type === "causes" || type === "bottleneck") && (
-                      <AlertTriangle
-                        width={48}
-                        height={48}
-                        className="text-red-500 ml-auto shrink-0"
-                        style={{ width: '48px', height: '48px', flexShrink: 0 }}
-                      />
-                    )}
-                </div>
-                <ul className="text-xs space-y-1.5 text-gray-600 flex-1 overflow-visible">
-                  {dataObj.method.map((item: any, idx: number) => (
-                    <li key={idx} className="flex gap-1.5 leading-tight">
-                      <div
-                        className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${flags.method ? (type === "causes" || type === "bottleneck" ? "bg-red-400" : "bg-emerald-400") : "bg-gray-300"}`}
-                      />
-                      <span className="break-words w-full">
-                        <span className="font-semibold text-gray-700">
-                          {item.label}:
-                        </span>{" "}
-                        {item.desc}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
+          {/* MANPOWER */}
+          <div
+            className={`cursor-pointer rounded-lg border-2 flex flex-col p-4 shadow-sm hover:shadow-md transition-shadow ${flags.manpower ? (type === "causes" || type === "bottleneck" ? "border-red-400 bg-red-50" : "border-emerald-400 bg-emerald-50") : "border-gray-200 bg-gray-50 hover:border-gray-300"}`}
+            onClick={() => toggleNode(`${type}-manpower`)}
+          >
+            <div className="flex items-center gap-2 mb-3 border-b pb-2 shrink-0 border-black/10">
+              {React.createElement(labelTheme.manpower.icon, {
+                className: `w-6 h-6 flex-shrink-0 ${flags.manpower ? (type === "causes" || type === "bottleneck" ? "text-red-600" : "text-emerald-600") : "text-gray-500"}`,
+              })}
+              <h4 className={`font-bold text-base uppercase tracking-wide truncate ${flags.manpower ? "text-gray-900" : "text-gray-600"}`}>
+                {labelTheme.manpower.label}
+              </h4>
+              {flags.manpower && (
+                <AlertTriangle className="w-6 h-6 text-red-500 ml-auto flex-shrink-0" />
+              )}
             </div>
+            <ul className="text-sm space-y-2 text-gray-700 flex-1 overflow-y-auto min-h-0 pr-1 break-words">
+              {dataObj.manpower.map((item: any, idx: number) => (
+                <li key={idx} className="flex gap-2">
+                  <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${flags.manpower ? (type === "causes" || type === "bottleneck" ? "bg-red-500" : "bg-emerald-500") : "bg-gray-400"}`} />
+                  <span className="break-words w-full leading-tight">
+                    <span className="font-semibold text-gray-900">{item.label}:</span> {item.desc}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            {/* BRANCH: MANPOWER/OPERATOR (Bottom-Left) */}
-            <div
-              style={{
-                position: "absolute",
-                left: 20,
-                bottom: 5,
-                width: 340,
-                minHeight: 155,
-                zIndex: 10,
-              }}
-            >
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                className={`w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all flex flex-col ${flags.manpower ? (type === "causes" || type === "bottleneck" ? "border-red-400" : "border-emerald-400") : "border-gray-200"}`}
-                onClick={() => toggleNode(`${type}-manpower`)}
-              >
-                <div
-                  className="flex items-center gap-2 mb-2 border-b pb-1 shrink-0"
-                  style={{ flexShrink: 0 }}
-                >
-                  {React.createElement(labelTheme.manpower.icon, {
-                    className: `shrink-0 ${flags.manpower ? (type === "causes" || type === "bottleneck" ? "text-red-500" : "text-emerald-500") : "text-gray-400"}`,
-                    size: 48,
-                    width: 48,
-                    height: 48,
-                    style: { width: '48px', height: '48px', flexShrink: 0 },
-                  })}
-                  <h4
-                    className={`font-bold text-sm truncate ${flags.manpower ? "text-gray-900" : "text-gray-500"}`}
-                  >
-                    {labelTheme.manpower.label}
-                  </h4>
-                  {flags.manpower &&
-                    (type === "causes" || type === "bottleneck") && (
-                      <AlertTriangle
-                        width={48}
-                        height={48}
-                        className="text-red-500 ml-auto shrink-0"
-                        style={{ width: '48px', height: '48px', flexShrink: 0 }}
-                      />
-                    )}
-                </div>
-                <ul className="text-xs space-y-1.5 text-gray-600 flex-1 overflow-visible">
-                  {dataObj.manpower.map((item: any, idx: number) => (
-                    <li key={idx} className="flex gap-1.5 leading-tight">
-                      <div
-                        className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${flags.manpower ? (type === "causes" || type === "bottleneck" ? "bg-red-400" : "bg-emerald-400") : "bg-gray-300"}`}
-                      />
-                      <span className="break-words w-full">
-                        <span className="font-semibold text-gray-700">
-                          {item.label}:
-                        </span>{" "}
-                        {item.desc}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
+          {/* MATERIAL */}
+          <div
+            className={`cursor-pointer rounded-lg border-2 flex flex-col p-4 shadow-sm hover:shadow-md transition-shadow ${flags.material ? (type === "causes" || type === "bottleneck" ? "border-red-400 bg-red-50" : "border-emerald-400 bg-emerald-50") : "border-gray-200 bg-gray-50 hover:border-gray-300"}`}
+            onClick={() => toggleNode(`${type}-material`)}
+          >
+            <div className="flex items-center gap-2 mb-3 border-b pb-2 shrink-0 border-black/10">
+              {React.createElement(labelTheme.material.icon, {
+                className: `w-6 h-6 flex-shrink-0 ${flags.material ? (type === "causes" || type === "bottleneck" ? "text-red-600" : "text-emerald-600") : "text-gray-500"}`,
+              })}
+              <h4 className={`font-bold text-base uppercase tracking-wide truncate ${flags.material ? "text-gray-900" : "text-gray-600"}`}>
+                {labelTheme.material.label}
+              </h4>
+              {flags.material && (
+                <AlertTriangle className="w-6 h-6 text-red-500 ml-auto flex-shrink-0" />
+              )}
             </div>
-
-            {/* BRANCH: MATERIAL/QUALITY (Bottom-Right) */}
-            <div
-              style={{
-                position: "absolute",
-                left: 470,
-                bottom: 5,
-                width: 340,
-                minHeight: 155,
-                zIndex: 10,
-              }}
-            >
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                className={`w-full p-3 rounded-md shadow bg-white border-2 cursor-pointer transition-all flex flex-col ${flags.material ? (type === "causes" || type === "bottleneck" ? "border-red-400" : "border-emerald-400") : "border-gray-200"}`}
-                onClick={() => toggleNode(`${type}-material`)}
-              >
-                <div
-                  className="flex items-center gap-2 mb-2 border-b pb-1 shrink-0"
-                  style={{ flexShrink: 0 }}
-                >
-                  {React.createElement(labelTheme.material.icon, {
-                    className: `shrink-0 ${flags.material ? (type === "causes" || type === "bottleneck" ? "text-red-500" : "text-emerald-500") : "text-gray-400"}`,
-                    size: 48,
-                    width: 48,
-                    height: 48,
-                    style: { width: '48px', height: '48px', flexShrink: 0 },
-                  })}
-                  <h4
-                    className={`font-bold text-sm truncate ${flags.material ? "text-gray-900" : "text-gray-500"}`}
-                  >
-                    {labelTheme.material.label}
-                  </h4>
-                  {flags.material &&
-                    (type === "causes" || type === "bottleneck") && (
-                      <AlertTriangle
-                        width={48}
-                        height={48}
-                        className="text-red-500 ml-auto shrink-0"
-                        style={{ width: '48px', height: '48px', flexShrink: 0 }}
-                      />
-                    )}
-                </div>
-                <ul className="text-xs space-y-1.5 text-gray-600 flex-1 overflow-visible">
-                  {dataObj.material.map((item: any, idx: number) => (
-                    <li key={idx} className="flex gap-1.5 leading-tight">
-                      <div
-                        className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${flags.material ? (type === "causes" || type === "bottleneck" ? "bg-red-400" : "bg-emerald-400") : "bg-gray-300"}`}
-                      />
-                      <span className="break-words w-full">
-                        <span className="font-semibold text-gray-700">
-                          {item.label}:
-                        </span>{" "}
-                        {item.desc}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            </div>
+            <ul className="text-sm space-y-2 text-gray-700 flex-1 overflow-y-auto min-h-0 pr-1 break-words">
+              {dataObj.material.map((item: any, idx: number) => (
+                <li key={idx} className="flex gap-2">
+                  <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${flags.material ? (type === "causes" || type === "bottleneck" ? "bg-red-400" : "bg-emerald-400") : "bg-gray-300"}`} />
+                  <span className="break-words w-full leading-tight">
+                    <span className="font-semibold text-gray-900">{item.label}:</span> {item.desc}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>

@@ -146,48 +146,24 @@ export default function ChartContainer({
 
   const handlePrint = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    const chartImageDataUrl = await captureFullChartImage();
-    if (!chartImageDataUrl) return;
 
-    const printWindow = window.open("", "_blank");
-    if (printWindow) {
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Print System - ${title}</title>
-            <style>
-              @page { 
-                size: A4 landscape; 
-                margin: 5mm; 
-              }
-              body { 
-                margin: 0; 
-                padding: 0; 
-                display: flex; 
-                justify-content: center; 
-                align-items: center; 
-                min-height: 100vh; 
-                background: #fff; 
-                overflow: hidden; 
-              }
-              /* Clamps the entire horizontal graph into exactly one viewport boundary box */
-              img { 
-                width: 100vw !important; 
-                height: 100vh !important; 
-                max-width: 100% !important; 
-                max-height: 100% !important; 
-                object-fit: contain !important; 
-                page-break-inside: avoid !important;
-              }
-            </style>
-          </head>
-          <body>
-            <img src="${chartImageDataUrl}" onload="window.print(); window.close();" />
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-    }
+    if (!containerRef.current) return;
+
+    document.body.classList.add("print-single-chart");
+    containerRef.current.classList.add("printable-area");
+
+    window.dispatchEvent(new Event("resize"));
+
+    setTimeout(() => {
+      window.print();
+
+      document.body.classList.remove("print-single-chart");
+      if (containerRef.current) {
+        containerRef.current.classList.remove("printable-area");
+      }
+
+      window.dispatchEvent(new Event("resize"));
+    }, 500);
   };
 
   const downloadPDF = async () => {

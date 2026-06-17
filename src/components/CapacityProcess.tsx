@@ -67,7 +67,15 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
 
     const calculatedMax = Math.round(Math.max(currentDataMax, target1, target2) * 1.2);
 
-    return { chartData, ops, avgCapacity, target1, target2, calculatedMax };
+    const metadata = processes.length > 0 ? {
+      line: processes[0].line,
+      buyerName: processes[0].buyer,
+      styleName: processes[0].style,
+      lineSmv: processes[0].raw["Line Total SMV"] || processes[0].raw["OB SMV"] || "N/A",
+      runday: processes[0].runday,
+    } : null;
+
+    return { chartData, ops, avgCapacity, target1, target2, calculatedMax, metadata };
   }, [processes]);
 
   if (processes.length === 0) return <div className="p-8 text-center text-gray-500">No data found matching current filters.</div>;
@@ -81,6 +89,30 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
         title="Capacity by Process × Operator" 
         icon={<BarChart2 className="h-5 w-5 text-blue-600" />}
       >
+        {isFullscreen && metadata && (
+          <div className="absolute top-24 right-12 bg-white/95 backdrop-blur-sm p-4 rounded-lg shadow-lg border border-gray-200 flex flex-col gap-2 text-sm z-[100] pointer-events-none min-w-[220px]">
+            <div className="flex justify-between items-center border-b border-gray-100 pb-1.5">
+              <span className="text-gray-500 font-medium">Line:</span>
+              <span className="text-gray-900 font-bold">{metadata.line || "N/A"}</span>
+            </div>
+            <div className="flex justify-between items-center border-b border-gray-100 pb-1.5">
+              <span className="text-gray-500 font-medium">Buyer Name:</span>
+              <span className="text-gray-900 font-bold">{metadata.buyerName || "N/A"}</span>
+            </div>
+            <div className="flex justify-between items-center border-b border-gray-100 pb-1.5">
+              <span className="text-gray-500 font-medium">Style Name:</span>
+              <span className="text-gray-900 font-bold">{metadata.styleName || "N/A"}</span>
+            </div>
+            <div className="flex justify-between items-center border-b border-gray-100 pb-1.5">
+              <span className="text-gray-500 font-medium">Line SMV:</span>
+              <span className="text-gray-900 font-bold">{metadata.lineSmv}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-500 font-medium">Runday:</span>
+              <span className="text-gray-900 font-bold">{metadata.runday || "N/A"}</span>
+            </div>
+          </div>
+        )}
         <div className="mb-2 flex justify-between items-end">
           <p className="text-sm text-gray-500">Average Capacity: <span className="font-semibold text-gray-800">{avgCapacity}</span></p>
           <div className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded">Scroll horizontally to view all</div>
