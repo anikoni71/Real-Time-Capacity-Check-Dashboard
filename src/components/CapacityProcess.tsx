@@ -90,25 +90,29 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
         icon={<BarChart2 className="h-5 w-5 text-blue-600" />}
       >
         {metadata && (
-          <div className="absolute top-16 right-8 bg-blue-50/90 backdrop-blur-sm p-4 rounded-lg shadow-sm border border-blue-200 flex flex-col gap-2 text-sm z-[10] pointer-events-none min-w-[200px] print:shadow-none print:bg-white print:border-gray-300 print:top-6 print:right-6">
-            <div className="flex justify-between items-center border-b border-blue-100 print:border-gray-200 pb-1.5">
-              <span className="text-blue-800 print:text-gray-600 font-medium mr-4">Line:</span>
+          <div className="absolute top-16 right-8 bg-blue-50/90 backdrop-blur-sm p-3 px-6 rounded-full shadow-sm border border-blue-200 flex flex-row flex-wrap justify-center items-center gap-6 text-sm z-[10] pointer-events-none print:shadow-none print:bg-white print:border-gray-300 print:top-6">
+            <div className="flex items-center gap-2">
+              <span className="text-blue-800 print:text-gray-600 font-medium">Line:</span>
               <span className="text-blue-900 print:text-gray-900 font-bold">{metadata.line || "N/A"}</span>
             </div>
-            <div className="flex justify-between items-center border-b border-blue-100 print:border-gray-200 pb-1.5">
-              <span className="text-blue-800 print:text-gray-600 font-medium mr-4">Buyer Name:</span>
+            <div className="text-blue-300 print:text-gray-300">|</div>
+            <div className="flex items-center gap-2">
+              <span className="text-blue-800 print:text-gray-600 font-medium">Buyer:</span>
               <span className="text-blue-900 print:text-gray-900 font-bold">{metadata.buyerName || "N/A"}</span>
             </div>
-            <div className="flex justify-between items-center border-b border-blue-100 print:border-gray-200 pb-1.5">
-              <span className="text-blue-800 print:text-gray-600 font-medium mr-4">Style Name:</span>
+            <div className="text-blue-300 print:text-gray-300">|</div>
+            <div className="flex items-center gap-2">
+              <span className="text-blue-800 print:text-gray-600 font-medium">Style:</span>
               <span className="text-blue-900 print:text-gray-900 font-bold">{metadata.styleName || "N/A"}</span>
             </div>
-            <div className="flex justify-between items-center border-b border-blue-100 print:border-gray-200 pb-1.5">
-              <span className="text-blue-800 print:text-gray-600 font-medium mr-4">Line SMV:</span>
+            <div className="text-blue-300 print:text-gray-300">|</div>
+            <div className="flex items-center gap-2">
+              <span className="text-blue-800 print:text-gray-600 font-medium">SMV:</span>
               <span className="text-blue-900 print:text-gray-900 font-bold">{metadata.lineSmv}</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-blue-800 print:text-gray-600 font-medium mr-4">Runday:</span>
+            <div className="text-blue-300 print:text-gray-300">|</div>
+            <div className="flex items-center gap-2">
+              <span className="text-blue-800 print:text-gray-600 font-medium">Runday:</span>
               <span className="text-blue-900 print:text-gray-900 font-bold">{metadata.runday || "N/A"}</span>
             </div>
           </div>
