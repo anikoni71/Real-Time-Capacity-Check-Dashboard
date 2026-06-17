@@ -13,7 +13,7 @@ const OPERATOR_COLORS = [
 
 export default function CapacityProcess({ processes }: { processes: ProcessRow[] }) {
   const isFullscreen = useFullscreenContext();
-  const { chartData, ops, avgCapacity, target1, target2, calculatedMax } = useMemo(() => {
+  const { chartData, ops, avgCapacity, target1, target2, calculatedMax, metadata } = useMemo(() => {
     // Process chart needs original sequence exactly. 
     // We can group by Process Name but maintain order of appearance.
     
@@ -89,27 +89,27 @@ export default function CapacityProcess({ processes }: { processes: ProcessRow[]
         title="Capacity by Process × Operator" 
         icon={<BarChart2 className="h-5 w-5 text-blue-600" />}
       >
-        {isFullscreen && metadata && (
-          <div className="absolute top-24 right-12 bg-white/95 backdrop-blur-sm p-4 rounded-lg shadow-lg border border-gray-200 flex flex-col gap-2 text-sm z-[100] pointer-events-none min-w-[220px]">
-            <div className="flex justify-between items-center border-b border-gray-100 pb-1.5">
-              <span className="text-gray-500 font-medium">Line:</span>
-              <span className="text-gray-900 font-bold">{metadata.line || "N/A"}</span>
+        {metadata && (
+          <div className="absolute top-16 right-8 bg-blue-50/90 backdrop-blur-sm p-4 rounded-lg shadow-sm border border-blue-200 flex flex-col gap-2 text-sm z-[10] pointer-events-none min-w-[200px] print:shadow-none print:bg-white print:border-gray-300 print:top-6 print:right-6">
+            <div className="flex justify-between items-center border-b border-blue-100 print:border-gray-200 pb-1.5">
+              <span className="text-blue-800 print:text-gray-600 font-medium mr-4">Line:</span>
+              <span className="text-blue-900 print:text-gray-900 font-bold">{metadata.line || "N/A"}</span>
             </div>
-            <div className="flex justify-between items-center border-b border-gray-100 pb-1.5">
-              <span className="text-gray-500 font-medium">Buyer Name:</span>
-              <span className="text-gray-900 font-bold">{metadata.buyerName || "N/A"}</span>
+            <div className="flex justify-between items-center border-b border-blue-100 print:border-gray-200 pb-1.5">
+              <span className="text-blue-800 print:text-gray-600 font-medium mr-4">Buyer Name:</span>
+              <span className="text-blue-900 print:text-gray-900 font-bold">{metadata.buyerName || "N/A"}</span>
             </div>
-            <div className="flex justify-between items-center border-b border-gray-100 pb-1.5">
-              <span className="text-gray-500 font-medium">Style Name:</span>
-              <span className="text-gray-900 font-bold">{metadata.styleName || "N/A"}</span>
+            <div className="flex justify-between items-center border-b border-blue-100 print:border-gray-200 pb-1.5">
+              <span className="text-blue-800 print:text-gray-600 font-medium mr-4">Style Name:</span>
+              <span className="text-blue-900 print:text-gray-900 font-bold">{metadata.styleName || "N/A"}</span>
             </div>
-            <div className="flex justify-between items-center border-b border-gray-100 pb-1.5">
-              <span className="text-gray-500 font-medium">Line SMV:</span>
-              <span className="text-gray-900 font-bold">{metadata.lineSmv}</span>
+            <div className="flex justify-between items-center border-b border-blue-100 print:border-gray-200 pb-1.5">
+              <span className="text-blue-800 print:text-gray-600 font-medium mr-4">Line SMV:</span>
+              <span className="text-blue-900 print:text-gray-900 font-bold">{metadata.lineSmv}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-500 font-medium">Runday:</span>
-              <span className="text-gray-900 font-bold">{metadata.runday || "N/A"}</span>
+              <span className="text-blue-800 print:text-gray-600 font-medium mr-4">Runday:</span>
+              <span className="text-blue-900 print:text-gray-900 font-bold">{metadata.runday || "N/A"}</span>
             </div>
           </div>
         )}
