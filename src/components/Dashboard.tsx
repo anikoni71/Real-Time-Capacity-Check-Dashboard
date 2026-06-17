@@ -202,7 +202,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col font-sans">
-      <header className="bg-white border-b px-6 py-4 flex items-center justify-between sticky top-0 z-20 shadow-sm">
+      <header className="bg-white border-b px-6 py-4 flex items-center justify-between sticky top-0 z-20 shadow-sm print:hidden">
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
             <Activity className="h-6 w-6 text-blue-600" />
@@ -239,6 +239,15 @@ export default function Dashboard() {
       </header>
 
       <div className="p-6 flex-1 max-w-7xl mx-auto w-full flex flex-col space-y-6">
+        <div className="hidden print:block mb-4 text-center border-b border-gray-200 pb-4">
+          <h1 className="text-2xl font-bold text-gray-900">
+            Real Time Capacity Check Dashboard
+          </h1>
+          <p className="text-gray-500 text-sm mt-1">
+            Generated on {new Date().toLocaleDateString()}
+          </p>
+        </div>
+
         <FilterBar
           data={data!}
           filters={filters}
